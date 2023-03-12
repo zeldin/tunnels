@@ -68,10 +68,115 @@ void SDLBackend::endSynthesis()
   SDL_UnlockAudioDevice(audioDevice);
 }
 
+byte SDLBackend::decodeKey(const SDL_Keysym &keysym)
+{
+  static const byte alphaFctn[26] = {
+    '|', 0xbe, '`', 0x09, 0x0b,'{', '}', 0xbf, '?', 0xc0, 0xc1, 0xc2, 0xc3,
+    0xc4, '\'', '"', 0xb9, '[', 0x08, ']', '_', 0x7f, '~', 0x0a, 0xc6, '\\'
+  };
+  static const byte numShift[15] = {
+    ')', '!', '@', '#', '$', '%', '^', '&', '*', '(', '<', '>', '-', ':', '+'
+  };
+  static const byte numFctn[15] = {
+    0xbc, 0x03, 0x04, 0x07, 0x02, 0x0e, 0x0c, 0x01, 0x06, 0x0f,
+    0xb8, 0xb9, 0xba, 0xbd, 0x05
+  };
+  static const byte numCtrl[7] = {
+    0x9e, 0x9f, 0x80, 0x9b, 0xbb, 0x9c, 0x9d
+  };
+  static const byte punct[5] = {
+    ',', '.', '/', ';', '='
+  };
+  byte index;
+  switch(keysym.scancode) {
+  case SDL_SCANCODE_RETURN:
+  case SDL_SCANCODE_KP_ENTER:
+    return byte{0x0d};
+  case SDL_SCANCODE_SPACE:
+    return byte{0x20};
+  case SDL_SCANCODE_LEFT:
+  case SDL_SCANCODE_KP_4:
+    return byte{0x08};
+  case SDL_SCANCODE_RIGHT:
+  case SDL_SCANCODE_KP_6:
+    return byte{0x09};
+  case SDL_SCANCODE_DOWN:
+  case SDL_SCANCODE_KP_2:
+    return byte{0x0a};
+  case SDL_SCANCODE_UP:
+  case SDL_SCANCODE_KP_8:
+    return byte{0x0b};
+  case SDL_SCANCODE_COMMA:
+    index = 10;
+    break;
+  case SDL_SCANCODE_PERIOD:
+    index = 11;
+    break;
+  case SDL_SCANCODE_SLASH:
+    index = 12;
+    break;
+  case SDL_SCANCODE_SEMICOLON:
+    index = 13;
+    break;
+  case SDL_SCANCODE_EQUALS:
+    index = 14;
+    break;
+  case SDL_SCANCODE_F12:
+    /* F12 -> FCTN = */
+    return byte{0x05};
+  default:
+    if (keysym.sym >= SDLK_0 && keysym.sym <= SDLK_9) {
+      index = keysym.sym - SDLK_0;
+      break;
+    } else if (keysym.sym >= SDLK_a && keysym.sym <= SDLK_z) {
+      /* Alphabetic key */
+      index = keysym.sym - SDLK_a;
+      if ((keysym.mod & KMOD_CTRL))
+	return byte{0x81}+index;
+      else if ((keysym.mod & (KMOD_ALT | KMOD_GUI)))
+	return alphaFctn[index];
+      else if ((keysym.mod & (KMOD_SHIFT | KMOD_CAPS)))
+	return byte{'A'}+index;
+      else
+	return byte{'a'}+index;
+    } else if (keysym.sym >= SDLK_SPACE &&
+	       keysym.sym <= SDLK_UNDERSCORE) {
+      /* Untranslated ASCII key */
+      return static_cast<byte>(keysym.sym);
+    } else if (keysym.sym >= SDLK_F1 && keysym.sym <= SDLK_F9) {
+      /* F1-F9 -> FCTN 1-9 */
+      return numFctn[(keysym.sym - SDLK_F1) + 1];
+    }
+    /* Unhandled key */
+    return byte{0xff};
+  }
+  /* Number or punctuation key */
+  if ((keysym.mod & KMOD_CTRL)) {
+    if (index < 8)
+      return byte{0xb0}+index;
+    else
+      return numCtrl[index-8];
+  } else if ((keysym.mod & (KMOD_ALT | KMOD_GUI)))
+    return numFctn[index];
+  else if ((keysym.mod & KMOD_SHIFT))
+    return numShift[index];
+  else {
+    if (index < 10)
+      return byte{'0'}+index;
+    else
+      return punct[index-10];
+  }
+}
+
 Event SDLBackend::handleEvent(const SDL_Event &event)
 {
   if (event.type == SDL_QUIT)
     return Event::quitEvent();
+  else if (event.type == SDL_KEYDOWN) {
+    byte keyCode = decodeKey(event.key.keysym);
+    if (keyCode != 0xff)
+      return Event::keyEvent(keyCode);
+  }
   return Event::nullEvent();
 }
 

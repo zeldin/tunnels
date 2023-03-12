@@ -40,6 +40,7 @@ protected:
   virtual void endRender() override;
   virtual void endSynthesis() override;
   virtual Event handleEvent(const SDL_Event &event);
+  static byte decodeKey(const SDL_Keysym &keysym);
 };
 
 class SDLWindowBackend : public SDLBackend {
