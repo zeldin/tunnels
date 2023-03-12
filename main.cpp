@@ -10,12 +10,8 @@ int main(void) {
   Tunnels::Timer::TimerManager timerManager;
   Tunnels::Classic::ScreenEngine screen(backend);
   Tunnels::Classic::SoundEngine sound(backend, timerManager);
-  screen.drawTitleScreen();
-  sound.playTitleMusic();
-  screen.refresh();
-  backend.runEventLoop(timerManager);
-  sound.stopMusic();
-  timerManager.removeTimeout();
+  Tunnels::GameEngine engine(backend, timerManager, screen, sound);
+  engine.run();
   SDL_Quit();
   return EXIT_SUCCESS;
 }
