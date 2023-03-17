@@ -193,6 +193,7 @@ void Screen::vchar(unsigned row, unsigned col, byte name, unsigned cnt)
     *d = (*n != name);
     *n = name;
     d += COLUMNS;
+    n += COLUMNS;
   }
   any_name_table_dirty = true;
 }
