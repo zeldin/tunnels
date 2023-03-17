@@ -394,6 +394,7 @@ void ScreenEngine::initScreen()
 {
   screen.all(' ');
   screen.loadRomFont();
+  screen.setBackground(6);
   static constexpr byte up[][VDP::PATTERN_H] {
     { 0x00, 0x10, 0x38, 0x54, 0x10, 0x10, 0x10, 0x10 }
   };

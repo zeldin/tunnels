@@ -124,6 +124,7 @@ class Screen
   bool any_pattern_generator_dirty;
   bool any_name_table_dirty;
 
+  byte background;
   byte xpt;
   byte ypt;
   
@@ -162,6 +163,7 @@ class Screen
   void vstr(unsigned row, unsigned col, const byte *str, unsigned len,
 	    byte offset = 0);
   void all(byte name);
+  void setBackground(byte color);
   void refresh(Backend &backend);
 
   byte getXpt() const { return xpt; }

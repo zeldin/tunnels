@@ -243,6 +243,32 @@ void Screen::all(byte name)
   hchar(0, 0, name, ROWS*COLUMNS);
 }
 
+void Screen::setBackground(byte color)
+{
+  color &= 0xf;
+  if (color != background) {
+    background = color;
+    byte *t = &color_table[0];
+    bool *d = &pattern_generator_dirty[0];
+    unsigned n = 32;
+    do {
+      byte c = *t++;
+      if (!(c&0xf) || !(c&0xf0)) {
+	*d++ = true;
+	*d++ = true;
+	*d++ = true;
+	*d++ = true;
+	*d++ = true;
+	*d++ = true;
+	*d++ = true;
+	*d++ = true;
+	any_pattern_generator_dirty = true;
+      } else
+	d += 8;
+    } while(--n);
+  }
+}
+
 void Screen::refresh(Backend &backend)
 {
   if (!any_name_table_dirty && !any_pattern_generator_dirty)
@@ -264,7 +290,10 @@ void Screen::refresh(Backend &backend)
 	if (name_table_dirty[i][j] ||
 	    pattern_generator_dirty[name_table[i][j]]) {	
 	  name = name_table[i][j];
-	  r.drawPattern(i, j, pattern_generator[name], color_table[name>>3]);
+	  byte c = color_table[name>>3];
+	  if (!(c&0xf)) c|=background;
+	  if (!(c&0xf0)) c|=background<<4;
+	  r.drawPattern(i, j, pattern_generator[name], c);
 	  name_table_dirty[i][j] = false;
 	}
   }
@@ -285,6 +314,7 @@ Screen::Screen()
   pattern_generator_dirty[0] = true;
   any_pattern_generator_dirty = true;
   any_name_table_dirty = false;
+  background = 0;
   xpt = 0;
   ypt = 0;
 }
