@@ -39,6 +39,8 @@ EventType GameEngine::run()
 {
   if (titleScreen() == EVENT_QUIT)
     return EVENT_QUIT;
+  screen.drawPrompt(0x11);
+  waitForEvent();
   return EVENT_NULL;
 }
 

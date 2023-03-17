@@ -12,6 +12,7 @@ public:
   virtual ~ScreenEngine() {}
   virtual void refresh() {}
   virtual void drawTitleScreen() = 0;
+  virtual void drawPrompt(unsigned n) = 0;
 };
 
 class SoundEngine {

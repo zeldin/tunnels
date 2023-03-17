@@ -151,6 +151,8 @@ class Screen
   }
 
   void loadRomFont();
+  byte gchar(unsigned row, unsigned col)
+  { return row < ROWS && col < COLUMNS? name_table[row][col] : 0; }
   void hchar(unsigned row, unsigned col, byte name, unsigned cnt);
   void vchar(unsigned row, unsigned col, byte name, unsigned cnt);
   void hstr(unsigned row, unsigned col, const char *str);

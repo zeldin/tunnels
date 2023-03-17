@@ -18,6 +18,11 @@ public:
 
   virtual void refresh() override;
   virtual void drawTitleScreen() override;
+  virtual void drawPrompt(unsigned n) override;
+
+private:
+  void initScreen();
+  unsigned putDigit(unsigned y, unsigned x, unsigned d);
 };
 
 }
