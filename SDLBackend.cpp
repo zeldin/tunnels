@@ -15,7 +15,7 @@ constexpr VDP::Palette<SDLColor> sdl_colors{VDP::palette};
 SDLBackend::SDLBackend(SDL_Surface *screen_, SDL_Surface *surface_,
 		       int sampleRate_) :
   VDP::BytemapRenderer{reinterpret_cast<byte *>(surface_->pixels),
-		       surface_->pitch},
+		       surface_->pitch, BORDER_W, BORDER_H},
   DCSG::PCMSynthesizer(sampleRate_),
   screen{screen_},
   surface{surface_}
@@ -38,7 +38,9 @@ SDLBackend::SDLBackend(SDL_Surface *screen_, SDL_Surface *surface_,
 
 SDLBackend::SDLBackend(SDL_Surface *screen_, int sampleRate_) :
   SDLBackend{screen_,
-	     SDL_CreateRGBSurface(SDL_SWSURFACE, VDP::PIXELS_W, VDP::PIXELS_H,
+	     SDL_CreateRGBSurface(SDL_SWSURFACE,
+				  VDP::PIXELS_W + 2*BORDER_W,
+				  VDP::PIXELS_H + 2*BORDER_H,
 				  8, 0, 0, 0, 0), sampleRate_}
 {
 }
@@ -205,7 +207,8 @@ SDLWindowBackend::SDLWindowBackend(SDL_Window *window_, int sampleRate) :
 SDLWindowBackend::SDLWindowBackend(const char *window_title, int sampleRate):
   SDLWindowBackend{SDL_CreateWindow(window_title, SDL_WINDOWPOS_CENTERED,
 				    SDL_WINDOWPOS_CENTERED,
-				    VDP::PIXELS_W, VDP::PIXELS_H,
+				    VDP::PIXELS_W + 2*BORDER_W,
+				    VDP::PIXELS_H + 2*BORDER_H,
 				    0), sampleRate}
 {
 }

@@ -32,6 +32,9 @@ public:
   virtual Event runEventLoop(Timer::TimerManager& timerManager) override;
 
 protected:
+  static constexpr unsigned BORDER_W = 8;
+  static constexpr unsigned BORDER_H = 8;
+
   SDLBackend(SDL_Surface *screen_, SDL_Surface *surface_,
 	     int sampleRate_);
   void fillAudio(int16 *buffer, int len) {

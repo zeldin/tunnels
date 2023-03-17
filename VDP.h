@@ -73,6 +73,7 @@ class Renderer {
 protected:
   virtual void drawPattern(unsigned row, unsigned col,
 			   const byte *pat, byte colors) = 0;
+  virtual void drawBorder(byte color) { };
   virtual void endRender() { };
 };
 
@@ -80,13 +81,18 @@ class BytemapRenderer : public Renderer {
 private:
   byte *data;
   int pitch;
+  unsigned border_w;
+  unsigned border_h;
 protected:
-  BytemapRenderer(byte *data_ = nullptr, int pitch_ = 0) :
-    data(data_), pitch(pitch_) { }
-  void set(byte *data_ = nullptr, int pitch_ = 0)
-  { data = data_; pitch = pitch_; }
+  BytemapRenderer(byte *data_ = nullptr, int pitch_ = 0,
+		  unsigned border_w_ = 0, unsigned border_h_ = 0) :
+    data(data_), pitch(pitch_), border_w(border_w_), border_h(border_h_) { }
+  void set(byte *data_ = nullptr, int pitch_ = 0, unsigned border_w_ = 0,
+	   unsigned border_h_ = 0)
+  { data = data_; pitch = pitch_; border_w = border_w_; border_h = border_h_; }
   virtual void drawPattern(unsigned row, unsigned col, const byte *pat,
 			   byte colors) override;
+  virtual void drawBorder(byte color) override;
 };
 
 class ScopedRender {
@@ -97,6 +103,9 @@ public:
   ~ScopedRender() { target->endRender(); }
   void drawPattern(unsigned row, unsigned col, const byte *pat, byte colors) {
     target->drawPattern(row, col, pat, colors);
+  }
+  void drawBorder(byte color) {
+    target->drawBorder(color);
   }
   ScopedRender & operator=(const ScopedRender&) = delete;
   ScopedRender(const ScopedRender&) = delete;
@@ -123,7 +132,8 @@ class Screen
   bool name_table_dirty[ROWS][COLUMNS];
   bool any_pattern_generator_dirty;
   bool any_name_table_dirty;
-
+  bool border_dirty;
+  
   byte background;
   byte xpt;
   byte ypt;

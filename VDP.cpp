@@ -9,7 +9,7 @@ void BytemapRenderer::drawPattern(unsigned row, unsigned col,
 {
   if (row >= ROWS || col >= COLUMNS || !data)
     return;
-  byte *pix = data + (row << 3)*pitch + (col << 3);
+  byte *pix = data + ((row << 3) + border_h)*pitch + (col << 3) + border_w;
   byte fg = colors >> 4;
   byte bg = colors & 15;
   for (unsigned i=0; i<8; i++) {
@@ -19,6 +19,35 @@ void BytemapRenderer::drawPattern(unsigned row, unsigned col,
     pix += pitch;
   }
 }
+
+void BytemapRenderer::drawBorder(byte color)
+{
+  if (!data) return;
+  unsigned x, y;
+  if (border_h) {
+    byte *pix = data, *pix2 = data + (PIXELS_H + border_h) * pitch;
+    for(y=0; y<border_h; y++) {
+      for(x=PIXELS_W+2*border_w; --x; ) {
+	pix[x] = color;
+	pix2[x] = color;
+      }
+      pix += pitch;
+      pix2 += pitch;
+    }
+  }
+  if (border_w) {
+    byte *pix = data, *pix2 = data + (PIXELS_W + border_w);
+    for(y=PIXELS_H+2*border_h; --y; ) {
+      for(x=0; x<border_w; x++) {
+	pix[x] = color;
+	pix2[x] = color;
+      }
+      pix += pitch;
+      pix2 += pitch;
+    }
+  }
+}
+
 
 void Screen::loadRomFont() {
   static constexpr byte rom_font[][7] {
@@ -248,6 +277,7 @@ void Screen::setBackground(byte color)
   color &= 0xf;
   if (color != background) {
     background = color;
+    border_dirty = true;
     byte *t = &color_table[0];
     bool *d = &pattern_generator_dirty[0];
     unsigned n = 32;
@@ -271,20 +301,26 @@ void Screen::setBackground(byte color)
 
 void Screen::refresh(Backend &backend)
 {
-  if (!any_name_table_dirty && !any_pattern_generator_dirty)
+  if (!any_name_table_dirty && !any_pattern_generator_dirty && !border_dirty)
     return;
   unsigned i, j;
-  for (i=0; i<ROWS; i++) {
-    for (j=0; j<COLUMNS; j++)
-      if (name_table_dirty[i][j] ||
-	  pattern_generator_dirty[name_table[i][j]])
+  if (any_name_table_dirty || any_pattern_generator_dirty)
+    for (i=0; i<ROWS; i++) {
+      for (j=0; j<COLUMNS; j++)
+	if (name_table_dirty[i][j] ||
+	    pattern_generator_dirty[name_table[i][j]])
+	  break;
+      if (j<COLUMNS)
 	break;
-    if (j<COLUMNS)
-      break;
-  }
-  if (i<ROWS) {
+    }
+  else i=ROWS;
+  if (i<ROWS || border_dirty) {
     ScopedRender r{backend.startRender()};
     byte name;
+    if (border_dirty) {
+      r.drawBorder(background);
+      border_dirty = false;
+    }
     for (; i<ROWS; i++)
       for (j=0; j<COLUMNS; j++)
 	if (name_table_dirty[i][j] ||
@@ -314,6 +350,7 @@ Screen::Screen()
   pattern_generator_dirty[0] = true;
   any_pattern_generator_dirty = true;
   any_name_table_dirty = false;
+  border_dirty = true;
   background = 0;
   xpt = 0;
   ypt = 0;
