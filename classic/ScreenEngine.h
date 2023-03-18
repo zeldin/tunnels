@@ -24,6 +24,8 @@ private:
   void initScreen();
   unsigned putDigit(unsigned y, unsigned x, unsigned d);
   unsigned putNumber(unsigned y, unsigned x, byte d);
+  unsigned putNumber(unsigned y, unsigned x, uint16 d);
+  unsigned putPlural();
   void putQuad(unsigned y, unsigned x, byte base);
   unsigned findEndOfLine();
   void gplExtension(uint16 addr);

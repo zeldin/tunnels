@@ -432,6 +432,42 @@ unsigned ScreenEngine::putNumber(unsigned y, unsigned x, byte n)
   return ++x;
 }
 
+unsigned ScreenEngine::putNumber(unsigned y, unsigned x, uint16 n)
+{
+  screen.hchar(y, x, ' ', 5);
+  unsigned d = n/10000;
+  n %= 10000;
+  x = putDigit(y, x, d);
+  d = n/1000;
+  n %= 1000;
+  x = putDigit(y, x, d);
+  d = n/100;
+  n %= 100;
+  x = putDigit(y, x, d);
+  d = n/10;
+  n %= 10;
+  x = putDigit(y, x, d);
+  screen.hchar(y, x++, '0'+n);
+  return ++x;
+}
+
+unsigned ScreenEngine::putPlural()
+{
+  unsigned y = screen.getYpt();
+  unsigned x = findEndOfLine();
+  byte c = screen.gchar(y, x);
+  if (c == 'X' || c == 'S') {
+    x++;
+    screen.hchar(y, x++, 'E');
+  } else if (c == 'F') {
+    screen.hchar(y, x++, 'V');
+    screen.hchar(y, x++, 'E');
+  } else
+    x++;
+  screen.hchar(y, x++, 'S');
+  return x;
+}
+
 void ScreenEngine::putQuad(unsigned y, unsigned x, byte base)
 {
   screen.hchar(y, x, base);
@@ -465,7 +501,7 @@ void ScreenEngine::gplExtension(uint16 addr)
   case 0xf1a6:
     {
       screen.hchar(y, x, screen.gchar(y, x) + 7); /* FIXME */
-      screen.setXpt(putNumber(y, x+2, 123)); /* FIXME */
+      screen.setXpt(putNumber(y, x+2, byte(123))); /* FIXME */
       drawPrompt(0x0f);
       return;
     }
@@ -533,9 +569,52 @@ void ScreenEngine::gplExtension(uint16 addr)
       return;
     }
   case 0xf336:
+    {
+      screen.vchar(1, 20, ' ', 14);
+      screen.vchar(1, 23, ' ', 14);
+      unsigned n = 2; /* FIXME */
+      screen.hchar(18, 27, '0'+n);
+      screen.setYpt(20);
+      screen.hstr(20, findEndOfLine()+2, "///////////////"); /* FIXME */
+      n = 3; /* FIXME */
+      y = 1+(n<<2);
+      screen.vchar(y, 20, ':', 2);
+      screen.vchar(y, 23, ':', 2);
+      screen.setXpt(20);
+      screen.setYpt(y+2);
+      return;
+    }
   case 0xf3ab:
+    {
+      int n = 3; /* FIXME */
+      drawPrompt(n > 1? 0x35 : 0x34);
+      return;
+    }
   case 0xf3be:
+    {
+      uint16 n = 12; /* FIXME */
+      screen.setYpt(13);
+      x = putNumber(13, findEndOfLine()+2, n);
+      screen.hchar(13, --x, '0');
+      screen.setXpt(x);
+      return;
+    }
   case 0xf3d0:
+    {
+      screen.setYpt(9);
+      putPlural();
+      byte n = 34; /* FIXME */
+      x = putNumber(9, 21, n);
+      screen.hstr(9, x-1, "0/");
+      n = 56; /* FIXME */
+      putNumber(9, x+1, n);
+      n = 78; /* FIXME */
+      x = putNumber(10, 21, n);
+      screen.hchar(10, --x, '0');
+      screen.setYpt(16);
+      screen.setXpt(20);
+      return;
+    }
   case 0xf429:
   case 0xf43b:
   case 0xf44a:
@@ -661,17 +740,7 @@ void ScreenEngine::drawPrompt(unsigned n)
       case Vocab::cPLURAL:
 	{
 	  unsigned y = screen.getYpt();
-	  unsigned x = findEndOfLine();
-	  byte c = screen.gchar(y, x);
-	  if (c == 'X' || c == 'S') {
-	    x++;
-	    screen.hchar(y, x++, 'E');
-	  } else if (c == 'F') {
-	    screen.hchar(y, x++, 'V');
-	    screen.hchar(y, x++, 'E');
-	  } else
-	    x++;
-	  screen.hchar(y, x++, 'S');
+	  unsigned x = putPlural();
 	  if (x < 30)
 	    screen.hchar(y, x, ' ');
 	  screen.setXpt(++x);
