@@ -7,6 +7,14 @@ namespace Classic {
 
 namespace SequencePack {
 
+template <uint16 n, typename T> struct ArraySequence
+{
+  static constexpr uint16 len = n;
+  typedef T type;
+  T data[n];
+  constexpr const T *ptr() const { return data; }
+};
+
 template <uint16 n, typename T> struct UniformSequence
 {
   static constexpr uint16 len = n;
@@ -53,6 +61,21 @@ template <typename T, typename ... U> struct SequenceType<T, U...>
   typedef Sequence<len, T, tailType> type;
 };
 
+template <typename ... T> struct StringSequenceType;
+
+template <> struct StringSequenceType<>
+{
+  static constexpr uint16 len = 0;
+  typedef EmptySequence type;
+};
+
+template <int n, typename ... U> struct StringSequenceType<const char[n], U...>
+{
+  typedef typename StringSequenceType<U...>::type tailType;
+  static constexpr uint16 len = 1 + tailType::len;
+  typedef Sequence<len, UniformSequence<n-1, byte>, tailType> type;
+};
+
 constexpr EmptySequence sequence() { return EmptySequence{}; }
 
 template <typename T, typename ... U>
@@ -60,14 +83,33 @@ constexpr typename SequenceType<T, U...>::type sequence(T head, U ... rest) {
   return typename SequenceType<T, U...>::type{head, sequence(rest...)};
 }
 
+template <int n> constexpr UniformSequence<n, byte> buildString(const char *p)
+{
+  return UniformSequence<n, byte>{*p, buildString<n-1>(p+1)};
+}
+
+template <> constexpr UniformSequence<0, byte> buildString<0>(const char *p)
+{
+  return UniformSequence<0, byte>{};
+}
+
+constexpr EmptySequence stringSequence() { return EmptySequence{}; }
+
+template <int n, typename ... U>
+constexpr typename StringSequenceType<const char[n], U ...>::type
+stringSequence(const char (&head)[n], U& ... rest) {
+  return typename StringSequenceType<const char[n], U ...>::type{
+    buildString<n-1>(head), stringSequence(rest...)};
+}
+
 constexpr UniformSequence<1, uint16> indexSequence(EmptySequence s, uint16 offs=0)
 {
   return UniformSequence<1, uint16>{offs, UniformSequence<0, uint16>{}};
 }
 
-template <uint16 n, uint16 m, typename T, typename U> constexpr
-UniformSequence<n+1, uint16> indexSequence(Sequence<n, UniformSequence<m, U>, T> s, uint16 offs=0) {
-  return UniformSequence<n+1, uint16>{offs, indexSequence(s.tail, offs+m)};
+template <uint16 n, typename T, typename U> constexpr
+UniformSequence<n+1, uint16> indexSequence(Sequence<n, T, U> s, uint16 offs=0) {
+  return UniformSequence<n+1, uint16>{offs, indexSequence(s.tail, offs+T::len)};
 }
 
 template <typename S> class IndexedSequence

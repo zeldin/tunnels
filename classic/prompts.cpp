@@ -43,52 +43,39 @@ enum {
   cINIT, cCLREOS, cBACK, cCALL, cEND
 };
 
-constexpr char words[] =
-  "A" "AT" "ABOVE" "ACCEPT" "" "ALL" "ALLOWED" "AND" "ARE" "ARROW" "ASCEND"
-  "ATTACK" "ATTEMPT" "AVAILABLE" "BACK" "BAR" "BATTLE" "BE" "BEEN" "BEFORE"
-  "BEGIN" "BELOW" "BONUS" "BREAK" "BUY" "BY" "CANCEL" "CAN'T" "CASSETTE"
-  "CATEGORY" "CHANCE" "CHANGE" "CHECK" "CLASS" "CLIMB" "COLOR" "COMBAT"
-  "COMMAND" "COMPLETE" "CONGRATULATIONS" "CONSTRUCTION" "CONTINUE" "COST"
-  "CURRENT" "CURSOR" "DAMAGE" "DATA" "DECREASE" "DEFENSE" "DESCEND" "DEVICE"
-  "DIFFERENT" "DIFFICULTY" "DIGGING" "DIGITS" "DIRECTION" "DISK" "WD" "DON'T"
-  "DOOR" "DOWN" "DROP" "DROPPED" "DUNGEON" "EACH" "EASIEST" "ENOUGH" "END"
-  "ENTER" "ERROR" "ESCAPE" "SPEED" "FAIL" "FILENAME" "FILE" "FIND" "FINISHED"
-  "FIRE" "FLOOR" "FOR" "FORMATION" "FOUND" "FROM" "FRONT" "GAME" "GIVE" "GO"
-  "GOES" "" "HALL" "HANDS" "HARDEST" "HAS" "HAVE" "HEAR" "HERE" "HIT" "HOLD"
-  "HP" "IF" "IN" "INCREASE" "INSERT" "IS" "IT" "ITEM" "KEY" "KILLED" "LEAVE"
-  "LEFT" "LISTEN" "LOAD" "LOOK" "LOST" "MAKE" "MANY" "MAP" "MAXIMUM" "MEDIUM"
-  "MISS" "MOBILITY" "MORE" "MOVE" "MOVEMENT" "NAME" "NEED" "NEGOTIATION"
-  "NEW" "NEXT" "NO" "NONE" "FORWARD" "NOT" "NUMBER" "OBJECT" "OF" "OLD"
-  "ON" "ONE" "OPEN" "OPTION" "OR" "ORDER" "OTHER" "OUT" "OVER" "PER" "PLEASE"
-  "POINT" "POSITION" "POSSESSION" "PRESS" "LATE" "PROC'D" "PROGRAM"
-  "PROTECTION" "PURCHASE" "QUEST" "WOUND" "RATINGS" "READY" "REAR" "REDO"
-  "REFUSE" "REPORT" "RESTOCK" "RETURN" "RIGHT" "ROOM" "SAME" "SAVE" ""
-  "SECOND" "SECRET" "SELECT" "SELECTION" "SHOW" "SIDE" "SOMETHING" "SORRY"
-  "THAT" "SPACE" "SPECIAL" "STAIR" "START" "STATUS" "STOCKING" "SUCCESSFULLY"
-  "SUMMARY" "SWITCHES" "TAKE" "TARGET" "RANGING" "THE" "THIS" "THOSE"
-  "THROUGH" "TO" "TRADE" "TRY" "TUNNELS OF DOOM" "TURN" "TWO" "UNAVAILABLE"
-  "UNDER" "UNLIMITED" "UNTRIED" "UP" "USE" "USER" "WAIT" "WARNING" "WANT"
-  "WHEN" "WHICH" "WHO" "WHOM" "WILL" "WITH" "WORKING" "YOU" "YOUR"
-  "PROTECTION" "RESISTANCE";
-constexpr unsigned short wordIndex[] = {
-  0, 1, 3, 8, 14, 14, 17, 24, 27, 30, 35, 41, 47, 54, 63, 67, 70, 76, 78,
-  82, 88, 93, 98, 103, 108, 111, 113, 119, 124, 132, 140, 146, 152, 157,
-  162, 167, 172, 178, 185, 193, 208, 220, 228, 232, 239, 245, 251, 255,
-  263, 270, 277, 283, 292, 302, 309, 315, 324, 328, 330, 335, 339, 343,
-  347, 354, 361, 365, 372, 378, 381, 386, 391, 397, 402, 406, 414, 418,
-  422, 430, 434, 439, 442, 451, 456, 460, 465, 469, 473, 475, 479, 479,
-  483, 488, 495, 498, 502, 506, 510, 513, 517, 519, 521, 523, 531, 537,
-  539, 541, 545, 548, 554, 559, 563, 569, 573, 577, 581, 585, 589, 592,
-  599, 605, 609, 617, 621, 625, 633, 637, 641, 652, 655, 659, 661, 665,
-  672, 675, 681, 687, 689, 692, 694, 697, 701, 707, 709, 714, 719, 722,
-  726, 729, 735, 740, 748, 758, 763, 767, 773, 780, 790, 798, 803, 808,
-  815, 820, 824, 828, 834, 840, 847, 853, 858, 862, 866, 870, 870, 876,
-  882, 888, 897, 901, 905, 914, 919, 923, 928, 935, 940, 945, 951, 959,
-  971, 978, 986, 990, 996, 1003, 1006, 1010, 1015, 1022, 1024, 1029, 1032,
-  1047, 1051, 1054, 1065, 1070, 1079, 1086, 1088, 1091, 1095, 1099, 1106,
-  1110, 1114, 1119, 1122, 1126, 1130, 1134, 1141, 1144, 1148, 1158, 1168,
-};
-
+constexpr const auto dictionary = SequencePack::index
+  (SequencePack::stringSequence
+   ("A", "AT", "ABOVE", "ACCEPT", "", "ALL", "ALLOWED", "AND", "ARE", "ARROW",
+    "ASCEND", "ATTACK", "ATTEMPT", "AVAILABLE", "BACK", "BAR", "BATTLE", "BE",
+    "BEEN", "BEFORE", "BEGIN", "BELOW", "BONUS", "BREAK", "BUY", "BY",
+    "CANCEL", "CAN'T", "CASSETTE", "CATEGORY", "CHANCE", "CHANGE", "CHECK",
+    "CLASS", "CLIMB", "COLOR", "COMBAT", "COMMAND", "COMPLETE",
+    "CONGRATULATIONS", "CONSTRUCTION", "CONTINUE", "COST", "CURRENT",
+    "CURSOR", "DAMAGE", "DATA", "DECREASE", "DEFENSE", "DESCEND", "DEVICE",
+    "DIFFERENT", "DIFFICULTY", "DIGGING", "DIGITS", "DIRECTION", "DISK", "WD",
+    "DON'T", "DOOR", "DOWN", "DROP", "DROPPED", "DUNGEON", "EACH", "EASIEST",
+    "ENOUGH", "END", "ENTER", "ERROR", "ESCAPE", "SPEED", "FAIL", "FILENAME",
+    "FILE", "FIND", "FINISHED", "FIRE", "FLOOR", "FOR", "FORMATION", "FOUND",
+    "FROM", "FRONT", "GAME", "GIVE", "GO", "GOES", "", "HALL", "HANDS",
+    "HARDEST", "HAS", "HAVE", "HEAR", "HERE", "HIT", "HOLD", "HP", "IF", "IN",
+    "INCREASE", "INSERT", "IS", "IT", "ITEM", "KEY", "KILLED", "LEAVE",
+    "LEFT", "LISTEN", "LOAD", "LOOK", "LOST", "MAKE", "MANY", "MAP",
+    "MAXIMUM", "MEDIUM", "MISS", "MOBILITY", "MORE", "MOVE", "MOVEMENT",
+    "NAME", "NEED", "NEGOTIATION", "NEW", "NEXT", "NO", "NONE", "FORWARD",
+    "NOT", "NUMBER", "OBJECT", "OF", "OLD", "ON", "ONE", "OPEN", "OPTION",
+    "OR", "ORDER", "OTHER", "OUT", "OVER", "PER", "PLEASE", "POINT",
+    "POSITION", "POSSESSION", "PRESS", "LATE", "PROC'D", "PROGRAM",
+    "PROTECTION", "PURCHASE", "QUEST", "WOUND", "RATINGS", "READY", "REAR",
+    "REDO", "REFUSE", "REPORT", "RESTOCK", "RETURN", "RIGHT", "ROOM", "SAME",
+    "SAVE", "", "SECOND", "SECRET", "SELECT", "SELECTION", "SHOW", "SIDE",
+    "SOMETHING", "SORRY", "THAT", "SPACE", "SPECIAL", "STAIR", "START",
+    "STATUS", "STOCKING", "SUCCESSFULLY", "SUMMARY", "SWITCHES", "TAKE",
+    "TARGET", "RANGING", "THE", "THIS", "THOSE", "THROUGH", "TO", "TRADE",
+    "TRY", "TUNNELS OF DOOM", "TURN", "TWO", "UNAVAILABLE", "UNDER",
+    "UNLIMITED", "UNTRIED", "UP", "USE", "USER", "WAIT", "WARNING", "WANT",
+    "WHEN", "WHICH", "WHO", "WHOM", "WILL", "WITH", "WORKING", "YOU", "YOUR",
+    "PROTECTION", "RESISTANCE"
+    ));
 
 constexpr SequencePack::UniformSequence<0, byte> prompt() {
   return SequencePack::UniformSequence<0, byte>{};
@@ -508,11 +495,10 @@ void ScreenEngine::drawPrompt(unsigned n)
   while ((c = *ptr++) != Vocab::cEND)
     if (c < Vocab::cNEXTL) {
       if (c) {
-	unsigned o = Vocab::wordIndex[c-1];
-	unsigned l = Vocab::wordIndex[c] - o;
 	unsigned x = screen.getXpt();
 	unsigned y = screen.getYpt();
-	screen.hstr(y, x, reinterpret_cast<const byte *>(&Vocab::words[o]), l);
+	unsigned l = Vocab::dictionary.len(c-1);
+	screen.hstr(y, x, Vocab::dictionary.entry(c-1), l);
 	if ((x += l) < 30)
 	  screen.hchar(y, x++, ' ');
 	else
