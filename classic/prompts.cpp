@@ -396,19 +396,19 @@ void ScreenEngine::initScreen()
   screen.loadRomFont();
   screen.setBackground(6);
   static constexpr byte up[][VDP::PATTERN_H] {
-    { 0x00, 0x10, 0x38, 0x54, 0x10, 0x10, 0x10, 0x10 }
+    { 0x00, 0x10, 0x38, 0x54, 0x10, 0x10, 0x10, 0x10 } // up arrow
   };
   screen.loadPatterns(60, up);
   static constexpr byte down[][VDP::PATTERN_H] {
-    { 0x00, 0x10, 0x10, 0x10, 0x10, 0x54, 0x38, 0x10 }
+    { 0x00, 0x10, 0x10, 0x10, 0x10, 0x54, 0x38, 0x10 } // down arrow
   };
   screen.loadPatterns(62, down);
   static constexpr byte patterns[][VDP::PATTERN_H] {
-    { 0x18, 0x24, 0x5a, 0xa1, 0xa1, 0x5a, 0x24, 0x18 },
-    { 0x00, 0x00, 0x10, 0x08, 0x7c, 0x08, 0x10, 0x00 },
-    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x82, 0x7c },
-    { 0x00, 0x38, 0x38, 0x38, 0x38, 0x38, 0x82, 0x7c },
-    { 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00 }
+    { 0x18, 0x24, 0x5a, 0xa1, 0xa1, 0x5a, 0x24, 0x18 },  // copyright
+    { 0x00, 0x00, 0x10, 0x08, 0x7c, 0x08, 0x10, 0x00 },  // right arrow
+    { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x82, 0x7c },  // entry field
+    { 0x00, 0x38, 0x38, 0x38, 0x38, 0x38, 0x82, 0x7c },  // entry cursor
+    { 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00 }   // hline
   };
   screen.loadPatterns(91, patterns);
   static constexpr byte color_table[] {
@@ -432,6 +432,75 @@ unsigned ScreenEngine::putDigit(unsigned y, unsigned x, unsigned d)
   return x;
 }
 
+unsigned ScreenEngine::putNumber(unsigned y, unsigned x, byte n)
+{
+  screen.hchar(y, x, ' ', 3);
+  unsigned d = n/100;
+  n %= 100;
+  x = putDigit(y, x, d);
+  d = n/10;
+  n %= 10;
+  x = putDigit(y, x, d);
+  screen.hchar(y, x++, '0'+n);
+  return ++x;
+}
+
+unsigned ScreenEngine::findEndOfLine()
+{
+  unsigned y = screen.getYpt();
+  unsigned x = 29;
+  byte c;
+  while (x && (c = screen.gchar(y, x)) == ' ') --x;
+  return x;
+}
+
+void ScreenEngine::gplExtension(uint16 addr)
+{
+  unsigned x = screen.getXpt();
+  unsigned y = screen.getYpt();
+  switch (addr) {
+  case 0xf193:
+    {
+      screen.hstr(y, x, "FOO" /* FIXME */);
+      x = findEndOfLine();
+      screen.hchar(y, ++x, '.');
+      screen.setXpt(x);
+      return;
+    }
+  case 0xf1a6:
+    {
+      screen.hchar(y, x, screen.gchar(y, x) + 7); /* FIXME */
+      screen.setXpt(putNumber(y, x+2, 123)); /* FIXME */
+      drawPrompt(0x0f);
+      return;
+    }
+  case 0xf1bc:
+  case 0xf1c5:
+  case 0xf25b:
+  case 0xf29f:
+  case 0xf2aa:
+  case 0xf336:
+  case 0xf3ab:
+  case 0xf3be:
+  case 0xf3d0:
+  case 0xf429:
+  case 0xf43b:
+  case 0xf44a:
+  case 0xf463:
+  case 0xf478:
+  case 0xf48a:
+  case 0xf4d0:
+  case 0xf581:
+  case 0xf620:
+  case 0xf65d:
+  case 0xf787:
+  case 0xf7d9:
+    break;
+  }
+  printf("Bad GPL %04x\n", (unsigned)addr);
+  abort();
+}
+
 void ScreenEngine::drawPrompt(unsigned n)
 {
   const byte *ptr = Vocab::prompts.entry(n);
@@ -445,7 +514,7 @@ void ScreenEngine::drawPrompt(unsigned n)
 	unsigned y = screen.getYpt();
 	screen.hstr(y, x, reinterpret_cast<const byte *>(&Vocab::words[o]), l);
 	if ((x += l) < 30)
-	  screen.hchar(y, x++, ' ', 1);
+	  screen.hchar(y, x++, ' ');
 	else
 	  x = 31;
 	screen.setXpt(x);
@@ -453,8 +522,8 @@ void ScreenEngine::drawPrompt(unsigned n)
     } else if (c < Vocab::cNUM) {
       if (c >= Vocab::cSP) {
 	screen.hchar(screen.getYpt(), screen.getXpt()-1,
-		     " <>:.,-/?!()"[c-Vocab::cSP], 1);
-	screen.hchar(screen.getYpt(), screen.getXpt(), ' ', 1);
+		     " <>:.,-/?!()"[c-Vocab::cSP]);
+	screen.hchar(screen.getYpt(), screen.getXpt(), ' ');
 	screen.setXpt(screen.getXpt()+1);
       } else switch(c) {
 	case Vocab::cNEXTL:
@@ -462,26 +531,15 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  screen.setXpt(2);
 	  break;
 	case Vocab::cJMP:
+	  ptr = Vocab::prompts.entry(*ptr - 1);
+	  break;
 	case Vocab::cGPL:
-	  printf("Bad C %02x\n", (unsigned)c);
-	  abort();
+	  gplExtension((ptr[0] << 8)|ptr[1]);
+	  return;
       }
     } else switch(c) {
       case Vocab::cNUM:
-	{
-	  unsigned n = *ptr++;
-	  unsigned x = screen.getXpt();
-	  unsigned y = screen.getYpt();
-	  screen.hchar(y, x, ' ', 3);
-	  unsigned d = n/100;
-	  n %= 100;
-	  x = putDigit(y, x, d);
-	  d = n/10;
-	  n %= 10;
-	  x = putDigit(y, x, d);
-	  screen.hchar(y, x++, '0'+n, 1);
-	  screen.setXpt(++x);
-	}
+	screen.setXpt(putNumber(screen.getYpt(), screen.getXpt(), *ptr++));
 	break;
       case Vocab::cCURSOR:
 	screen.setYpt(*ptr++);
@@ -506,8 +564,22 @@ void ScreenEngine::drawPrompt(unsigned n)
 	screen.hchar(screen.getYpt(), 2, *ptr++, 28);
 	break;
       case Vocab::cTEXT:
-	printf("Bad C %02x\n", (unsigned)c);
-	abort();
+	{
+	  unsigned x = screen.getXpt();
+	  unsigned y = screen.getYpt();
+	  byte n = *ptr++;
+	  if ((n & 0x80)) {
+	    n = ~n;
+	    screen.hstr(y, x, "ENTRY("); /* FIXME */
+	    screen.hchar(y, putNumber(y, x+6, n)-1, ')'); /* FIXME */
+	  } else {
+	    uint16 addr = (n << 8) | *ptr++;
+	    n = *ptr++;
+	    screen.hchar(y, x, '*', n); /* FIXME */
+	  }
+	  screen.setXpt(findEndOfLine()+2);
+	}
+	break;
       case Vocab::cLIST:
 	{
 	  byte a = *ptr++;
@@ -516,13 +588,13 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  unsigned x = screen.getXpt();
 	  unsigned y = screen.getYpt();
 	  do {
-	    screen.hchar(y, x, a, 1);
-	    screen.hchar(y, x+1, c, 1);
+	    screen.hchar(y, x, a);
+	    screen.hchar(y, x+1, c);
 	    y++;
 	  } while(++a <= b);
 	  x += 2;
 	  if (x < 30)
-	    screen.hchar(screen.getYpt(), x++, ' ', 1);
+	    screen.hchar(screen.getYpt(), x++, ' ');
 	  screen.setXpt(x);
 	}
 	break;
@@ -539,20 +611,19 @@ void ScreenEngine::drawPrompt(unsigned n)
       case Vocab::cPLURAL:
 	{
 	  unsigned y = screen.getYpt();
-	  unsigned x = 29;
-	  byte c;
-	  while (x && (c = screen.gchar(y, x)) == ' ') --x;
+	  unsigned x = findEndOfLine();
+	  byte c = screen.gchar(y, x);
 	  if (c == 'X' || c == 'S') {
 	    x++;
-	    screen.hchar(y, x++, 'E', 1);
+	    screen.hchar(y, x++, 'E');
 	  } else if (c == 'F') {
-	    screen.hchar(y, x++, 'V', 1);
-	    screen.hchar(y, x++, 'E', 1);
+	    screen.hchar(y, x++, 'V');
+	    screen.hchar(y, x++, 'E');
 	  } else
 	    x++;
-	  screen.hchar(y, x++, 'S', 1);
+	  screen.hchar(y, x++, 'S');
 	  if (x < 30)
-	    screen.hchar(y, x++, ' ', 1);
+	    screen.hchar(y, x++, ' ');
 	  screen.setXpt(x);
 	}
 	break;
@@ -564,7 +635,7 @@ void ScreenEngine::drawPrompt(unsigned n)
 	    x++;
 	  screen.hstr(y, x, "ED"); x+=2;
 	  if (x < 30)
-	    screen.hchar(y, x++, ' ', 1);
+	    screen.hchar(y, x++, ' ');
 	  screen.setXpt(x);
 	}
 	break;
@@ -576,7 +647,7 @@ void ScreenEngine::drawPrompt(unsigned n)
 	    x++;
 	  screen.hstr(y, x, "ING"); x+=3;
 	  if (x < 30)
-	    screen.hchar(y, x++, ' ', 1);
+	    screen.hchar(y, x++, ' ');
 	  screen.setXpt(x);
 	}
 	break;
@@ -584,8 +655,13 @@ void ScreenEngine::drawPrompt(unsigned n)
 	initScreen();
 	break;
       case Vocab::cCLREOS:
-	printf("Bad C %02x\n", (unsigned)c);
-	abort();
+	{
+	  unsigned y = screen.getYpt();
+	  do
+	    screen.hchar(y++, 2, ' ', 28);
+	  while (y < VDP::ROWS);
+	}
+	break;
       case Vocab::cBACK:
 	screen.setXpt(screen.getXpt()-1);
 	break;
