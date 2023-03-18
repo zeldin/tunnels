@@ -432,6 +432,14 @@ unsigned ScreenEngine::putNumber(unsigned y, unsigned x, byte n)
   return ++x;
 }
 
+void ScreenEngine::putQuad(unsigned y, unsigned x, byte base)
+{
+  screen.hchar(y, x, base);
+  screen.hchar(y+1, x, base+1);
+  screen.hchar(y+1, x+1, base+3);
+  screen.hchar(y, x+1, base+2);
+}
+
 unsigned ScreenEngine::findEndOfLine()
 {
   unsigned y = screen.getYpt();
@@ -478,12 +486,52 @@ void ScreenEngine::gplExtension(uint16 addr)
 	0x88, 0xfb
       };
       screen.fmt(fmt1);
-      /* FIXME */
+      unsigned i, n = 3; /* FIXME */
+      y = 7; x = 17;
+      if (n == 1)
+	screen.hchar(y, 2, ' ', 28);
+      else
+	screen.hchar(y, x, screen.gchar(y, x)+n);
+      y = 16; x = 4;
+      for (i=1; i<=4; i++) {
+	if (i > n)
+	  screen.hchar(y, x, ' ', 2);
+	else
+	  screen.hstr(y, x+2, "##########"); /* FIXME */
+	y += 2;
+      }
+      screen.setXpt(x);
+      screen.setYpt(y);
       return;
     }
   case 0xf25b:
+    {
+      unsigned i, n = 3; /* FIXME */
+      y = 10; x = 6;
+      for (i=0; i<n; i++) {
+	putQuad(y, x, i<<3);
+	screen.hstr(y, x+3, "///////////////"); /* FIXME */
+	screen.hstr(y+1, x+3, "##########"); /* FIXME */
+	y += 3;
+      }
+      screen.setXpt(x);
+      screen.setYpt(y);
+      return;
+    }
   case 0xf29f:
+    {
+      byte n = 17; /* FIXME */
+      screen.setXpt(putNumber(y, findEndOfLine()+2, n));
+      return;
+    }
   case 0xf2aa:
+    {
+      screen.setBackground(4);
+      /* FIXME ... */
+      drawPrompt(0x2a);
+      drawPrompt(0x2b);
+      return;
+    }
   case 0xf336:
   case 0xf3ab:
   case 0xf3be:
@@ -518,10 +566,8 @@ void ScreenEngine::drawPrompt(unsigned n)
 	unsigned l = Vocab::dictionary.len(c-1);
 	screen.hstr(y, x, Vocab::dictionary.entry(c-1), l);
 	if ((x += l) < 30)
-	  screen.hchar(y, x++, ' ');
-	else
-	  x = 31;
-	screen.setXpt(x);
+	  screen.hchar(y, x, ' ');
+	screen.setXpt(++x);
       }
     } else if (c < Vocab::cNUM) {
       if (c >= Vocab::cSP) {
@@ -598,8 +644,8 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  } while(++a <= b);
 	  x += 2;
 	  if (x < 30)
-	    screen.hchar(screen.getYpt(), x++, ' ');
-	  screen.setXpt(x);
+	    screen.hchar(screen.getYpt(), x, ' ');
+	  screen.setXpt(++x);
 	}
 	break;
       case Vocab::cFWD:
@@ -627,8 +673,8 @@ void ScreenEngine::drawPrompt(unsigned n)
 	    x++;
 	  screen.hchar(y, x++, 'S');
 	  if (x < 30)
-	    screen.hchar(y, x++, ' ');
-	  screen.setXpt(x);
+	    screen.hchar(y, x, ' ');
+	  screen.setXpt(++x);
 	}
 	break;
       case Vocab::cED:
@@ -639,8 +685,8 @@ void ScreenEngine::drawPrompt(unsigned n)
 	    x++;
 	  screen.hstr(y, x, "ED"); x+=2;
 	  if (x < 30)
-	    screen.hchar(y, x++, ' ');
-	  screen.setXpt(x);
+	    screen.hchar(y, x, ' ');
+	  screen.setXpt(++x);
 	}
 	break;
       case Vocab::cING:
@@ -651,8 +697,8 @@ void ScreenEngine::drawPrompt(unsigned n)
 	    x++;
 	  screen.hstr(y, x, "ING"); x+=3;
 	  if (x < 30)
-	    screen.hchar(y, x++, ' ');
-	  screen.setXpt(x);
+	    screen.hchar(y, x, ' ');
+	  screen.setXpt(++x);
 	}
 	break;
       case Vocab::cINIT:
