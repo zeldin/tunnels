@@ -34,10 +34,19 @@ enum {
   WARNING, WANT, WHEN, WHICH, WHO, WHOM, WILL, WITH, WORKING, YOU,
   YOUR, PROTECTION2, RESISTANCE,
 
-  cNEXTL, cJMP, cGPL, cSP, cLT, cGT, cCOLON, cPERIOD, cCOMMA, cDASH,
+  cNEXTL, cJMP, cGPL, cEXT=cGPL, cSP, cLT, cGT, cCOLON, cPERIOD, cCOMMA, cDASH,
   cSLASH, cQUESTION, cEXCLAM, cLPAREN, cRPAREN, cNUM, cCURSOR,
   cHCHAR, cVCHAR, cCLEARL, cTEXT, cLIST, cFWD, cPLURAL, cED, cING,
   cINIT, cCLREOS, cBACK, cCALL, cEND
+};
+
+enum {
+  extQUESTOBJ, extFLOORRANGE, extMAXPARTY, extCLASSES, extPARTY,
+  extFLOOREOL, extGAMEOVER, extCURPLAYER, extMONSTERPLURALITY,
+  extPARTYGOLD, extSTOREPRICES, extPLAYERNAME, extITEMSLABEL,
+  extGOLDFOUND, extQUESTCOMPLETE, extAMMO, extFLOORAT,
+  extMONSTERREPORT, extPLAYERSTATUS, extITEMS, extPARTYSTATUS,
+  extNEGOTIATION, extVAULT
 };
 
 constexpr const auto dictionary = SequencePack::index
@@ -503,6 +512,7 @@ void ScreenEngine::gplExtension(uint16 addr)
   unsigned x = screen.getXpt();
   unsigned y = screen.getYpt();
   switch (addr) {
+  case Vocab::extQUESTOBJ:
   case 0xf193:
     {
       screen.hstr(y, x, "FOO" /* FIXME */);
@@ -511,6 +521,7 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setXpt(x);
       return;
     }
+  case Vocab::extFLOORRANGE:
   case 0xf1a6:
     {
       screen.hchar(y, x, screen.gchar(y, x) + 7); /* FIXME */
@@ -518,11 +529,13 @@ void ScreenEngine::gplExtension(uint16 addr)
       drawPrompt(0x0f);
       return;
     }
+  case Vocab::extMAXPARTY:
   case 0xf1bc:
     {
       screen.hchar(y, x, '0' + 3); /* FIXME */
       return;
     }
+  case Vocab::extCLASSES:
   case 0xf1c5:
     {
       static constexpr byte fmt1[] = {
@@ -553,6 +566,7 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setYpt(y);
       return;
     }
+  case Vocab::extPARTY:
   case 0xf25b:
     {
       unsigned i, n = 3; /* FIXME */
@@ -567,12 +581,14 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setYpt(y);
       return;
     }
+  case Vocab::extFLOOREOL:
   case 0xf29f:
     {
       byte n = 17; /* FIXME */
       putNumberEol(y, n);
       return;
     }
+  case Vocab::extGAMEOVER:
   case 0xf2aa:
     {
       screen.setBackground(4);
@@ -581,6 +597,7 @@ void ScreenEngine::gplExtension(uint16 addr)
       drawPrompt(0x2b);
       return;
     }
+  case Vocab::extCURPLAYER:
   case 0xf336:
     {
       screen.vchar(1, 20, ' ', 14);
@@ -597,12 +614,14 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setYpt(y+2);
       return;
     }
+  case Vocab::extMONSTERPLURALITY:
   case 0xf3ab:
     {
       int n = 3; /* FIXME */
       drawPrompt(n > 1? 0x35 : 0x34);
       return;
     }
+  case Vocab::extPARTYGOLD:
   case 0xf3be:
     {
       uint16 n = 12; /* FIXME */
@@ -611,6 +630,7 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setXpt(x);
       return;
     }
+  case Vocab::extSTOREPRICES:
   case 0xf3d0:
     {
       screen.setYpt(9);
@@ -627,17 +647,20 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setXpt(20);
       return;
     }
+  case Vocab::extPLAYERNAME:
   case 0xf429:
     {
       unsigned n = 13; /* FIXME */
       screen.hstr(2, 9+(15>>1)-(n>>1), "/////////////"); /* FIXME */
       return;
     }
+  case Vocab::extITEMSLABEL:
   case 0xf43b:
     {
       screen.hstr(8, 6, "#######"); /* FIXME */
       return;
     }
+  case Vocab::extGOLDFOUND:
   case 0xf44a:
     {
       uint16 n = 123; /* FIXME */
@@ -647,6 +670,7 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setXpt(x+1);
       return;
     }
+  case Vocab::extQUESTCOMPLETE:
   case 0xf463:
     {
       screen.hstr(y, x, "%%%%%%%%%%%"); /* FIXME */
@@ -654,6 +678,7 @@ void ScreenEngine::gplExtension(uint16 addr)
       drawPrompt(0x35);
       return;
     }
+  case Vocab::extAMMO:
   case 0xf478:
     {
       x = findEndOfLine();
@@ -661,12 +686,14 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setXpt(findEndOfLine()+2);
       return;
     }
+  case Vocab::extFLOORAT:
   case 0xf48a:
     {
       byte n = 17; /* FIXME */
       screen.setXpt(putNumber(y, x, n));
       return;
     }
+  case Vocab::extMONSTERREPORT:
   case 0xf4d0:
     {
       /* Monster report */
@@ -708,30 +735,35 @@ void ScreenEngine::gplExtension(uint16 addr)
       }
       return;
     }
+  case Vocab::extPLAYERSTATUS:
   case 0xf581:
     {
       /* Player status */
       /* FIXME */
       return;
     }
+  case Vocab::extITEMS:
   case 0xf620:
     {
       /* Magical item list */
       /* FIXME */
       return;
     }
+  case Vocab::extPARTYSTATUS:
   case 0xf65d:
     {
       /* Party status */
       /* FIXME */
       return;
     }
+  case Vocab::extNEGOTIATION:
   case 0xf787:
     {
       /* Negotiation */
       /* FIXME */
       return;
     }
+  case Vocab::extVAULT:
   case 0xf7d9:
     {
       /* Vault */
@@ -772,7 +804,10 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  ptr = Vocab::prompts.entry(*ptr - 1);
 	  break;
 	case Vocab::cGPL:
-	  gplExtension((ptr[0] << 8)|ptr[1]);
+	  if ((ptr[0] & 0x80))
+	    gplExtension((ptr[0] << 8)|ptr[1]);
+	  else
+	    gplExtension(ptr[0]);
 	  return;
       }
     } else switch(c) {
