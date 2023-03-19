@@ -23,8 +23,10 @@ public:
 private:
   void initScreen();
   unsigned putDigit(unsigned y, unsigned x, unsigned d);
-  unsigned putNumber(unsigned y, unsigned x, byte d);
-  unsigned putNumber(unsigned y, unsigned x, uint16 d);
+  unsigned putNumber(unsigned y, unsigned x, byte n);
+  unsigned putNumber(unsigned y, unsigned x, uint16 n);
+  unsigned putNumberEol(unsigned y, byte n);
+  unsigned putNumberEol(unsigned y, uint16 n);
   unsigned putPlural();
   void putQuad(unsigned y, unsigned x, byte base);
   unsigned findEndOfLine();

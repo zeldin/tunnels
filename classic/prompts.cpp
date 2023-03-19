@@ -3,9 +3,6 @@
 #include "classic/ScreenEngine.h"
 #include "classic/SequencePack.h"
 
-#include <cstdio>
-#include <cstdlib>
-
 namespace Tunnels { namespace Classic {
 
 namespace Vocab {
@@ -451,6 +448,22 @@ unsigned ScreenEngine::putNumber(unsigned y, unsigned x, uint16 n)
   return ++x;
 }
 
+unsigned ScreenEngine::putNumberEol(unsigned y, byte n)
+{
+  screen.setYpt(y);
+  unsigned x = putNumber(y, findEndOfLine()+2, n)-1;
+  screen.setXpt(x);
+  return x;
+}
+
+unsigned ScreenEngine::putNumberEol(unsigned y, uint16 n)
+{
+  screen.setYpt(y);
+  unsigned x = putNumber(y, findEndOfLine()+2, n)-1;
+  screen.setXpt(x);
+  return x;
+}
+
 unsigned ScreenEngine::putPlural()
 {
   unsigned y = screen.getYpt();
@@ -557,7 +570,7 @@ void ScreenEngine::gplExtension(uint16 addr)
   case 0xf29f:
     {
       byte n = 17; /* FIXME */
-      screen.setXpt(putNumber(y, findEndOfLine()+2, n));
+      putNumberEol(y, n);
       return;
     }
   case 0xf2aa:
@@ -593,8 +606,7 @@ void ScreenEngine::gplExtension(uint16 addr)
   case 0xf3be:
     {
       uint16 n = 12; /* FIXME */
-      screen.setYpt(13);
-      x = putNumber(13, findEndOfLine()+2, n);
+      x = putNumberEol(13, n);
       screen.hchar(13, --x, '0');
       screen.setXpt(x);
       return;
@@ -616,21 +628,117 @@ void ScreenEngine::gplExtension(uint16 addr)
       return;
     }
   case 0xf429:
+    {
+      unsigned n = 13; /* FIXME */
+      screen.hstr(2, 9+(15>>1)-(n>>1), "/////////////"); /* FIXME */
+      return;
+    }
   case 0xf43b:
+    {
+      screen.hstr(8, 6, "#######"); /* FIXME */
+      return;
+    }
   case 0xf44a:
+    {
+      uint16 n = 123; /* FIXME */
+      x = putNumber(y, x, n);
+      screen.hstr(y, x-1, "0 ");
+      screen.hstr(y, x+1, "################"); /* FIXME */
+      screen.setXpt(x+1);
+      return;
+    }
   case 0xf463:
+    {
+      screen.hstr(y, x, "%%%%%%%%%%%"); /* FIXME */
+      screen.setXpt(findEndOfLine()+2);
+      drawPrompt(0x35);
+      return;
+    }
   case 0xf478:
+    {
+      x = findEndOfLine();
+      screen.hstr(y, x, "============="); /* FIXME */
+      screen.setXpt(findEndOfLine()+2);
+      return;
+    }
   case 0xf48a:
+    {
+      byte n = 17; /* FIXME */
+      screen.setXpt(putNumber(y, x, n));
+      return;
+    }
   case 0xf4d0:
+    {
+      /* Monster report */
+      unsigned n = 4; /* FIXME */
+      screen.hstr(3, 11+(12>>1)-(n>>1), "****"); /* FIXME */
+      n = 6; /* FIXME */
+      putNumberEol(5, byte(n*6));
+      n = 12345; /* FIXME */
+      screen.hchar(6, putNumberEol(6, uint16(n))-1, '0');
+      n = 0xfe; /* FIXME */
+      putNumberEol(9, byte((n&0x80)? 256-n : n));
+      if ((n&0x80)) {
+	screen.setXpt(findEndOfLine()+2);
+	drawPrompt(0x83);
+      }
+      putNumberEol(10, byte(4)); /* FIXME */
+      putNumberEol(11, byte(5)); /* FIXME */
+      n = 4; /* FIXME */
+      screen.hchar(13, putNumberEol(13, byte(10*n)), '%');
+      putNumber(14, 11, byte(9)); /* FIXME */
+      n = 1; /* FIXME */
+      screen.hchar(14, putNumberEol(14, byte(25*n)), '%');
+      n = 2; /* FIXME */
+      screen.hchar(15, putNumberEol(15, byte(25*n)), '%');
+      n = 8; /* FIXME */
+      screen.hchar(17, putNumberEol(17, byte(n)), '%');
+      if (n > 0) {
+	n = 0xfd;
+	if ((n & 0x80)) {
+	  screen.setYpt(18); screen.setXpt(19);
+	  drawPrompt(0x83);
+	  n = 256-n;
+	}
+	screen.hchar(18, 2, ' ', 28);
+	screen.hchar(19, 2, ' ', 28);
+	screen.hchar(20, 2, ' ', 28);
+	screen.hstr(18, 3, "###############"); /* FIXME */
+	/* FIXME */
+      }
+      return;
+    }
   case 0xf581:
+    {
+      /* Player status */
+      /* FIXME */
+      return;
+    }
   case 0xf620:
+    {
+      /* Magical item list */
+      /* FIXME */
+      return;
+    }
   case 0xf65d:
+    {
+      /* Party status */
+      /* FIXME */
+      return;
+    }
   case 0xf787:
+    {
+      /* Negotiation */
+      /* FIXME */
+      return;
+    }
   case 0xf7d9:
-    break;
+    {
+      /* Vault */
+      /* FIXME */
+      return;
+    }
   }
-  printf("Bad GPL %04x\n", (unsigned)addr);
-  abort();
 }
 
 void ScreenEngine::drawPrompt(unsigned n)
@@ -650,10 +758,11 @@ void ScreenEngine::drawPrompt(unsigned n)
       }
     } else if (c < Vocab::cNUM) {
       if (c >= Vocab::cSP) {
-	screen.hchar(screen.getYpt(), screen.getXpt()-1,
-		     " <>:.,-/?!()"[c-Vocab::cSP]);
-	screen.hchar(screen.getYpt(), screen.getXpt(), ' ');
-	screen.setXpt(screen.getXpt()+1);
+	unsigned x = screen.getXpt();
+	screen.hchar(screen.getYpt(), x-1, " <>:.,-/?!()"[c-Vocab::cSP]);
+	if (x < 30)
+	  screen.hchar(screen.getYpt(), x, ' ');
+	screen.setXpt(++x);
       } else switch(c) {
 	case Vocab::cNEXTL:
 	  screen.setYpt(screen.getYpt()+1);
