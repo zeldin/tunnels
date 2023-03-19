@@ -132,8 +132,7 @@ public:
   constexpr T span(uint16 n) const
   { return n < S::len?
       T{seq.head.ptr()+idx.ptr()[n],
-	unsigned(idx.ptr()[n+1]) - unsigned(idx.ptr()[n])} :
-      T{nullptr, 0}; }
+	unsigned(idx.ptr()[n+1]) - unsigned(idx.ptr()[n])} : T{}; }
 };
 
 template <typename S> constexpr IndexedSequence<S> index(S seq)
