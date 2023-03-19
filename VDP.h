@@ -193,6 +193,7 @@ class Screen
 	    byte offset = 0);
   void vstr(unsigned row, unsigned col, Utils::StringSpan span,
 	    byte offset = 0);
+  Utils::StringSpan gstr(unsigned row, unsigned col, unsigned len);
   void all(byte name);
   void setBackground(byte color);
   void refresh(Backend &backend);

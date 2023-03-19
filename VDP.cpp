@@ -262,6 +262,16 @@ void Screen::vstr(unsigned row, unsigned col, Utils::StringSpan span,
   }
 }
 
+Utils::StringSpan Screen::gstr(unsigned row, unsigned col, unsigned len)
+{
+  if (row < ROWS) {
+    Utils::StringSpan r{name_table[row]};
+    r.subspan(col, len);
+    return r;
+  } else
+    return Utils::StringSpan{};
+}
+
 void Screen::all(byte name)
 {
   hchar(0, 0, name, ROWS*COLUMNS);

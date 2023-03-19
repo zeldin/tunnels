@@ -24,6 +24,15 @@ public:
   void uncenter() {
     while (l>0 && *p == ' ') { p++; --l; }
   }
+  void subspan(unsigned start, unsigned len) {
+    if (start < l) {
+      p += start;
+      l -= start;
+      if (l > len)
+	l = len;
+    } else
+      l = 0;
+  }
 };
 
 }}
