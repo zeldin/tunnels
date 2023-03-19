@@ -1,5 +1,6 @@
 #include "system.h"
 
+#include "Utils.h"
 #include "classic/ScreenEngine.h"
 #include "classic/SequencePack.h"
 
@@ -760,7 +761,7 @@ void ScreenEngine::drawPrompt(unsigned n)
 	unsigned x = screen.getXpt();
 	unsigned y = screen.getYpt();
 	unsigned l = Vocab::dictionary.len(c-1);
-	screen.hstr(y, x, Vocab::dictionary.entry(c-1), l);
+	screen.hstr(y, x, Utils::StringSpan{Vocab::dictionary.entry(c-1), l});
 	if ((x += l) < 30)
 	  screen.hchar(y, x, ' ');
 	screen.setXpt(++x);

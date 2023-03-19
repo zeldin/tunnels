@@ -1,7 +1,11 @@
 #ifndef TUNNELS_VDP_H_
 #define TUNNELS_VDP_H_
 
-namespace Tunnels { namespace VDP {
+namespace Tunnels {
+
+namespace Utils { class StringSpan; }
+
+namespace VDP {
      
 constexpr unsigned COLUMNS = 32;
 constexpr unsigned ROWS = 24;
@@ -185,11 +189,9 @@ class Screen
   { return row < ROWS && col < COLUMNS? name_table[row][col] : 0; }
   void hchar(unsigned row, unsigned col, byte name, unsigned cnt = 1);
   void vchar(unsigned row, unsigned col, byte name, unsigned cnt = 1);
-  void hstr(unsigned row, unsigned col, const char *str);
-  void vstr(unsigned row, unsigned col, const char *str);
-  void hstr(unsigned row, unsigned col, const byte *str, unsigned len,
+  void hstr(unsigned row, unsigned col, Utils::StringSpan span,
 	    byte offset = 0);
-  void vstr(unsigned row, unsigned col, const byte *str, unsigned len,
+  void vstr(unsigned row, unsigned col, Utils::StringSpan span,
 	    byte offset = 0);
   void all(byte name);
   void setBackground(byte color);

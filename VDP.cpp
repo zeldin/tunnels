@@ -1,5 +1,6 @@
 #include "system.h"
 
+#include "Utils.h"
 #include "VDP.h"
 
 namespace Tunnels { namespace VDP {
@@ -227,9 +228,11 @@ void Screen::vchar(unsigned row, unsigned col, byte name, unsigned cnt)
   any_name_table_dirty = true;
 }
 
-void Screen::hstr(unsigned row, unsigned col, const byte *str, unsigned len,
+void Screen::hstr(unsigned row, unsigned col, Utils::StringSpan span,
 		  byte offset)
 {
+  const byte *str = span.ptr();
+  unsigned len = span.len();
   if (row >= ROWS || col >= COLUMNS)
     return;
   while (len--) {
@@ -242,9 +245,11 @@ void Screen::hstr(unsigned row, unsigned col, const byte *str, unsigned len,
   }
 }
 
-void Screen::vstr(unsigned row, unsigned col, const byte *str, unsigned len,
+void Screen::vstr(unsigned row, unsigned col, Utils::StringSpan span,
 		  byte offset)
 {
+  const byte *str = span.ptr();
+  unsigned len = span.len();
   if (row >= ROWS || col >= COLUMNS)
     return;
   while (len--) {
@@ -257,16 +262,6 @@ void Screen::vstr(unsigned row, unsigned col, const byte *str, unsigned len,
   }
 }
 
-void Screen::hstr(unsigned row, unsigned col, const char *str)
-{
-  hstr(row, col, reinterpret_cast<const byte *>(str), strlen(str));
-}
-  
-void Screen::vstr(unsigned row, unsigned col, const char *str)
-{
-  vstr(row, col, reinterpret_cast<const byte *>(str), strlen(str));
-}
-  
 void Screen::all(byte name)
 {
   hchar(0, 0, name, ROWS*COLUMNS);
@@ -383,7 +378,7 @@ unsigned FMT::run(unsigned offs)
 	byte ypt = screen.getYpt();
 	if (op == 0) {
 	  /* hstr */
-	  screen.hstr(ypt, xpt, data+offs, cnt, offset);
+	  screen.hstr(ypt, xpt, Utils::StringSpan{data+offs, cnt}, offset);
 	  if ((xpt += cnt) >= 32) {
 	    xpt -= 32;
 	    if (++ypt >= 24)
@@ -391,7 +386,7 @@ unsigned FMT::run(unsigned offs)
 	  }
 	} else {
 	  /* vstr */
-	  screen.vstr(ypt, xpt, data+offs, cnt, offset);
+	  screen.vstr(ypt, xpt, Utils::StringSpan{data+offs, cnt}, offset);
 	  if ((ypt += cnt) >= 24) {
 	    ypt -= 24;
 	    if (ypt >= 24)
