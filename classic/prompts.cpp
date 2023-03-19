@@ -34,7 +34,7 @@ enum {
   WARNING, WANT, WHEN, WHICH, WHO, WHOM, WILL, WITH, WORKING, YOU,
   YOUR, PROTECTION2, RESISTANCE,
 
-  cNEXTL, cJMP, cGPL, cEXT=cGPL, cSP, cLT, cGT, cCOLON, cPERIOD, cCOMMA, cDASH,
+  cNEXTL, cJMP, cEXT, cSP, cLT, cGT, cCOLON, cPERIOD, cCOMMA, cDASH,
   cSLASH, cQUESTION, cEXCLAM, cLPAREN, cRPAREN, cNUM, cCURSOR,
   cHCHAR, cVCHAR, cCLEARL, cTEXT, cLIST, cFWD, cPLURAL, cED, cING,
   cINIT, cCLREOS, cBACK, cCALL, cEND
@@ -128,7 +128,7 @@ constexpr const auto prompts = SequencePack::index
     prompt(cCURSOR, 21, 3, cCLEARL, ' ', THIS, WILL, TAKE, cNUM, 200, // 18
 	   SECOND, cPLURAL, cEND),
     prompt(cCURSOR, 18, 3, cCLREOS, YOU, ARE, TO, cHCHAR, 'O', 1, // 19
-	   LATE, TO, SAVE, cNEXTL, cSP, THE, cGPL, 0xf1, 0x93),
+	   LATE, TO, SAVE, cNEXTL, cSP, THE, cEXT, extQUESTOBJ),
     prompt(cINIT, cCURSOR, 5, 9, GAME, SELECTION, cCOLON, cFWD, 43, // 1A
 	   cNUM, 1, cDASH, NEW, DUNGEON, cFWD, 49, cNUM, 2, cDASH,
 	   RESTOCK, OLD, DUNGEON, cCURSOR, 7, 4, cEND),
@@ -138,9 +138,9 @@ constexpr const auto prompts = SequencePack::index
 	   cLIST, '1', '3', '-', EASIEST, cFWD, 24, MEDIUM, cFWD, 25,
 	   HARDEST, cCURSOR, 23, 2, cJMP, 0x08),
     prompt(cCURSOR, 3, 2, NUMBER, OF, FLOOR, cPLURAL, cLPAREN, // 1D
-	   cHCHAR, '0', 1, cDASH, cCALL, 0x20, cGPL, 0xf1, 0xa6),
+	   cHCHAR, '0', 1, cDASH, cCALL, 0x20, cEXT, extFLOORRANGE),
     prompt(cCURSOR, 5, 2, cCLREOS, NUMBER, IN, cTEXT, -2, // 1E
-	   cCALL, 0x1f, cBACK, cGPL, 0xf1, 0xbc),
+	   cCALL, 0x1f, cBACK, cEXT, extMAXPARTY),
     prompt(cLPAREN, cHCHAR, '1', 1, cDASH, cHCHAR, '0', 1, // 1F
 	   cRPAREN, cQUESTION),
     prompt(cBACK, cBACK, cBACK, cBACK, cEND), // 20
@@ -148,27 +148,27 @@ constexpr const auto prompts = SequencePack::index
 	   cCURSOR, 5, 9, NAME, cQUESTION, cFWD, 58, CLASS, cCALL, 0x1f,
 	   cFWD, 55, COLOR, cCALL, 0x1f, cHCHAR, '4', 1, cFWD, 110,
 	   cCLEARL, '_', cFWD, 37, CLASS, cPLURAL, cFWD, 6,
-	   COLOR, cPLURAL, cGPL, 0xf1, 0xc5),
+	   COLOR, cPLURAL, cEXT, extCLASSES),
     prompt(cCURSOR, 12, 4, SELECT, A, DIFFERENT, COLOR, cPERIOD, cEND), // 22
     prompt(cINIT, cCURSOR, 3, 7, POINT, OF, NO, RETURN, cFWD, 40, // 23
 	   CHECK, THE, DATA, BELOW, BEFORE, cFWD, 13, CONTINUE, cING,
 	   cFWD, 34, cCLEARL, '_', cCURSOR, 22, 3, cCALL, 0x06, cNEXTL,
-	   cCALL, 0x07, cGPL, 0xf2, 0x5b),
+	   cCALL, 0x07, cEXT, extPARTY),
     prompt(cCURSOR, 2, 11, cCLREOS, PLEASE, WAIT, cFWD, 12, DUNGEON, // 24
 	   UNDER, CONSTRUCTION, cCURSOR, 8, 0, cTEXT, 0x06, 0x00, 192,
 	   cCURSOR, 14, 0, cTEXT, 0x06, 0xc0, 192, cEND),
     prompt(cCURSOR, 5, 8, cCLEARL, ' ', DIGGING, FLOOR, cNEXTL, // 25
-	   cCLEARL, ' ', cCURSOR, 5, -1, cGPL, 0xf2, 0x9f),
+	   cCLEARL, ' ', cCURSOR, 5, -1, cEXT, extFLOOREOL),
     prompt(cCURSOR, 6, 8, cCLEARL, ' ', STOCKING, FLOOR, // 26
-	   cGPL, 0xf2, 0x9f),
+	   cEXT, extFLOOREOL),
     prompt(cINIT, cCALL, 0x04, cCURSOR, 22, 2, cCALL, 0x03, cNEXTL, // 27
 	   cCALL, 0x02, cCURSOR, 3, 3, cEND),
     prompt(cCURSOR, 5, 18, cCLEARL, ' ', DESCEND, cING, cNEXTL, // 28
 	   cCLEARL, ' ', cEND),
     prompt(cVCHAR, 0xdd, cCURSOR, 1, 23, THIS, cFWD, 27, GAME, // 29
-	   cFWD, 28, IS, cFWD, 28, OVER, cEXCLAM, cCURSOR, 21, 2,
-	   cCLEARL, '_', cNEXTL, STATUS, REPORT, cPLURAL, ARE, AVAILABLE,
-	   cNEXTL, cFWD, 1, PRESS, BEGIN, FOR, A, NEW, GAME, cGPL, 0xf2, 0xaa),
+	   cFWD, 28, IS, cFWD, 28, OVER, cEXCLAM, cCURSOR, 21, 2, cCLEARL, '_',
+	   cNEXTL, STATUS, REPORT, cPLURAL, ARE, AVAILABLE, cNEXTL, cFWD, 1,
+	   PRESS, BEGIN, FOR, A, NEW, GAME, cEXT, extGAMEOVER),
     prompt(cCURSOR, 5, 21, cHCHAR, '_', 10, cFWD, 22, COMPLETE, cED, // 2A
 	   cFWD, 22, QUEST, cPLURAL, cCOLON, cCURSOR, 17, 21,
 	   cHCHAR, '_', 10, cEND),
@@ -184,10 +184,10 @@ constexpr const auto prompts = SequencePack::index
     prompt(cCURSOR, 19, 4, ASCEND, cING, cEND), // 2F
     prompt(cCURSOR, 19, 4, DESCEND, cING, cEND), // 30
     prompt(cCURSOR, 18, 20, SPEED, cCOLON, cFWD, 40, cCLREOS, YOUR, // 31
-	   TURN, cCOMMA, cGPL, 0xf3, 0x36),
+	   TURN, cCOMMA, cEXT, extCURPLAYER),
     prompt(cCURSOR, 21, 3, YOU, ARE, USE, cING, YOUR, HANDS, cEND), // 32
     prompt(cCURSOR, 20, 3, cCLREOS, THE, cTEXT, 0x02, 0x44, 14, // 33
-	   ATTACK, cGPL, 0xf3, 0xab),
+	   ATTACK, cEXT, extMONSTERPLURALITY),
     prompt(cPLURAL), // 34
     prompt(cEXCLAM, cEND), // 35
     prompt(cCURSOR, 21, 3, YOU, HIT, THE, cTEXT, 0x11, 0x26, 12, // 36
@@ -204,7 +204,7 @@ constexpr const auto prompts = SequencePack::index
     prompt(cINIT, cCURSOR, 0, 8, cCLEARL, ' ', cTEXT, 0x25, 0x94, 16, // 3D
 	   cCURSOR, 2, 20, COST, cCOLON, cCURSOR, 12, 2, cCLEARL, '_', cNEXTL,
 	   cTEXT, 0x32, 0x70, 16, cCOLON, cNEXTL, cCLEARL, '_',
-	   cGPL, 0xf3, 0xbe),
+	   cEXT, extPARTYGOLD),
     prompt(cCURSOR, 4, 4, cNUM, 1, cTEXT, -6, cPLURAL, cCALL, 0x64, // 3E
 	   cNUM, 2, cTEXT, -5, cTEXT, -6, cPLURAL, cCALL, 0x64,
 	   cNUM, 3, cTEXT, -5, cTEXT, -6, cPLURAL, cCALL, 0x64,
@@ -212,7 +212,7 @@ constexpr const auto prompts = SequencePack::index
 	   cNUM, 5, cTEXT, -8, cPLURAL, cCALL, 0x64,
 	   cNUM, 6, cTEXT, -11, cCALL, 0x64,
 	   cNUM, 7, cTEXT, -12, cCALL, 0x3f,
-	   cCURSOR, 23, 2, cCLREOS, cCALL, 0x0c, cGPL, 0xf3, 0xd0),
+	   cCURSOR, 23, 2, cCLREOS, cCALL, 0x0c, cEXT, extSTOREPRICES),
     prompt(cCURSOR, 16, 2, BUY, WHICH, NUMBER, cQUESTION, cEND), // 3F
     prompt(cCURSOR, -1, 5, NO, ITEM, cEND), // 40
     prompt(cCURSOR, 22, 2, ALLOWED, ITEM, cPLURAL, ARE, ARROW, cED, cEND, // 41
@@ -228,13 +228,13 @@ constexpr const auto prompts = SequencePack::index
     prompt(cINIT, cCURSOR, 18, 13, WHICH, NUMBER, cQUESTION, cEND), // 47
     prompt(cCURSOR, 3, 3, YOU, CANT, HOLD, ALL, OF, THIS, cEXCLAM, // 48
 	   cNEXTL, WHICH, ITEM, WILL, YOU, GIVE, UP, cQUESTION,
-	   cFWD, 37, cNUM, 0, cGPL, 0xf4, 0x29),
+	   cFWD, 37, cNUM, 0, cEXT, extPLAYERNAME),
     prompt(cCURSOR, 3, 13, TRADE, cING, cFWD, 47, // 49
 	   cNUM, 1, cTEXT, -7, cCALL, 0x64,
 	   cNUM, 2, cTEXT, -8, cPLURAL, cCALL, 0x64,
 	   cNUM, 3, cTEXT, -6, cPLURAL, cCALL, 0x64,
 	   cNUM, 4, cCURSOR, 17, 2, cCLEARL, ' ',
-	   WHO, START, cPLURAL, cQUESTION, cGPL, 0xf4, 0x3b),
+	   WHO, START, cPLURAL, cQUESTION, cEXT, extITEMSLABEL),
     prompt(cCURSOR, 19, 2, cCLEARL, ' ', GIVE, TO, cQUESTION, // 4A
 	   cCURSOR, 22, 3, cCLREOS, IF, NO, NAME, IS, ENTER, cED, cCOMMA,
 	   THE, cNEXTL, cFWD, 4, ITEM, WILL, BE, DROPPED, cPERIOD, cEND),
@@ -257,17 +257,17 @@ constexpr const auto prompts = SequencePack::index
     prompt(cCURSOR, 19, 2, WHO, WILL, OPEN, THE, cNEXTL, // 58
 	   cTEXT, 0x34, 0xa0, 12, cQUESTION, cEND),
     prompt(cCURSOR, 18, 4, YOU, HAVE, FOUND, cCALL, 0x64, // 59
-	   cGPL, 0xf4, 0x4a),
+	   cEXT, extGOLDFOUND),
     prompt(), // 5A
     prompt(cCURSOR, 19, 2, HERE, IS, A, MAP, OF, THIS, FLOOR, cEND), // 5B
     prompt(cCURSOR, 18, 2, A, QUEST, IS, COMPLETE, cED, cEXCLAM, YOU, // 5C
-	   cNEXTL, HAVE, FOUND, THE, cGPL, 0xf4, 0x63),
+	   cNEXTL, HAVE, FOUND, THE, cEXT, extQUESTCOMPLETE),
     prompt(NONE, cEND), // 5D
     prompt(NONE, cSP, cLPAREN, cBACK, HANDS, cRPAREN, cEND), // 5E
-    prompt(UNLIMITED, cGPL, 0xf4, 0x78), // 5F
+    prompt(UNLIMITED, cEXT, extAMMO), // 5F
     prompt(ONE, USE, PER, BATTLE, cEND), // 60
     prompt(LEFT, cEND), // 61
-    prompt(cCURSOR, 20, 12, FLOOR, cCOLON, cGPL, 0xf4, 0x8a), // 62
+    prompt(cCURSOR, 20, 12, FLOOR, cCOLON, cEXT, extFLOORAT), // 62
     prompt(cNEXTL), // 63
     prompt(cNEXTL, cFWD, 1, cEND), // 64
     prompt(cCURSOR, 3, 6, HALL, AND, ROOM, MOVEMENT, // 65
@@ -312,23 +312,23 @@ constexpr const auto prompts = SequencePack::index
 	   cCALL, 0x69, SPEED, cCOLON, cFWD, 5, MOBILITY,
 	   cCALL, 0x69, NEGOTIATION, cCOLON, cNEXTL, cNEXTL,
 	   SPECIAL, ATTACK, CHANCE, cCOLON, cCURSOR, 23, 2,
-	   cCALL, 0x02, cGPL, 0xf4, 0xd0),
+	   cCALL, 0x02, cEXT, extMONSTERREPORT),
     prompt(cCURSOR, 4, 13, STATUS, cCURSOR, 7, 8, HIT, POINT, // 6B
 	   cPLURAL, cCOLON, cFWD, 24, WOUND, cPLURAL, cCOLON, cFWD, 20,
 	   cTEXT, -3, cCOLON, cFWD, 25, cTEXT, -4, cCOLON, cFWD, 47,
 	   cTEXT, -6, cPLURAL, cCURSOR, -1, 20, BONUS, cCOLON, cFWD, 24,
 	   DAMAGE, cCOLON, cFWD, 56, DAMAGE, cCOLON, cFWD, 78,
 	   cTEXT, -7, cCOLON, cFWD, 24, cTEXT, -8, cCOLON, cFWD, 20,
-	   PROTECTION, cCOLON, cGPL, 0xf5, 0x81),
+	   PROTECTION, cCOLON, cEXT, extPLAYERSTATUS),
     prompt(cCURSOR, 4, 8, cTEXT, 0x32, 0x80, 16, cCURSOR, 7, 7, // 6C
 	   cLIST, '1', '9', ':', cCURSOR, 16, 6, cNUM, 10, cCALL, 0x69,
-	   DATA, ON, WHICH, ITEM, cQUESTION, cGPL, 0xf6, 0x20),
+	   DATA, ON, WHICH, ITEM, cQUESTION, cEXT, extITEMS),
     prompt(cINIT, cCURSOR, 2, 10, QUEST, STATUS, cNEXTL, cNEXTL, // 6D
 	   cTEXT, 0x32, 0x70, 16, cCOLON, cNEXTL, cTEXT, -11, cPLURAL, cCOLON,
 	   cCURSOR, 7, 3, QUEST, OBJECT, cPLURAL, cCALL, 0x69,
 	   cLIST, '1', '8', ':', cCURSOR, 16, 4, cHCHAR, '*', 1, TURN,
 	   cPLURAL, LEFT, TO, FIND, cCURSOR, 20, 2, HIT, POINT, cPLURAL,
-	   cNEXTL, DAMAGE, cNEXTL, cNEXTL, cCALL, 0x02, cGPL, 0xf6, 0x5d),
+	   cNEXTL, DAMAGE, cNEXTL, cNEXTL, cCALL, 0x02, cEXT, extPARTYSTATUS),
     prompt(FILE, ERROR, cEND), // 6E
     prompt(DEVICE, ERROR, cEND), // 6F
     prompt(PROGRAM, ERROR, cEND), // 70
@@ -354,11 +354,11 @@ constexpr const auto prompts = SequencePack::index
 	   cNEXTL, cFWD, 4, cTEXT, -1, cPLURAL, ON, THAT, SIDE,
 	   cNEXTL, cNEXTL, cJMP, 0x02),
     prompt(cCURSOR, 19, 2, cCLREOS, THE, cTEXT, 0x02, 0x44, 14, WANT, // 7D
-	   cNEXTL, cTEXT, 0x32, 0x70, 16, cGPL, 0xf7, 0x87),
+	   cNEXTL, cTEXT, 0x32, 0x70, 16, cEXT, extNEGOTIATION),
     prompt(cCURSOR, 18, 2, WHO, WILL, TRY, TO, cTEXT, 0x2d, 0xbe, 8, // 7E
 	   cNEXTL, THE, cTEXT, 0x34, 0xac, 12, cQUESTION, cCURSOR, 22, 2,
 	   THE, cTEXT, 0x11, 0x62, 16, HAS, cNEXTL, DIGITS, RANGING,
-	   FROM, cSP, cHCHAR, '1', 1, TO, cGPL, 0xf7, 0xd9),
+	   FROM, cSP, cHCHAR, '1', 1, TO, cEXT, extVAULT),
     prompt(cCURSOR, 20, 2, cCLREOS, HP, cCOLON, cFWD, 7, WD, cCOLON, // 7F
 	   cCURSOR, 22, 2, REDO, CHANGE, cPLURAL, cTEXT, -1,
 	   cCURSOR, 23, 2, PRESS, BACK, TO, GIVE, UP,
@@ -512,8 +512,7 @@ void ScreenEngine::gplExtension(uint16 addr)
   unsigned x = screen.getXpt();
   unsigned y = screen.getYpt();
   switch (addr) {
-  case Vocab::extQUESTOBJ:
-  case 0xf193:
+  case Vocab::extQUESTOBJ: /* G@>F193 */
     {
       screen.hstr(y, x, "FOO" /* FIXME */);
       x = findEndOfLine();
@@ -521,22 +520,19 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setXpt(x);
       return;
     }
-  case Vocab::extFLOORRANGE:
-  case 0xf1a6:
+  case Vocab::extFLOORRANGE: /* G@>F1A6 */
     {
       screen.hchar(y, x, screen.gchar(y, x) + 7); /* FIXME */
       screen.setXpt(putNumber(y, x+2, byte(123))); /* FIXME */
       drawPrompt(0x0f);
       return;
     }
-  case Vocab::extMAXPARTY:
-  case 0xf1bc:
+  case Vocab::extMAXPARTY: /* G@>F1BC */
     {
       screen.hchar(y, x, '0' + 3); /* FIXME */
       return;
     }
-  case Vocab::extCLASSES:
-  case 0xf1c5:
+  case Vocab::extCLASSES: /* G@>F1C5 */
     {
       static constexpr byte fmt1[] = {
 	0xfe, 0x10, 0xff, 0x04, 0x26, 0x31, 0x20, 0x32,
@@ -566,8 +562,7 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setYpt(y);
       return;
     }
-  case Vocab::extPARTY:
-  case 0xf25b:
+  case Vocab::extPARTY: /* G@>F25B */
     {
       unsigned i, n = 3; /* FIXME */
       y = 10; x = 6;
@@ -581,15 +576,13 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setYpt(y);
       return;
     }
-  case Vocab::extFLOOREOL:
-  case 0xf29f:
+  case Vocab::extFLOOREOL: /* G@>F29F */
     {
       byte n = 17; /* FIXME */
       putNumberEol(y, n);
       return;
     }
-  case Vocab::extGAMEOVER:
-  case 0xf2aa:
+  case Vocab::extGAMEOVER: /* G@>F2AA */
     {
       screen.setBackground(4);
       /* FIXME ... */
@@ -597,8 +590,7 @@ void ScreenEngine::gplExtension(uint16 addr)
       drawPrompt(0x2b);
       return;
     }
-  case Vocab::extCURPLAYER:
-  case 0xf336:
+  case Vocab::extCURPLAYER: /* G@>F336 */
     {
       screen.vchar(1, 20, ' ', 14);
       screen.vchar(1, 23, ' ', 14);
@@ -614,15 +606,13 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setYpt(y+2);
       return;
     }
-  case Vocab::extMONSTERPLURALITY:
-  case 0xf3ab:
+  case Vocab::extMONSTERPLURALITY: /* G@>F3AB */
     {
       int n = 3; /* FIXME */
       drawPrompt(n > 1? 0x35 : 0x34);
       return;
     }
-  case Vocab::extPARTYGOLD:
-  case 0xf3be:
+  case Vocab::extPARTYGOLD: /* G@>F3BE */
     {
       uint16 n = 12; /* FIXME */
       x = putNumberEol(13, n);
@@ -630,8 +620,7 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setXpt(x);
       return;
     }
-  case Vocab::extSTOREPRICES:
-  case 0xf3d0:
+  case Vocab::extSTOREPRICES: /* G@>F3D0 */
     {
       screen.setYpt(9);
       putPlural();
@@ -647,21 +636,18 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setXpt(20);
       return;
     }
-  case Vocab::extPLAYERNAME:
-  case 0xf429:
+  case Vocab::extPLAYERNAME: /* G@>F429 */
     {
       unsigned n = 13; /* FIXME */
       screen.hstr(2, 9+(15>>1)-(n>>1), "/////////////"); /* FIXME */
       return;
     }
-  case Vocab::extITEMSLABEL:
-  case 0xf43b:
+  case Vocab::extITEMSLABEL: /* G@>F43B */
     {
       screen.hstr(8, 6, "#######"); /* FIXME */
       return;
     }
-  case Vocab::extGOLDFOUND:
-  case 0xf44a:
+  case Vocab::extGOLDFOUND: /* G@>F44A */
     {
       uint16 n = 123; /* FIXME */
       x = putNumber(y, x, n);
@@ -670,31 +656,27 @@ void ScreenEngine::gplExtension(uint16 addr)
       screen.setXpt(x+1);
       return;
     }
-  case Vocab::extQUESTCOMPLETE:
-  case 0xf463:
+  case Vocab::extQUESTCOMPLETE: /* G@>F463 */
     {
       screen.hstr(y, x, "%%%%%%%%%%%"); /* FIXME */
       screen.setXpt(findEndOfLine()+2);
       drawPrompt(0x35);
       return;
     }
-  case Vocab::extAMMO:
-  case 0xf478:
+  case Vocab::extAMMO: /* G@>F478 */
     {
       x = findEndOfLine();
       screen.hstr(y, x, "============="); /* FIXME */
       screen.setXpt(findEndOfLine()+2);
       return;
     }
-  case Vocab::extFLOORAT:
-  case 0xf48a:
+  case Vocab::extFLOORAT: /* G@>F48A */
     {
       byte n = 17; /* FIXME */
       screen.setXpt(putNumber(y, x, n));
       return;
     }
-  case Vocab::extMONSTERREPORT:
-  case 0xf4d0:
+  case Vocab::extMONSTERREPORT: /* G@>F4D0 */
     {
       /* Monster report */
       unsigned n = 4; /* FIXME */
@@ -735,36 +717,31 @@ void ScreenEngine::gplExtension(uint16 addr)
       }
       return;
     }
-  case Vocab::extPLAYERSTATUS:
-  case 0xf581:
+  case Vocab::extPLAYERSTATUS: /* G@>F581 */
     {
       /* Player status */
       /* FIXME */
       return;
     }
-  case Vocab::extITEMS:
-  case 0xf620:
+  case Vocab::extITEMS: /* G@>F620 */
     {
       /* Magical item list */
       /* FIXME */
       return;
     }
-  case Vocab::extPARTYSTATUS:
-  case 0xf65d:
+  case Vocab::extPARTYSTATUS: /* G@>F65D */
     {
       /* Party status */
       /* FIXME */
       return;
     }
-  case Vocab::extNEGOTIATION:
-  case 0xf787:
+  case Vocab::extNEGOTIATION: /* G@>F787 */
     {
       /* Negotiation */
       /* FIXME */
       return;
     }
-  case Vocab::extVAULT:
-  case 0xf7d9:
+  case Vocab::extVAULT: /* G@>F7D9 */
     {
       /* Vault */
       /* FIXME */
@@ -803,11 +780,8 @@ void ScreenEngine::drawPrompt(unsigned n)
 	case Vocab::cJMP:
 	  ptr = Vocab::prompts.entry(*ptr - 1);
 	  break;
-	case Vocab::cGPL:
-	  if ((ptr[0] & 0x80))
-	    gplExtension((ptr[0] << 8)|ptr[1]);
-	  else
-	    gplExtension(ptr[0]);
+	case Vocab::cEXT:
+	  gplExtension(ptr[0]);
 	  return;
       }
     } else switch(c) {
