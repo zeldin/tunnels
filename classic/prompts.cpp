@@ -760,9 +760,9 @@ void ScreenEngine::drawPrompt(unsigned n)
       if (c) {
 	unsigned x = screen.getXpt();
 	unsigned y = screen.getYpt();
-	unsigned l = Vocab::dictionary.len(c-1);
-	screen.hstr(y, x, Utils::StringSpan{Vocab::dictionary.entry(c-1), l});
-	if ((x += l) < 30)
+	Utils::StringSpan span = Vocab::dictionary.span(c-1);
+	screen.hstr(y, x, span);
+	if ((x += span.len()) < 30)
 	  screen.hchar(y, x, ' ');
 	screen.setXpt(++x);
       }

@@ -3,6 +3,8 @@
 
 namespace Tunnels {
 
+namespace Utils { class StringSpan; }
+
 namespace Classic {
 
 namespace SequencePack {
@@ -112,6 +114,9 @@ UniformSequence<n+1, uint16> indexSequence(Sequence<n, T, U> s, uint16 offs=0) {
   return UniformSequence<n+1, uint16>{offs, indexSequence(s.tail, offs+T::len)};
 }
 
+template <typename T> class SpanType { };
+template <> class SpanType<byte> { typedef Utils::StringSpan type; };
+
 template <typename S> class IndexedSequence
 {
 private:
@@ -123,6 +128,12 @@ public:
   { return n < S::len? seq.head.ptr()+idx.ptr()[n] : nullptr; }
   constexpr uint16 len(uint16 n) const
   { return n < S::len? idx.ptr()[n+1] - idx.ptr()[n] : 0; }
+  template<typename T=typename SpanType<typename S::headType::type>::type>
+  constexpr T span(uint16 n) const
+  { return n < S::len?
+      T{seq.head.ptr()+idx.ptr()[n],
+	unsigned(idx.ptr()[n+1]) - unsigned(idx.ptr()[n])} :
+      T{nullptr, 0}; }
 };
 
 template <typename S> constexpr IndexedSequence<S> index(S seq)
