@@ -639,13 +639,16 @@ void ScreenEngine::promptExtension(byte n)
     }
   case Vocab::extPLAYERNAME: /* G@>F429 */
     {
-      unsigned n = 13; /* FIXME */
-      screen.hstr(2, 9+(15>>1)-(n>>1), "/////////////"); /* FIXME */
+      Utils::StringSpan name{"#####          "}; /* FIXME */
+      unsigned offs = name.center();
+      screen.hstr(2, 9+offs, name);
       return;
     }
   case Vocab::extITEMSLABEL: /* G@>F43B */
     {
-      screen.hstr(8, 6, "#######"); /* FIXME */
+      Utils::StringSpan label{"     #######    "}; /* FIXME */
+      label.uncenter();
+      screen.hstr(8, 6, label);
       return;
     }
   case Vocab::extGOLDFOUND: /* G@>F44A */
@@ -680,9 +683,10 @@ void ScreenEngine::promptExtension(byte n)
   case Vocab::extMONSTERREPORT: /* G@>F4D0 */
     {
       /* Monster report */
-      unsigned n = 4; /* FIXME */
-      screen.hstr(3, 11+(12>>1)-(n>>1), "****"); /* FIXME */
-      n = 6; /* FIXME */
+      Utils::StringSpan name{"****        "}; /* FIXME */
+      unsigned offs = name.center();
+      screen.hstr(3, 11+offs, name);
+      unsigned n = 6; /* FIXME */
       putNumberEol(5, byte(n*6));
       n = 12345; /* FIXME */
       screen.hchar(6, putNumberEol(6, uint16(n))-1, '0');

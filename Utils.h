@@ -16,6 +16,14 @@ public:
 
   const byte *ptr() const { return p; }
   unsigned len() const { return l; }
+  unsigned center() {
+    unsigned offs = 0;
+    while (l>0 && p[l-1] == ' ') if ((--l & 1))	offs++;
+    return offs;
+  }
+  void uncenter() {
+    while (l>0 && *p == ' ') { p++; --l; }
+  }
 };
 
 }}
