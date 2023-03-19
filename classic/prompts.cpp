@@ -37,7 +37,7 @@ enum {
   cNEXTL, cJMP, cEXT, cSP, cLT, cGT, cCOLON, cPERIOD, cCOMMA, cDASH,
   cSLASH, cQUESTION, cEXCLAM, cLPAREN, cRPAREN, cNUM, cCURSOR,
   cHCHAR, cVCHAR, cCLEARL, cTEXT, cLIST, cFWD, cPLURAL, cED, cING,
-  cINIT, cCLREOS, cBACK, cCALL, cEND
+  cMENU, cCLREOS, cBACK, cCALL, cEND
 };
 
 enum {
@@ -110,11 +110,11 @@ constexpr const auto prompts = SequencePack::index
     prompt(cFWD, 1, PRESS, PROCD, WHEN, FINISHED, cEND), // 0C
     prompt(cCURSOR, 22, 2, cCLREOS, cNEXTL, cCLEARL, '_', // 0D
 	   cCURSOR, -1, 12, cSP, cBACK, WORKING, cEND),
-    prompt(cINIT, cEND), // 0E
+    prompt(cMENU, cEND), // 0E
     prompt(cRPAREN, cQUESTION, cSP, cEND), // 0F
     prompt(cCURSOR, 0, 9, cVCHAR, 0xa0, TUNNELS_OF_DOOM, cNEXTL, // 10
 	   cCLEARL, '_', cEND),
-    prompt(cINIT, cCURSOR, 22, 2, cCALL, 0x08, cCURSOR, 3, 3, LOAD, // 11
+    prompt(cMENU, cCURSOR, 22, 2, cCALL, 0x08, cCURSOR, 3, 3, LOAD, // 11
 	   DATA, FROM, cCOLON, cFWD, 49, cLIST, '1', '3', '-'),
     prompt(CASSETTE, cFWD, 23, DISK, cNUM, 1, cFWD, 25, OTHER, // 12
 	   cCURSOR, 5, 4, cEND),
@@ -129,7 +129,7 @@ constexpr const auto prompts = SequencePack::index
 	   SECOND, cPLURAL, cEND),
     prompt(cCURSOR, 18, 3, cCLREOS, YOU, ARE, TO, cHCHAR, 'O', 1, // 19
 	   LATE, TO, SAVE, cNEXTL, cSP, THE, cEXT, extQUESTOBJ),
-    prompt(cINIT, cCURSOR, 5, 9, GAME, SELECTION, cCOLON, cFWD, 43, // 1A
+    prompt(cMENU, cCURSOR, 5, 9, GAME, SELECTION, cCOLON, cFWD, 43, // 1A
 	   cNUM, 1, cDASH, NEW, DUNGEON, cFWD, 49, cNUM, 2, cDASH,
 	   RESTOCK, OLD, DUNGEON, cCURSOR, 7, 4, cEND),
     prompt(cCURSOR, 11, 4, cNUM, 3, cDASH, CONTINUE, CURRENT, // 1B
@@ -144,13 +144,13 @@ constexpr const auto prompts = SequencePack::index
     prompt(cLPAREN, cHCHAR, '1', 1, cDASH, cHCHAR, '0', 1, // 1F
 	   cRPAREN, cQUESTION),
     prompt(cBACK, cBACK, cBACK, cBACK, cEND), // 20
-    prompt(cINIT, cCURSOR, 3, 9, cTEXT, -1, cSP, cHCHAR, '0', 1, // 21
+    prompt(cMENU, cCURSOR, 3, 9, cTEXT, -1, cSP, cHCHAR, '0', 1, // 21
 	   cCURSOR, 5, 9, NAME, cQUESTION, cFWD, 58, CLASS, cCALL, 0x1f,
 	   cFWD, 55, COLOR, cCALL, 0x1f, cHCHAR, '4', 1, cFWD, 110,
 	   cCLEARL, '_', cFWD, 37, CLASS, cPLURAL, cFWD, 6,
 	   COLOR, cPLURAL, cEXT, extCLASSES),
     prompt(cCURSOR, 12, 4, SELECT, A, DIFFERENT, COLOR, cPERIOD, cEND), // 22
-    prompt(cINIT, cCURSOR, 3, 7, POINT, OF, NO, RETURN, cFWD, 40, // 23
+    prompt(cMENU, cCURSOR, 3, 7, POINT, OF, NO, RETURN, cFWD, 40, // 23
 	   CHECK, THE, DATA, BELOW, BEFORE, cFWD, 13, CONTINUE, cING,
 	   cFWD, 34, cCLEARL, '_', cCURSOR, 22, 3, cCALL, 0x06, cNEXTL,
 	   cCALL, 0x07, cEXT, extPARTY),
@@ -161,7 +161,7 @@ constexpr const auto prompts = SequencePack::index
 	   cCLEARL, ' ', cCURSOR, 5, -1, cEXT, extFLOOREOL),
     prompt(cCURSOR, 6, 8, cCLEARL, ' ', STOCKING, FLOOR, // 26
 	   cEXT, extFLOOREOL),
-    prompt(cINIT, cCALL, 0x04, cCURSOR, 22, 2, cCALL, 0x03, cNEXTL, // 27
+    prompt(cMENU, cCALL, 0x04, cCURSOR, 22, 2, cCALL, 0x03, cNEXTL, // 27
 	   cCALL, 0x02, cCURSOR, 3, 3, cEND),
     prompt(cCURSOR, 5, 18, cCLEARL, ' ', DESCEND, cING, cNEXTL, // 28
 	   cCLEARL, ' ', cEND),
@@ -201,7 +201,7 @@ constexpr const auto prompts = SequencePack::index
     prompt(cCURSOR, 23, 2, cCALL, 0x02, cCURSOR, 15, 2, BUY, FOR, // 3B
 	   cQUESTION, cEND),
     prompt(cCURSOR, 16, 4, NO, ITEM, cPLURAL, AVAILABLE, HERE, cEND), // 3C
-    prompt(cINIT, cCURSOR, 0, 8, cCLEARL, ' ', cTEXT, 0x25, 0x94, 16, // 3D
+    prompt(cMENU, cCURSOR, 0, 8, cCLEARL, ' ', cTEXT, 0x25, 0x94, 16, // 3D
 	   cCURSOR, 2, 20, COST, cCOLON, cCURSOR, 12, 2, cCLEARL, '_', cNEXTL,
 	   cTEXT, 0x32, 0x70, 16, cCOLON, cNEXTL, cCLEARL, '_',
 	   cEXT, extPARTYGOLD),
@@ -225,7 +225,7 @@ constexpr const auto prompts = SequencePack::index
     prompt(cCURSOR, 18, 11, cCLREOS, PURCHASE, cED, cEND), // 45
     prompt(cCURSOR, 7, 4, cLIST, '1', '9', ' ', cCURSOR, 16, 3, // 46
 	   cNUM, 10, cEND),
-    prompt(cINIT, cCURSOR, 18, 13, WHICH, NUMBER, cQUESTION, cEND), // 47
+    prompt(cMENU, cCURSOR, 18, 13, WHICH, NUMBER, cQUESTION, cEND), // 47
     prompt(cCURSOR, 3, 3, YOU, CANT, HOLD, ALL, OF, THIS, cEXCLAM, // 48
 	   cNEXTL, WHICH, ITEM, WILL, YOU, GIVE, UP, cQUESTION,
 	   cFWD, 37, cNUM, 0, cEXT, extPLAYERNAME),
@@ -299,7 +299,7 @@ constexpr const auto prompts = SequencePack::index
 	   cCALL, 0x64, cHCHAR, 'W', 1, cDASH, CHANGE, cTEXT, -6, cPLURAL,
 	   cCALL, 0x64, cBACK, ENTER, cDASH, END, OF, TURN, cEND),
     prompt(cCOLON, cNEXTL, cFWD, 1, cEND), // 69
-    prompt(cINIT, cCURSOR, 2, 6, cHCHAR, 0xf0, 1, cHCHAR, 0xf2, 1, // 6A
+    prompt(cMENU, cCURSOR, 2, 6, cHCHAR, 0xf0, 1, cHCHAR, 0xf2, 1, // 6A
 	   cFWD, 18, cHCHAR, 0xf8, 1, cHCHAR, 0xfa, 1, cFWD, 10,
 	   cHCHAR, 0xf1, 1, cHCHAR, 0xf3, 1, cFWD, 18, cHCHAR, 0xf9, 1,
 	   cHCHAR, 0xfb, 1, cFWD, 40, MAXIMUM, HIT, POINT, cPLURAL,
@@ -323,7 +323,7 @@ constexpr const auto prompts = SequencePack::index
     prompt(cCURSOR, 4, 8, cTEXT, 0x32, 0x80, 16, cCURSOR, 7, 7, // 6C
 	   cLIST, '1', '9', ':', cCURSOR, 16, 6, cNUM, 10, cCALL, 0x69,
 	   DATA, ON, WHICH, ITEM, cQUESTION, cEXT, extITEMS),
-    prompt(cINIT, cCURSOR, 2, 10, QUEST, STATUS, cNEXTL, cNEXTL, // 6D
+    prompt(cMENU, cCURSOR, 2, 10, QUEST, STATUS, cNEXTL, cNEXTL, // 6D
 	   cTEXT, 0x32, 0x70, 16, cCOLON, cNEXTL, cTEXT, -11, cPLURAL, cCOLON,
 	   cCURSOR, 7, 3, QUEST, OBJECT, cPLURAL, cCALL, 0x69,
 	   cLIST, '1', '8', ':', cCURSOR, 16, 4, cHCHAR, '*', 1, TURN,
@@ -383,11 +383,11 @@ constexpr const auto prompts = SequencePack::index
 
 }
 
-void ScreenEngine::initScreen()
+void ScreenEngine::menuScreen()
 {
   screen.all(' ');
   screen.loadRomFont();
-  screen.setBackground(6);
+  screen.setBackground(VDP::DARK_RED);
   static constexpr byte up[][VDP::PATTERN_H] {
     { 0x00, 0x10, 0x38, 0x54, 0x10, 0x10, 0x10, 0x10 } // up arrow
   };
@@ -507,11 +507,11 @@ unsigned ScreenEngine::findEndOfLine()
   return x;
 }
 
-void ScreenEngine::gplExtension(uint16 addr)
+void ScreenEngine::promptExtension(byte n)
 {
   unsigned x = screen.getXpt();
   unsigned y = screen.getYpt();
-  switch (addr) {
+  switch (n) {
   case Vocab::extQUESTOBJ: /* G@>F193 */
     {
       screen.hstr(y, x, "FOO" /* FIXME */);
@@ -584,7 +584,7 @@ void ScreenEngine::gplExtension(uint16 addr)
     }
   case Vocab::extGAMEOVER: /* G@>F2AA */
     {
-      screen.setBackground(4);
+      screen.setBackground(VDP::DARK_BLUE);
       /* FIXME ... */
       drawPrompt(0x2a);
       drawPrompt(0x2b);
@@ -781,7 +781,7 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  ptr = Vocab::prompts.entry(*ptr - 1);
 	  break;
 	case Vocab::cEXT:
-	  gplExtension(ptr[0]);
+	  promptExtension(ptr[0]);
 	  return;
       }
     } else switch(c) {
@@ -888,8 +888,8 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  screen.setXpt(++x);
 	}
 	break;
-      case Vocab::cINIT:
-	initScreen();
+      case Vocab::cMENU:
+	menuScreen();
 	break;
       case Vocab::cCLREOS:
 	{

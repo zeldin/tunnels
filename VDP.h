@@ -49,6 +49,25 @@ private:
     Palette{Convert<i-1,U>(conv.src), vals..., conv.next()} { }
 };
 
+enum {
+  TRANSPARENT,
+  BLACK,
+  MEDIUM_GREEN,
+  LIGHT_GREEN,
+  DARK_BLUE,
+  LIGHT_BLUE,
+  DARK_RED,
+  CYAN,
+  MEDIUM_RED,
+  LIGHT_RED,
+  DARK_YELLOW,
+  LIGHT_YELLOW,
+  DARK_GREEN,
+  MAGENTA,
+  GRAY,
+  WHITE
+};
+
 constexpr Palette<RGB> palette{
   RGB{ 0, 0, 0, },
   RGB{ 0, 0, 0, },

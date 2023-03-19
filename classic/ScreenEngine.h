@@ -21,7 +21,7 @@ public:
   virtual void drawPrompt(unsigned n) override;
 
 private:
-  void initScreen();
+  void menuScreen();
   unsigned putDigit(unsigned y, unsigned x, unsigned d);
   unsigned putNumber(unsigned y, unsigned x, byte n);
   unsigned putNumber(unsigned y, unsigned x, uint16 n);
@@ -30,7 +30,7 @@ private:
   unsigned putPlural();
   void putQuad(unsigned y, unsigned x, byte base);
   unsigned findEndOfLine();
-  void gplExtension(uint16 addr);
+  void promptExtension(byte n);
 };
 
 }
