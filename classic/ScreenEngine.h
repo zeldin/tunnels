@@ -3,22 +3,26 @@
 
 #include "Engine.h"
 #include "VDP.h"
+#include "Timer.h"
 
 namespace Tunnels {
 
 namespace Classic {
 
-class ScreenEngine : public Tunnels::ScreenEngine {
+class ScreenEngine : Timer::Timer, public Tunnels::ScreenEngine {
 private:
+  Tunnels::Timer::TimerManager &timerManager;
   VDP::Screen screen;
   VDP::Backend &backend;
 
 public:
-  ScreenEngine(VDP::Backend &backend_) : backend(backend_) {}
+  ScreenEngine(VDP::Backend &backend_, Tunnels::Timer::TimerManager &timerManager_) :
+    timerManager(timerManager_), backend(backend_) {}
 
   virtual void refresh() override;
   virtual void drawTitleScreen() override;
   virtual void drawPrompt(unsigned n) override;
+  virtual void setCursorEnabled(bool enabled) override;
 
 private:
   void menuScreen();
@@ -31,6 +35,9 @@ private:
   void putQuad(unsigned y, unsigned x, byte base);
   unsigned findEndOfLine();
   void promptExtension(byte n);
+
+protected:
+  virtual void callback() override;
 };
 
 }
