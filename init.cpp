@@ -40,6 +40,9 @@ EventType GameEngine::run()
   if (titleScreen() == EVENT_QUIT)
     return EVENT_QUIT;
   screen.drawPrompt(0x11);
+  byte x;
+  if (getNumberKey(x, 1, 3).type() == EVENT_QUIT)
+    return EVENT_QUIT;
   waitForEvent();
   return EVENT_NULL;
 }

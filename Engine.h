@@ -14,6 +14,7 @@ public:
   virtual void drawTitleScreen() = 0;
   virtual void drawPrompt(unsigned n) = 0;
   virtual void setCursorEnabled(bool enabled) = 0;
+  virtual void markSelection(byte ch) = 0;
 };
 
 class SoundEngine {
@@ -41,6 +42,8 @@ private:
   Event nextEvent();
   EventType waitForEvent();
   EventType titleScreen();
+  Event getKey();
+  Event getNumberKey(byte &n, byte low, byte high);
 };
 
 }

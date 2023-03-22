@@ -23,6 +23,7 @@ public:
   virtual void drawTitleScreen() override;
   virtual void drawPrompt(unsigned n) override;
   virtual void setCursorEnabled(bool enabled) override;
+  virtual void markSelection(byte ch) override;
 
 private:
   void menuScreen();
