@@ -19,6 +19,8 @@ public:
 
   virtual void stopMusic() override;
   virtual void playTitleMusic() override;
+  virtual void beep() override;
+  virtual void honk() override;
 };
 
 }

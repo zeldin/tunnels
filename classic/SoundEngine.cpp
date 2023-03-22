@@ -12,4 +12,22 @@ void SoundEngine::stopMusic()
   music.play(clearVoices);
 }
 
+void SoundEngine::beep()
+{
+  static constexpr byte beepSound[] {
+    0x06, 0xbf, 0xdf, 0xff, 0x80, 0x05, 0x92, 0x0a, 0x01,
+    0x9f, 0x00
+  };
+  music.play(beepSound);
+}
+
+void SoundEngine::honk()
+{
+  static constexpr byte honkSound[] {
+    0x06, 0xbf, 0xdf, 0xff, 0x80, 0x20, 0x90, 0x0a, 0x01,
+    0x9f, 0x00
+  };
+  music.play(honkSound);
+}
+
 }}

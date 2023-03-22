@@ -20,6 +20,8 @@ public:
   virtual ~SoundEngine() {}
   virtual void stopMusic() = 0;
   virtual void playTitleMusic() = 0;
+  virtual void beep() = 0;
+  virtual void honk() = 0;
 };
 
 class GameEngine {
