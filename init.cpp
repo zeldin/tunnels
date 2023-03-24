@@ -25,26 +25,37 @@ EventType GameEngine::waitForEvent()
   return nextEvent().type();
 }
 
-EventType GameEngine::titleScreen()
+GameEngine::Checkpoint GameEngine::titleScreen()
 {
   screen.drawTitleScreen();
   sound.playTitleMusic();
   EventType e = waitForEvent();
   sound.stopMusic();
   timerManager.removeTimeout();
-  return e;
+  return e == EVENT_QUIT? CHECKPOINT_QUIT : CHECKPOINT_LOAD_SAVE;
 }
 
 EventType GameEngine::run()
 {
-  if (titleScreen() == EVENT_QUIT)
-    return EVENT_QUIT;
-  screen.drawPrompt(0x11);
-  byte x;
-  if (getNumberKey(x, 1, 3).type() == EVENT_QUIT)
-    return EVENT_QUIT;
-  waitForEvent();
-  return EVENT_NULL;
+  Checkpoint checkpoint = titleScreen();
+  for (;;)
+    switch (checkpoint) {
+    case CHECKPOINT_LOAD_SAVE:
+      redoTarget = CHECKPOINT_LOAD_SAVE;
+      procdTarget = CHECKPOINT_NEW_OR_RESTOCK;
+      screen.drawPrompt(0x11);
+      byte x;
+      if ((checkpoint = getNumberKey(x, 1, 3)))
+	continue;
+      waitForEvent();
+      checkpoint = CHECKPOINT_QUIT;
+      break;
+    default:
+      // internal error...
+      return EVENT_NULL;
+    case CHECKPOINT_QUIT:
+      return EVENT_QUIT;
+    }
 }
 
 }

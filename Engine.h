@@ -33,6 +33,16 @@ private:
   ScreenEngine &screen;
   SoundEngine &sound;
 
+  enum Checkpoint {
+    CHECKPOINT_NULL,           // keep going
+    CHECKPOINT_LOAD_SAVE,      // G@>6046
+    CHECKPOINT_NEW_OR_RESTOCK, // G@>6114
+    CHECKPOINT_QUIT
+  };
+
+  Checkpoint redoTarget;
+  Checkpoint procdTarget;
+  
 public:
   GameEngine(EventLoop &eventLoop_, Timer::TimerManager &timerManager_,
 	     ScreenEngine &screen_, SoundEngine &sound_);
@@ -41,9 +51,9 @@ public:
 private:
   Event nextEvent();
   EventType waitForEvent();
-  EventType titleScreen();
-  Event getKey();
-  Event getNumberKey(byte &n, byte low, byte high);
+  Checkpoint titleScreen();
+  Checkpoint getKey(byte &kc);
+  Checkpoint getNumberKey(byte &n, byte low, byte high);
 };
 
 }

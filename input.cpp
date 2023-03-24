@@ -5,35 +5,53 @@
 
 namespace Tunnels {
 
-Event GameEngine::getKey()
+GameEngine::Checkpoint GameEngine::getKey(byte &kc)
 {
-  Event e = Event::nullEvent();
+  Checkpoint cp = CHECKPOINT_NULL;
   screen.setCursorEnabled(true);
   for (;;) {
-    e = nextEvent();
-    if (e.type() != EVENT_KEY)
+    Event e = nextEvent();
+    if (e.type() != EVENT_KEY) {
+      if (e.type() == EVENT_QUIT) {
+	cp = CHECKPOINT_QUIT;
+	break;
+      }
+      continue;
+    }
+    kc = e.keycode();
+    if (kc == KEY_REDO) {
+      cp = redoTarget;
       break;
-    byte kc = e.keycode();
+    }
+    if (kc == KEY_PROCD) {
+      cp = procdTarget;
+      break;
+    }
+    if (kc == KEY_BEGIN) {
+      cp = CHECKPOINT_NEW_OR_RESTOCK;
+      break;
+    }
     if (kc >= '1' && kc <= '9')
       break;
     sound.honk();
   }
   screen.setCursorEnabled(false);
-  return e;
+  return cp;
 }
 
-Event GameEngine::getNumberKey(byte &n, byte low, byte high)
+GameEngine::Checkpoint GameEngine::getNumberKey(byte &n, byte low, byte high)
 {
   for (;;) {
-    Event e = getKey();
-    if (e.type() != EVENT_KEY)
-      return e;
-    byte v = e.keycode() - '0';
+    byte kc;
+    Checkpoint cp = getKey(kc);
+    if (cp)
+      return cp;
+    byte v = kc - '0';
     if (v >= low && v <= high) {
-      screen.markSelection(e.keycode());
+      screen.markSelection(kc);
       n = v-1;
       sound.beep();
-      return e;
+      return CHECKPOINT_NULL;
     }
     sound.honk();
   }
