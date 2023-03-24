@@ -5,40 +5,69 @@
 
 namespace Tunnels {
 
-GameEngine::Checkpoint GameEngine::getKey(byte &kc)
+GameEngine::Checkpoint GameEngine::getKeyNoCursor(byte &kc)
 {
-  Checkpoint cp = CHECKPOINT_NULL;
-  screen.setCursorEnabled(true);
   for (;;) {
     Event e = nextEvent();
     if (e.type() != EVENT_KEY) {
-      if (e.type() == EVENT_QUIT) {
-	cp = CHECKPOINT_QUIT;
-	break;
-      }
+      if (e.type() == EVENT_QUIT)
+	return CHECKPOINT_QUIT;
       continue;
     }
     kc = e.keycode();
-    if (kc == KEY_REDO && (acceptMask & ACCEPT_REDO)) {
-      cp = redoTarget;
-      break;
+    if ((kc >= '0' && kc <= '9') ||
+	kc == KEY_ERASE || kc == KEY_LEFT || kc == KEY_ENTER) {
+      if (!(acceptMask &
+	    (ACCEPT_NUMERIC | ACCEPT_ALPHANUMERIC | ACCEPT_ALPHANUMERIC2)))
+	continue;
+      /* @>8356 = >36DB */
+      return CHECKPOINT_NULL;
+    } else if (kc < ' ')
+      switch(kc) {
+      case KEY_AID:
+	if ((acceptMask & ACCEPT_AID))
+	  return CHECKPOINT_NULL;
+	break;
+      case KEY_REDO:
+	if ((acceptMask & ACCEPT_REDO))
+	  return redoTarget;
+	break;
+      case KEY_DOWN:
+      case KEY_UP:
+	if ((acceptMask & ACCEPT_UP_DOWN))
+	  return CHECKPOINT_NULL;	
+	break;
+      case KEY_PROCD:
+	if ((acceptMask & ACCEPT_PROCD))
+	  return procdTarget;
+	break;
+      case KEY_BEGIN:
+	if (progression >= 4) {
+	  screen.initMenu();
+	  return CHECKPOINT_NEW_OR_RESTOCK;
+	}
+	break;
+      case KEY_BACK:
+	if ((acceptMask & ACCEPT_BACK))
+	  return backTarget;
+	break;
+      }
+    else {
+      if ((acceptMask & ACCEPT_ALPHANUMERIC))
+	return CHECKPOINT_NULL;
+      if ((acceptMask & ACCEPT_ALPHANUMERIC2)) {
+	/* @>8356 = >36DB */
+	return CHECKPOINT_NULL;
+      }
     }
-    if (kc == KEY_PROCD && (acceptMask & ACCEPT_PROCD)) {
-      cp = procdTarget;
-      break;
-    }
-    if (kc == KEY_BACK && (acceptMask & ACCEPT_BACK)) {
-      cp = backTarget;
-      break;
-    }
-    if (kc == KEY_BEGIN && progression >= 4) {
-      cp = CHECKPOINT_NEW_OR_RESTOCK;
-      break;
-    }
-    if (kc >= '1' && kc <= '9')
-      break;
     sound.honk();
   }
+}
+
+GameEngine::Checkpoint GameEngine::getKey(byte &kc)
+{
+  screen.setCursorEnabled(true);
+  Checkpoint cp = getKeyNoCursor(kc);
   screen.setCursorEnabled(false);
   return cp;
 }

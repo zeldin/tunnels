@@ -384,9 +384,8 @@ constexpr const auto prompts = SequencePack::index
 
 }
 
-void ScreenEngine::menuScreen()
+void ScreenEngine::initMenu()
 {
-  screen.all(' ');
   screen.loadRomFont();
   screen.setBackground(VDP::DARK_RED);
   static constexpr byte up[][VDP::PATTERN_H] {
@@ -412,6 +411,12 @@ void ScreenEngine::menuScreen()
     0x00, 0x00, 0x00, 0x00, 0x4b, 0x1b, 0x1b
   };
   screen.loadColorTable(4, color_table);
+}
+
+void ScreenEngine::menuScreen()
+{
+  screen.all(' ');
+  initMenu();
   drawPrompt(0x10);
 }
 

@@ -12,6 +12,7 @@ public:
   virtual ~ScreenEngine() {}
   virtual void refresh() {}
   virtual void drawTitleScreen() = 0;
+  virtual void initMenu() = 0;
   virtual void drawPrompt(unsigned n) = 0;
   virtual void setCursorEnabled(bool enabled) = 0;
   virtual void markSelection(byte ch) = 0;
@@ -66,6 +67,7 @@ private:
   Event nextEvent();
   EventType waitForEvent();
   Checkpoint titleScreen();
+  Checkpoint getKeyNoCursor(byte &kc);
   Checkpoint getKey(byte &kc);
   Checkpoint getNumberKey(byte &n, byte low, byte high);
 };

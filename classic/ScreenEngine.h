@@ -21,6 +21,7 @@ public:
 
   virtual void refresh() override;
   virtual void drawTitleScreen() override;
+  virtual void initMenu() override;
   virtual void drawPrompt(unsigned n) override;
   virtual void setCursorEnabled(bool enabled) override;
   virtual void markSelection(byte ch) override;
