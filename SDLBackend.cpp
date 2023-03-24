@@ -93,21 +93,21 @@ byte SDLBackend::decodeKey(const SDL_Keysym &keysym)
   switch(keysym.scancode) {
   case SDL_SCANCODE_RETURN:
   case SDL_SCANCODE_KP_ENTER:
-    return byte{0x0d};
+    return byte{KEY_ENTER};
   case SDL_SCANCODE_SPACE:
-    return byte{0x20};
+    return byte{' '};
   case SDL_SCANCODE_LEFT:
   case SDL_SCANCODE_KP_4:
-    return byte{0x08};
+    return byte{KEY_LEFT};
   case SDL_SCANCODE_RIGHT:
   case SDL_SCANCODE_KP_6:
-    return byte{0x09};
+    return byte{KEY_RIGHT};
   case SDL_SCANCODE_DOWN:
   case SDL_SCANCODE_KP_2:
-    return byte{0x0a};
+    return byte{KEY_DOWN};
   case SDL_SCANCODE_UP:
   case SDL_SCANCODE_KP_8:
-    return byte{0x0b};
+    return byte{KEY_UP};
   case SDL_SCANCODE_COMMA:
     index = 10;
     break;
@@ -125,7 +125,7 @@ byte SDLBackend::decodeKey(const SDL_Keysym &keysym)
     break;
   case SDL_SCANCODE_F12:
     /* F12 -> FCTN = */
-    return byte{0x05};
+    return byte{KEY_QUIT};
   default:
     if (keysym.sym >= SDLK_0 && keysym.sym <= SDLK_9) {
       index = keysym.sym - SDLK_0;

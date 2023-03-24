@@ -12,6 +12,24 @@ enum EventType {
   EVENT_KEY
 };
 
+enum KeyCodes {
+  KEY_AID = 1,
+  KEY_CLEAR = 2,
+  KEY_DEL = 3,
+  KEY_INS = 4,
+  KEY_QUIT = 5,
+  KEY_REDO = 6,
+  KEY_ERASE = 7,
+  KEY_LEFT = 8,
+  KEY_RIGHT = 9,
+  KEY_DOWN = 10,
+  KEY_UP = 11,
+  KEY_PROCD = 12,
+  KEY_ENTER = 13,
+  KEY_BEGIN = 14,
+  KEY_BACK = 15
+};
+
 class Event {
 private:
   uint32 eventNum;
