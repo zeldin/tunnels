@@ -38,15 +38,24 @@ GameEngine::Checkpoint GameEngine::titleScreen()
 EventType GameEngine::run()
 {
   Checkpoint checkpoint = titleScreen();
+  progression = 2;
   for (;;)
     switch (checkpoint) {
     case CHECKPOINT_LOAD_SAVE:
       redoTarget = CHECKPOINT_LOAD_SAVE;
       procdTarget = CHECKPOINT_NEW_OR_RESTOCK;
+      acceptMask = ACCEPT_REDO | ACCEPT_NUMERIC;
       screen.drawPrompt(0x11);
       byte x;
-      if ((checkpoint = getNumberKey(x, 1, 3)))
+      if (progression != 2) {
+	acceptMask |= ACCEPT_PROCD;
+	screen.drawPrompt(0x13);
+	checkpoint = getNumberKey(x, 1, 6);
+      } else
+	checkpoint = getNumberKey(x, 1, 3);
+      if(checkpoint)
 	continue;
+      sound.beep();
       waitForEvent();
       checkpoint = CHECKPOINT_QUIT;
       break;

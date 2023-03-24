@@ -19,15 +19,19 @@ GameEngine::Checkpoint GameEngine::getKey(byte &kc)
       continue;
     }
     kc = e.keycode();
-    if (kc == KEY_REDO) {
+    if (kc == KEY_REDO && (acceptMask & ACCEPT_REDO)) {
       cp = redoTarget;
       break;
     }
-    if (kc == KEY_PROCD) {
+    if (kc == KEY_PROCD && (acceptMask & ACCEPT_PROCD)) {
       cp = procdTarget;
       break;
     }
-    if (kc == KEY_BEGIN) {
+    if (kc == KEY_BACK && (acceptMask & ACCEPT_BACK)) {
+      cp = backTarget;
+      break;
+    }
+    if (kc == KEY_BEGIN && progression >= 4) {
       cp = CHECKPOINT_NEW_OR_RESTOCK;
       break;
     }
