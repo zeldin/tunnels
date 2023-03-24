@@ -67,6 +67,7 @@ private:
   Event nextEvent();
   EventType waitForEvent();
   Checkpoint titleScreen();
+  Checkpoint loadSave();
   Checkpoint getKeyNoCursor(byte &kc);
   Checkpoint getKey(byte &kc);
   Checkpoint getNumberKey(byte &n, byte low, byte high);

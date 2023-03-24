@@ -42,23 +42,9 @@ EventType GameEngine::run()
   for (;;)
     switch (checkpoint) {
     case CHECKPOINT_LOAD_SAVE:
-      redoTarget = CHECKPOINT_LOAD_SAVE;
-      procdTarget = CHECKPOINT_NEW_OR_RESTOCK;
-      acceptMask = ACCEPT_REDO | ACCEPT_NUMERIC;
-      screen.drawPrompt(0x11);
-      byte x;
-      if (progression != 2) {
-	acceptMask |= ACCEPT_PROCD;
-	screen.drawPrompt(0x13);
-	checkpoint = getNumberKey(x, 1, 6);
-      } else
-	checkpoint = getNumberKey(x, 1, 3);
-      if(checkpoint)
+      if ((checkpoint = loadSave()))
 	continue;
-      sound.beep();
-      waitForEvent();
-      checkpoint = CHECKPOINT_QUIT;
-      break;
+    case CHECKPOINT_NEW_OR_RESTOCK:
     default:
       // internal error...
       return EVENT_NULL;

@@ -7,7 +7,7 @@ CLASSIC_ENGINE_SRCS = ScreenEngine.cpp SoundEngine.cpp \
 	title_screen.cpp title_music.cpp prompts.cpp cursor.cpp
 
 SRCS = main.cpp SDLBackend.cpp VDP.cpp DCSG.cpp Timer.cpp \
-	init.cpp input.cpp \
+	init.cpp input.cpp loadsave.cpp \
 	$(addprefix classic/,$(CLASSIC_ENGINE_SRCS))
 
 OBJS = $(addprefix build/,$(SRCS:.cpp=.o))
