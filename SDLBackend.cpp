@@ -176,6 +176,13 @@ Event SDLBackend::handleEvent(const SDL_Event &event)
     return Event::quitEvent();
   else if (event.type == SDL_KEYDOWN) {
     byte keyCode = decodeKey(event.key.keysym);
+
+    /* Mode 3 */
+    if (keyCode >= 'a' && keyCode <= 'z')
+      keyCode -= 0x20;
+    if (keyCode > 0x5f || (keyCode >= 0x10 && keyCode <= 0x1f))
+      keyCode = 0xff;
+
     if (keyCode != 0xff)
       return Event::keyEvent(keyCode);
   }
