@@ -200,8 +200,8 @@ void Screen::hchar(unsigned row, unsigned col, byte name, unsigned cnt)
   byte *n = &name_table[row][col];
   bool *d = &name_table_dirty[row][col];
   while(cnt--) {
-    *d++ = (*n != name);
-    *n++ = name;
+    if (*n != name) { *d=true; *n=name; }
+    d++; n++;
   }
   any_name_table_dirty = true;
 }
@@ -220,8 +220,7 @@ void Screen::vchar(unsigned row, unsigned col, byte name, unsigned cnt)
   byte *n = &name_table[row][col];
   bool *d = &name_table_dirty[row][col];
   while(cnt--) {
-    *d = (*n != name);
-    *n = name;
+    if (*n != name) { *d=true; *n=name; }
     d += COLUMNS;
     n += COLUMNS;
   }
