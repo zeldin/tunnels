@@ -29,7 +29,7 @@ EventType GameEngine::waitForEvent()
 
 GameEngine::Diversion GameEngine::delay(unsigned ms)
 {
-  timerManager.setTimeout(ms);
+  timerManager.setTimeoutAfter(ms);
   EventType e;
   do {
     e = waitForEvent();

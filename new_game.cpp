@@ -28,7 +28,7 @@ GameEngine::Diversion GameEngine::newOrRestockMenu()
     }
     if (d)
       return d;
-    if ((d = delay(3600)))
+    if ((d = delay(667)))
       return d;
     backTarget = DIVERSION_NEW_OR_RESTOCK;
   }
@@ -65,7 +65,7 @@ GameEngine::Diversion GameEngine::newOrRestockMenu()
   database->setDifficulty(x);
   if ((unknown & 0x80))
     database->setUnknown1CF4(0);
-  if ((d = delay(3600)))
+  if ((d = delay(667)))
     return d;
   // 61D4
   return DIVERSION_NULL;
