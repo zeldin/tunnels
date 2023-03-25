@@ -788,7 +788,7 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  screen.setXpt(2);
 	  break;
 	case Vocab::cJMP:
-	  ptr = Vocab::prompts.entry(*ptr - 1);
+	  ptr = Vocab::prompts.entry(*ptr);
 	  break;
 	case Vocab::cEXT:
 	  promptExtension(ptr[0]);
