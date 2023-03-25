@@ -5,13 +5,13 @@
 
 namespace Tunnels {
 
-GameEngine::Checkpoint GameEngine::getKeyNoCursor(byte &kc)
+GameEngine::Diversion GameEngine::getKeyNoCursor(byte &kc)
 {
   for (;;) {
     Event e = nextEvent();
     if (e.type() != EVENT_KEY) {
       if (e.type() == EVENT_QUIT)
-	return CHECKPOINT_QUIT;
+	return DIVERSION_QUIT;
       continue;
     }
     kc = e.keycode();
@@ -21,12 +21,12 @@ GameEngine::Checkpoint GameEngine::getKeyNoCursor(byte &kc)
 	    (ACCEPT_NUMERIC | ACCEPT_ALPHANUMERIC | ACCEPT_ALPHANUMERIC2)))
 	continue;
       /* @>8356 = >36DB */
-      return CHECKPOINT_NULL;
+      return DIVERSION_NULL;
     } else if (kc < ' ')
       switch(kc) {
       case KEY_AID:
 	if ((acceptMask & ACCEPT_AID))
-	  return CHECKPOINT_NULL;
+	  return DIVERSION_NULL;
 	break;
       case KEY_REDO:
 	if ((acceptMask & ACCEPT_REDO))
@@ -35,7 +35,7 @@ GameEngine::Checkpoint GameEngine::getKeyNoCursor(byte &kc)
       case KEY_DOWN:
       case KEY_UP:
 	if ((acceptMask & ACCEPT_UP_DOWN))
-	  return CHECKPOINT_NULL;	
+	  return DIVERSION_NULL;	
 	break;
       case KEY_PROCD:
 	if ((acceptMask & ACCEPT_PROCD))
@@ -44,7 +44,7 @@ GameEngine::Checkpoint GameEngine::getKeyNoCursor(byte &kc)
       case KEY_BEGIN:
 	if (progression >= 4) {
 	  screen.initMenu();
-	  return CHECKPOINT_NEW_OR_RESTOCK;
+	  return DIVERSION_NEW_OR_RESTOCK;
 	}
 	break;
       case KEY_BACK:
@@ -54,51 +54,51 @@ GameEngine::Checkpoint GameEngine::getKeyNoCursor(byte &kc)
       }
     else {
       if ((acceptMask & ACCEPT_ALPHANUMERIC))
-	return CHECKPOINT_NULL;
+	return DIVERSION_NULL;
       if ((acceptMask & ACCEPT_ALPHANUMERIC2)) {
 	/* @>8356 = >36DB */
-	return CHECKPOINT_NULL;
+	return DIVERSION_NULL;
       }
     }
     sound.honk();
   }
 }
 
-GameEngine::Checkpoint GameEngine::getKey(byte &kc)
+GameEngine::Diversion GameEngine::getKey(byte &kc)
 {
   screen.setCursorEnabled(true);
-  Checkpoint cp = getKeyNoCursor(kc);
+  Diversion d = getKeyNoCursor(kc);
   screen.setCursorEnabled(false);
-  return cp;
+  return d;
 }
 
-GameEngine::Checkpoint GameEngine::getNumberKey(byte &n, byte low, byte high)
+GameEngine::Diversion GameEngine::getNumberKey(byte &n, byte low, byte high)
 {
   for (;;) {
     byte kc;
-    Checkpoint cp = getKey(kc);
-    if (cp)
-      return cp;
+    Diversion d = getKey(kc);
+    if (d)
+      return d;
     byte v = kc - '0';
     if (v >= low && v <= high) {
       screen.markSelection(kc);
       n = v-1;
       sound.beep();
-      return CHECKPOINT_NULL;
+      return DIVERSION_NULL;
     }
     sound.honk();
   }
 }
 
-GameEngine::Checkpoint GameEngine::getString(unsigned len, byte *result)
+GameEngine::Diversion GameEngine::getString(unsigned len, byte *result)
 {
   screen.prepareStringInputField(len);
   unsigned cnt = 0;
   for (;;) {
     byte kc;
-    Checkpoint cp = getKey(kc);
-    if (cp)
-      return cp;
+    Diversion d = getKey(kc);
+    if (d)
+      return d;
     if (kc == KEY_ENTER)
       break;
     else if (kc == KEY_ERASE) {
@@ -115,11 +115,11 @@ GameEngine::Checkpoint GameEngine::getString(unsigned len, byte *result)
       if (kc < 0x10) {
 	switch (kc) {
 	case KEY_AID:
-	  return CHECKPOINT_AID;
+	  return DIVERSION_AID;
 	case KEY_UP:
-	  return CHECKPOINT_UP;
+	  return DIVERSION_UP;
 	case KEY_DOWN:
-	  return CHECKPOINT_DOWN;
+	  return DIVERSION_DOWN;
 	}
       } else {
 	if (result)
@@ -135,7 +135,7 @@ GameEngine::Checkpoint GameEngine::getString(unsigned len, byte *result)
   if (result != nullptr)
     while(cnt < len)
       result[cnt++] = ' ';
-  return CHECKPOINT_NULL;
+  return DIVERSION_NULL;
 }
 
 }

@@ -38,20 +38,18 @@ private:
   ScreenEngine &screen;
   SoundEngine &sound;
 
-  enum Checkpoint {
-    CHECKPOINT_NULL,           // keep going
-    CHECKPOINT_LOAD_SAVE,      // G@>6046
-    CHECKPOINT_NEW_OR_RESTOCK, // G@>6114
-
-    // Meta checkpoints
-    CHECKPOINT_AID,
-    CHECKPOINT_UP,
-    CHECKPOINT_DOWN,
-    CHECKPOINT_QUIT
+  enum Diversion {
+    DIVERSION_NULL,           // keep going
+    DIVERSION_LOAD_SAVE,      // G@>6046
+    DIVERSION_NEW_OR_RESTOCK, // G@>6114
+    DIVERSION_AID,
+    DIVERSION_UP,
+    DIVERSION_DOWN,
+    DIVERSION_QUIT
   };
-  Checkpoint redoTarget;
-  Checkpoint backTarget;
-  Checkpoint procdTarget;
+  Diversion redoTarget;
+  Diversion backTarget;
+  Diversion procdTarget;
 
   enum {
     ACCEPT_PROCD         = 0x01,
@@ -75,13 +73,13 @@ public:
 private:
   Event nextEvent();
   EventType waitForEvent();
-  Checkpoint titleScreen();
-  Checkpoint loadSave();
-  Checkpoint getKeyNoCursor(byte &kc);
-  Checkpoint getKey(byte &kc);
-  Checkpoint getNumberKey(byte &n, byte low, byte high);
-  Checkpoint getString(unsigned len, byte *result = nullptr);
-  template<unsigned n> Checkpoint getString(byte (&result)[n])
+  Diversion titleScreen();
+  Diversion loadSave();
+  Diversion getKeyNoCursor(byte &kc);
+  Diversion getKey(byte &kc);
+  Diversion getNumberKey(byte &n, byte low, byte high);
+  Diversion getString(unsigned len, byte *result = nullptr);
+  template<unsigned n> Diversion getString(byte (&result)[n])
   { return getString(n, &result[0]); }
 };
 
