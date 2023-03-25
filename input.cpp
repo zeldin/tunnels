@@ -90,4 +90,52 @@ GameEngine::Checkpoint GameEngine::getNumberKey(byte &n, byte low, byte high)
   }
 }
 
+GameEngine::Checkpoint GameEngine::getString(unsigned len, byte *result)
+{
+  screen.prepareStringInputField(len);
+  unsigned cnt = 0;
+  for (;;) {
+    byte kc;
+    Checkpoint cp = getKey(kc);
+    if (cp)
+      return cp;
+    if (kc == KEY_ENTER)
+      break;
+    else if (kc == KEY_ERASE) {
+      screen.eraseStringInputField(cnt);
+      cnt = 0;
+      continue;
+    } else if (kc == KEY_LEFT) {
+      if (cnt > 0) {
+	screen.eraseStringInputField(1);
+	--cnt;
+	continue;
+      }
+    } else if (cnt < len) {
+      if (kc < 0x10) {
+	switch (kc) {
+	case KEY_AID:
+	  return CHECKPOINT_AID;
+	case KEY_UP:
+	  return CHECKPOINT_UP;
+	case KEY_DOWN:
+	  return CHECKPOINT_DOWN;
+	}
+      } else {
+	if (result)
+	  result[cnt] = kc;
+	cnt++;
+	screen.addStringInputField(kc);
+	continue;
+      }
+    }
+    sound.honk();
+  }
+  screen.endStringInputField(len, cnt);
+  if (result != nullptr)
+    while(cnt < len)
+      result[cnt++] = ' ';
+  return CHECKPOINT_NULL;
+}
+
 }

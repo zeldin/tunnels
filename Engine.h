@@ -16,6 +16,10 @@ public:
   virtual void drawPrompt(unsigned n) = 0;
   virtual void setCursorEnabled(bool enabled) = 0;
   virtual void markSelection(byte ch) = 0;
+  virtual void prepareStringInputField(unsigned len) = 0;
+  virtual void endStringInputField(unsigned len, unsigned cnt) = 0;
+  virtual void addStringInputField(byte ch) = 0;
+  virtual void eraseStringInputField(unsigned cnt) = 0;
 };
 
 class SoundEngine {
@@ -38,6 +42,11 @@ private:
     CHECKPOINT_NULL,           // keep going
     CHECKPOINT_LOAD_SAVE,      // G@>6046
     CHECKPOINT_NEW_OR_RESTOCK, // G@>6114
+
+    // Meta checkpoints
+    CHECKPOINT_AID,
+    CHECKPOINT_UP,
+    CHECKPOINT_DOWN,
     CHECKPOINT_QUIT
   };
   Checkpoint redoTarget;
@@ -71,6 +80,9 @@ private:
   Checkpoint getKeyNoCursor(byte &kc);
   Checkpoint getKey(byte &kc);
   Checkpoint getNumberKey(byte &n, byte low, byte high);
+  Checkpoint getString(unsigned len, byte *result = nullptr);
+  template<unsigned n> Checkpoint getString(byte (&result)[n])
+  { return getString(n, &result[0]); }
 };
 
 }

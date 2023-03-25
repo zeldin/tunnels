@@ -25,6 +25,10 @@ public:
   virtual void drawPrompt(unsigned n) override;
   virtual void setCursorEnabled(bool enabled) override;
   virtual void markSelection(byte ch) override;
+  virtual void prepareStringInputField(unsigned len) override;
+  virtual void endStringInputField(unsigned len, unsigned cnt) override;
+  virtual void addStringInputField(byte ch) override;
+  virtual void eraseStringInputField(unsigned cnt) override;
 
 private:
   void menuScreen();
