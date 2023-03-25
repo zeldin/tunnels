@@ -21,11 +21,13 @@ public:
   virtual void initMenu() = 0;
   virtual void drawPrompt(unsigned n) = 0;
   virtual void setCursorEnabled(bool enabled) = 0;
+  virtual void setBorderFlashEnabled(bool enabled) = 0;
   virtual void markSelection(byte ch) = 0;
   virtual void prepareStringInputField(unsigned len) = 0;
   virtual void endStringInputField(unsigned len, unsigned cnt) = 0;
   virtual void addStringInputField(byte ch) = 0;
   virtual void eraseStringInputField(unsigned cnt) = 0;
+  virtual void drawIoError(bool casette, byte error) = 0;
 };
 
 class SoundEngine {
@@ -100,6 +102,8 @@ private:
   { return getString(n, &result[0]); }
   Diversion getNumber(unsigned lower, unsigned upper, unsigned &value,
 		      bool x10=false);
+  void ioError(bool casette, byte error);
+  Diversion flashBorder();
 };
 
 }

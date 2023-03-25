@@ -31,7 +31,10 @@ private:
     byte currentFloor;    // V@>1CF8
     byte unknown_1cf9;    // V@>1CF9
     byte currentPlayer;   // V@>1CFA
-    byte unknown_1cfb[0x1595];
+    byte unknown_1cfb[5];
+    byte unknown_1d00;    // V@>1D00
+    byte unknown_1d01;    // V@>1D01
+    byte unknown_1d02[0x158e];
     byte dictionary[36][12]; // V@3290
     byte unknown_3440[0x292];
     byte pab[10];         // V@>36D2
@@ -50,6 +53,7 @@ public:
   virtual void setNumFloors(byte num) override { data.numFloors = num; }
   virtual void setNumPlayers(byte num) override { data.numPlayers = num; }
   virtual void setDifficulty(byte dif) override { data.difficulty = dif; }
+  virtual byte getUnknown1D01() const override { return data.unknown_1d01; }
   virtual Utils::StringSpan getDictionaryWord(byte n) const override;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name)
     override;

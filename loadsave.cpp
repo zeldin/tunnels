@@ -7,6 +7,20 @@
 
 namespace Tunnels {
 
+void GameEngine::ioError(bool casette, byte error)
+{
+  screen.drawIoError(casette, error);
+  if (error == File::ERROR_BAD_ATTRIBUTE ||
+      error == File::ERROR_ILLEGAL_OPCODE)
+    screen.drawPrompt(0x70);
+  else if(error == File::ERROR_MEMORY_FULL)
+    screen.drawPrompt(0x71);
+  else if(error == File::ERROR_PAST_EOF || error == File::ERROR_FILE_ERROR)
+    screen.drawPrompt(0x72); // Was 0x04?!
+  else
+    screen.drawPrompt(0x6f);
+}
+
 void GameEngine::preserveState()
 {
   // FIXME: G@>608D
@@ -44,8 +58,9 @@ GameEngine::Diversion GameEngine::loadSave(bool isSave, unsigned len,
     failed = true;
   if(failed) {
     sound.honk();
-    // f_c010();
-    // f_8018();
+    ioError(len==3 && *name.ptr()=='C', error);
+    if (Diversion d = flashBorder())
+      return d;
     return DIVERSION_LOAD_SAVE;
   }
   

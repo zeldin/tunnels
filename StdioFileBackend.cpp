@@ -65,6 +65,10 @@ StdioFileBackend::FileHandle StdioFileBackend::fopen(Utils::StringSpan filename,
 {
   char namebuf[32];
   filename.removePrefix("DSK1.");
+  if (!filename.len()) {
+    error = File::ERROR_BAD_ATTRIBUTE;
+    return nullptr;
+  }
   filename.store(namebuf);
   FILE *f = ::fopen(namebuf, mode);
   if (!f) {

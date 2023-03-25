@@ -38,6 +38,17 @@ GameEngine::Diversion GameEngine::delay(unsigned ms)
   return (e == EVENT_QUIT? DIVERSION_QUIT : DIVERSION_NULL);
 }
 
+GameEngine::Diversion GameEngine::flashBorder()
+{
+  EventType e;
+  screen.setBorderFlashEnabled(true);
+  do {
+    e = waitForEvent();
+  } while(e != EVENT_KEY && e != EVENT_QUIT);
+  screen.setBorderFlashEnabled(false);
+  return (e == EVENT_QUIT? DIVERSION_QUIT : DIVERSION_NULL);
+}
+
 GameEngine::Diversion GameEngine::titleScreen()
 {
   screen.drawTitleScreen();

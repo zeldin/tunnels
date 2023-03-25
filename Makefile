@@ -5,7 +5,7 @@ OPTIMIZE = -g
 
 CLASSIC_ENGINE_SRCS = ScreenEngine.cpp SoundEngine.cpp \
 	DatabaseFactory.cpp DatabaseImpl.cpp \
-	title_screen.cpp title_music.cpp prompts.cpp cursor.cpp
+	title_screen.cpp title_music.cpp prompts.cpp flashing.cpp
 
 SRCS = main.cpp SDLBackend.cpp VDP.cpp DCSG.cpp Timer.cpp \
 	StdioFileBackend.cpp \

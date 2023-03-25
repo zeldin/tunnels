@@ -17,6 +17,7 @@ public:
   virtual void setNumFloors(byte num) = 0;
   virtual void setNumPlayers(byte num) = 0;
   virtual void setDifficulty(byte dif) = 0;
+  virtual byte getUnknown1D01() const = 0;
   virtual Utils::StringSpan getDictionaryWord(byte n) const = 0;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name) = 0;
   virtual ~Database() { }

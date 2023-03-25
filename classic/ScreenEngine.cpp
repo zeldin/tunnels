@@ -45,6 +45,20 @@ void ScreenEngine::eraseStringInputField(unsigned cnt)
   }
 }
 
+void ScreenEngine::drawIoError(bool casette, byte error)
+{
+  screen.setYpt(19);
+  screen.setXpt(3);
+  if (casette) {
+    screen.all(' ');
+    screen.setYpt(11);
+  }
+  drawPrompt(0x6e);
+  screen.hchar(screen.getYpt(), screen.getXpt(), byte('0'+error));
+  screen.setYpt(screen.getYpt()+1);
+  screen.setXpt(3);
+}
+
 void ScreenEngine::refresh()
 {
   screen.refresh(backend);
