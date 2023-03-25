@@ -5,6 +5,11 @@
 
 namespace Tunnels { namespace Classic {
 
+Utils::StringSpan DatabaseImpl::getDictionaryWord(byte n) const
+{
+  return data.dictionary[n];
+}
+
 void DatabaseImpl::setFileData(bool isSave, unsigned len,
 			       Utils::StringSpan name)
 {

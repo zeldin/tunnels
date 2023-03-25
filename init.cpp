@@ -27,6 +27,17 @@ EventType GameEngine::waitForEvent()
   return nextEvent().type();
 }
 
+GameEngine::Diversion GameEngine::delay(unsigned ms)
+{
+  timerManager.setTimeout(ms);
+  EventType e;
+  do {
+    e = waitForEvent();
+  } while(e != EVENT_TIMEOUT && e != EVENT_QUIT);
+  timerManager.removeTimeout();
+  return (e == EVENT_QUIT? DIVERSION_QUIT : DIVERSION_NULL);
+}
+
 GameEngine::Diversion GameEngine::titleScreen()
 {
   screen.drawTitleScreen();
@@ -43,11 +54,14 @@ EventType GameEngine::run()
   progression = 2;
   for (;;)
     switch (diversion) {
+    case DIVERSION_LOAD_SAVE_BACK:
+      progression = 3;
     case DIVERSION_LOAD_SAVE:
       if ((diversion = loadSaveMenu()))
 	continue;
     case DIVERSION_NEW_OR_RESTOCK:
-      waitForEvent();
+      if ((diversion = newOrRestockMenu()))
+	continue;
     default:
       // internal error...
       return EVENT_NULL;

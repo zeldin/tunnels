@@ -16,6 +16,7 @@ class ScreenEngine {
 public:
   virtual ~ScreenEngine() {}
   virtual void refresh() {}
+  virtual void setDatabase(const Database *database) {};
   virtual void drawTitleScreen() = 0;
   virtual void initMenu() = 0;
   virtual void drawPrompt(unsigned n) = 0;
@@ -49,7 +50,9 @@ private:
   enum Diversion {
     DIVERSION_NULL,           // keep going
     DIVERSION_LOAD_SAVE,      // G@>6046
+    DIVERSION_LOAD_SAVE_BACK, // G@>6108
     DIVERSION_NEW_OR_RESTOCK, // G@>6114
+    DIVERSION_CONTINUE_GAME,  // G@>6556
     DIVERSION_AID,
     DIVERSION_UP,
     DIVERSION_DOWN,
@@ -82,9 +85,11 @@ public:
 private:
   Event nextEvent();
   EventType waitForEvent();
+  Diversion delay(unsigned ms);
   Diversion titleScreen();
   Diversion loadSaveMenu();
   Diversion loadSave(bool isSave, unsigned len, Utils::StringSpan name);
+  Diversion newOrRestockMenu();
   void preserveState();
   void restoreState();
   Diversion getKeyNoCursor(byte &kc);
@@ -93,6 +98,8 @@ private:
   Diversion getString(unsigned len, byte *result = nullptr);
   template<unsigned n> Diversion getString(byte (&result)[n])
   { return getString(n, &result[0]); }
+  Diversion getNumber(unsigned lower, unsigned upper, unsigned &value,
+		      bool x10=false);
 };
 
 }

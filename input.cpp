@@ -138,4 +138,33 @@ GameEngine::Diversion GameEngine::getString(unsigned len, byte *result)
   return DIVERSION_NULL;
 }
 
+GameEngine::Diversion GameEngine::getNumber(unsigned lower, unsigned upper,
+					    unsigned &value, bool x10)
+{
+  unsigned numDigs = x10, limit = 1;
+  while (upper >= limit) {
+    numDigs ++;
+    limit *= 10;
+  }
+  byte digits[numDigs];
+  for (;;) {
+    Diversion d = getString(numDigs, digits);
+    if (d)
+      return d;
+    unsigned n = 0;
+    for(unsigned i=0; i<numDigs; i++)
+      if (digits[i] >= '0' && digits[i] <= '9')
+	n = n*10 + (digits[i]-'0');
+      else
+	break;
+    if (x10)
+      n /= 10;
+    if (n >= lower && n <=upper) {
+      value = n;
+      return DIVERSION_NULL;
+    }
+    sound.honk();
+  }
+}
+
 }

@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "classic/ScreenEngine.h"
 #include "classic/SequencePack.h"
+#include "Database.h"
 
 namespace Tunnels { namespace Classic {
 
@@ -528,14 +529,16 @@ void ScreenEngine::promptExtension(byte n)
     }
   case Vocab::extFLOORRANGE: /* G@>F1A6 */
     {
-      screen.hchar(y, x, screen.gchar(y, x) + 7); /* FIXME */
-      screen.setXpt(putNumber(y, x+2, byte(123))); /* FIXME */
+      screen.hchar(y, x, screen.gchar(y, x) + database->getMinFloors());
+      screen.setXpt(putNumber(y, x+2, database->getMaxFloors()));
       drawPrompt(0x0f);
+      screen.setXpt(screen.getXpt()-1);
       return;
     }
   case Vocab::extMAXPARTY: /* G@>F1BC */
     {
-      screen.hchar(y, x, '0' + 3); /* FIXME */
+      screen.hchar(y, x, '0' + database->getMaxPlayers());
+      screen.setXpt(findEndOfLine()+2);
       return;
     }
   case Vocab::extCLASSES: /* G@>F1C5 */
@@ -827,8 +830,7 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  byte n = *ptr++;
 	  if ((n & 0x80)) {
 	    n = ~n;
-	    screen.hstr(y, x, "ENTRY("); /* FIXME */
-	    screen.hchar(y, putNumber(y, x+6, n)-1, ')'); /* FIXME */
+	    screen.hstr(y, x, database->getDictionaryWord(n));
 	  } else {
 	    uint16 addr = (n << 8) | *ptr++;
 	    n = *ptr++;
@@ -917,6 +919,10 @@ void ScreenEngine::drawPrompt(unsigned n)
 	screen.setXpt(screen.getXpt()+1);
 	break;
     }
+  if (n == 0x1c) {
+    screen.setYpt(8);
+    screen.setXpt(4);
+  }
 }
 
 }}

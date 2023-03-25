@@ -14,12 +14,14 @@ private:
   Tunnels::Timer::TimerManager &timerManager;
   VDP::Screen screen;
   VDP::Backend &backend;
+  const Database *database;
 
 public:
   ScreenEngine(VDP::Backend &backend_, Tunnels::Timer::TimerManager &timerManager_) :
-    timerManager(timerManager_), backend(backend_) {}
+    timerManager(timerManager_), backend(backend_), database(nullptr) {}
 
   virtual void refresh() override;
+  virtual void setDatabase(const Database *db) override { database = db; }
   virtual void drawTitleScreen() override;
   virtual void initMenu() override;
   virtual void drawPrompt(unsigned n) override;
