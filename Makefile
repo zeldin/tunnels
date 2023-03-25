@@ -4,9 +4,11 @@ CXXFLAGS = $(OPTIMIZE) -std=c++11 -I. -MMD
 OPTIMIZE = -g
 
 CLASSIC_ENGINE_SRCS = ScreenEngine.cpp SoundEngine.cpp \
+	DatabaseFactory.cpp DatabaseImpl.cpp \
 	title_screen.cpp title_music.cpp prompts.cpp cursor.cpp
 
 SRCS = main.cpp SDLBackend.cpp VDP.cpp DCSG.cpp Timer.cpp \
+	StdioFileBackend.cpp \
 	init.cpp input.cpp loadsave.cpp \
 	$(addprefix classic/,$(CLASSIC_ENGINE_SRCS))
 

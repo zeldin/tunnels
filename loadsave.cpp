@@ -1,11 +1,71 @@
 #include "system.h"
 
 #include "Engine.h"
+#include "Database.h"
+#include "File.h"
+#include "Utils.h"
 
 namespace Tunnels {
 
-GameEngine::Diversion GameEngine::loadSave()
+void GameEngine::preserveState()
 {
+  // FIXME: G@>608D
+}
+
+void GameEngine::restoreState()
+{
+  // FIXME: G@>610D
+}
+
+GameEngine::Diversion GameEngine::loadSave(bool isSave, unsigned len,
+					   Utils::StringSpan name)
+{
+  if (database)
+    database->setFileData(isSave, len, name);
+
+  name.subspan(0, len);
+  screen.refresh();
+  bool failed = false;
+  if (isSave) {
+    if (!database || !file.save(*database, name, databaseFactory))
+      failed = true;
+  } else {
+    Database *db = file.load(name, databaseFactory);
+    if (db != nullptr && database != nullptr)
+      delete database;
+    if (db == nullptr)
+      failed = true;
+    else
+      database = db;
+  }
+  File::Error error = file.getError();
+  if (error || !database)
+    failed = true;
+  if(failed) {
+    sound.honk();
+    // f_c010();
+    // f_8018();
+    return DIVERSION_LOAD_SAVE;
+  }
+  
+  return DIVERSION_NULL;
+}
+
+namespace {
+template<unsigned n> void setPrefix(byte (&buffer)[n], const char *pfx)
+{
+  for(unsigned i=0; i<n; i++)
+    if (pfx[i])
+      buffer[i] = pfx[i];
+    else
+      break;
+}
+}
+
+GameEngine::Diversion GameEngine::loadSaveMenu()
+{
+  byte devicename[28];
+  setPrefix(devicename, "CS1                         ");
   redoTarget = DIVERSION_LOAD_SAVE;
   procdTarget = DIVERSION_NEW_OR_RESTOCK;
   acceptMask = ACCEPT_REDO | ACCEPT_NUMERIC;
@@ -21,33 +81,39 @@ GameEngine::Diversion GameEngine::loadSave()
   if(d)
     return d;
   sound.beep();
+  bool isSave = false;
   if (x > 2) {
+    preserveState();
+    isSave = true;
     x -= 3;
   }
   switch (x) {
   case 0:
     screen.drawPrompt(0x18);
-    screen.drawPrompt(0x0d);
-    waitForEvent();
-    return DIVERSION_QUIT;
     break;
   case 1:
+    setPrefix(devicename, "DSK1.");
     screen.drawPrompt(0x14);
     acceptMask = ACCEPT_REDO | ACCEPT_NUMERIC | ACCEPT_ALPHANUMERIC;
-    byte filename[8];
-    d = getString(filename);
+    d = getString(8, devicename+5);
     break;
   case 2:
     screen.drawPrompt(0x15);
     acceptMask = ACCEPT_REDO | ACCEPT_ALPHANUMERIC2;
-    byte devname[28];
     d = getString(devicename);
     break;
   }
   if (d)
     return d;
-  waitForEvent();
-  return DIVERSION_QUIT;
+  Utils::StringSpan devicespan{devicename};
+  unsigned len = devicespan.prefixLen();
+  if (!len)
+    return DIVERSION_LOAD_SAVE;
+  screen.drawPrompt(0x0d);
+  if ((d = loadSave(isSave, len, devicespan)))
+    return d;
+  restoreState();
+  return DIVERSION_NULL;
 }
 
 }

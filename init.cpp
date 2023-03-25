@@ -8,9 +8,11 @@ namespace Tunnels {
 
 GameEngine::GameEngine(EventLoop &eventLoop_,
 		       Timer::TimerManager &timerManager_,
-		       ScreenEngine &screen_, SoundEngine &sound_)
+		       ScreenEngine &screen_, SoundEngine &sound_,
+		       File::Backend &file_, DatabaseFactory &databaseFactory_)
   : eventLoop(eventLoop_), timerManager(timerManager_),
-    screen(screen_), sound(sound_)
+    screen(screen_), sound(sound_), file(file_),
+    databaseFactory(databaseFactory_), database(nullptr)
 {
 }
 
@@ -42,9 +44,10 @@ EventType GameEngine::run()
   for (;;)
     switch (diversion) {
     case DIVERSION_LOAD_SAVE:
-      if ((diversion = loadSave()))
+      if ((diversion = loadSaveMenu()))
 	continue;
     case DIVERSION_NEW_OR_RESTOCK:
+      waitForEvent();
     default:
       // internal error...
       return EVENT_NULL;

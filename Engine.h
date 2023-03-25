@@ -6,6 +6,11 @@
 namespace Tunnels {
 
 namespace Timer { class TimerManager; }
+namespace Utils { class StringSpan; }
+namespace File { class Backend; }
+
+class Database;
+class DatabaseFactory;
 
 class ScreenEngine {
 public:
@@ -37,6 +42,9 @@ private:
   Timer::TimerManager &timerManager;
   ScreenEngine &screen;
   SoundEngine &sound;
+  File::Backend &file;
+  DatabaseFactory &databaseFactory;
+  Database *database;
 
   enum Diversion {
     DIVERSION_NULL,           // keep going
@@ -67,14 +75,18 @@ private:
 
 public:
   GameEngine(EventLoop &eventLoop_, Timer::TimerManager &timerManager_,
-	     ScreenEngine &screen_, SoundEngine &sound_);
+	     ScreenEngine &screen_, SoundEngine &sound_, File::Backend &file_,
+	     DatabaseFactory &databaseFactory_);
   EventType run();
 
 private:
   Event nextEvent();
   EventType waitForEvent();
   Diversion titleScreen();
-  Diversion loadSave();
+  Diversion loadSaveMenu();
+  Diversion loadSave(bool isSave, unsigned len, Utils::StringSpan name);
+  void preserveState();
+  void restoreState();
   Diversion getKeyNoCursor(byte &kc);
   Diversion getKey(byte &kc);
   Diversion getNumberKey(byte &n, byte low, byte high);
