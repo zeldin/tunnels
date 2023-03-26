@@ -73,11 +73,73 @@ GameEngine::Diversion GameEngine::newOrRestockMenu()
     return DIVERSION_CREATE_PARTY;
 }
 
+GameEngine::Diversion GameEngine::createPartyMember(unsigned player)
+{
+  database->clearPlayerSheet(player);
+  screen.drawPrompt(0x21);
+  acceptMask = ACCEPT_BACK | ACCEPT_REDO | ACCEPT_ALPHANUMERIC;
+  screen.preparePlayerNameInput(player);
+  for (;;) {
+    byte name[15];
+    Diversion d = getString(name);
+    if (d) return d;
+    if (name[0] != ' ') {
+      database->setPlayerName(player, name);
+      break;
+    }
+    sound.honk();
+  }
+  unsigned classId, classChoices = database->getNumClassChoices();
+  acceptMask = ACCEPT_PROCD | ACCEPT_REDO | ACCEPT_NUMERIC; // PROC'D? Really?
+  if (classChoices > 1) {
+    screen.preparePlayerClassInput();
+    Diversion d = getNumber(1, classChoices, classId);
+    if (d) return d;
+    --classId;
+  } else
+    classId = 0;
+  database->setPlayerClass(player, classId);
+  screen.setPlayerShapes(player);
+  for (;;) {
+    unsigned color;
+    screen.preparePlayerColorInput();
+    Diversion d = getNumber(1, 4, color);
+    if (d) return d;
+    database->setPlayerColor(player, color-1);
+    unsigned p;
+    for (p=0; p<player; p++)
+      if (database->getPlayerColor(p) == database->getPlayerColor(player) &&
+	  database->getPlayerClass(p) == database->getPlayerClass(player))
+	break;
+    if (p >= player)
+      break;
+    sound.honk();
+    screen.drawPrompt(0x22);
+  }
+  procdTarget = DIVERSION_PROCD;
+  screen.askCharacterAccept();
+  acceptMask = ACCEPT_PROCD | ACCEPT_REDO | ACCEPT_BACK;
+  byte kc;
+  return getKeyNoCursor(kc);
+}
+
 GameEngine::Diversion GameEngine::createPartyMenu()
 {
   database->setNumConfiguredPlayers(0);
   database->setUnknown1CEB(0);
-  // G@>61E5 ...
+  backTarget = DIVERSION_NEW_OR_RESTOCK;
+  redoTarget = DIVERSION_REDO;
+  unsigned numPlayers = database->getNumPlayers(), player = 0;
+  while (player < numPlayers) {
+    Diversion d = createPartyMember(player);
+    if (d == DIVERSION_PROCD)
+      d = DIVERSION_NULL;
+    else if (d == DIVERSION_REDO)
+      continue;
+    else if (d)
+      return d;
+    player++;
+  }
   return DIVERSION_NULL;
 }
 

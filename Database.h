@@ -10,10 +10,15 @@ class Database {
 public:
   virtual Utils::StringSpan getDescription() const = 0;
   virtual Utils::StringSpan getPatternTable() const = 0;
+  virtual void clearPlayerSheet(unsigned n) = 0;
   virtual Utils::StringSpan getPlayerName(unsigned n) const = 0;
+  virtual void setPlayerName(unsigned n, Utils::StringSpan name) = 0;
   virtual byte getPlayerClass(unsigned n) const = 0;
+  virtual void setPlayerClass(unsigned n, unsigned c) = 0;
   virtual Utils::StringSpan getClassName(unsigned n) const = 0;
+  virtual Utils::StringSpan getClassPatternTable(unsigned n) const = 0;
   virtual byte getMaxPlayers() const = 0;
+  virtual byte getNumClassChoices() const = 0;
   virtual byte getMaxFloors() const = 0;
   virtual byte getNumConfiguredPlayers() const = 0;
   virtual void setNumConfiguredPlayers(byte num) = 0;
@@ -28,6 +33,7 @@ public:
   virtual void setDifficulty(byte dif) = 0;
   virtual byte getUnknown1D01() const = 0;
   virtual byte getPlayerColor(unsigned n) const = 0;
+  virtual void setPlayerColor(unsigned n, unsigned c) = 0;
   virtual Utils::StringSpan getDictionaryWord(byte n) const = 0;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name) = 0;
   virtual ~Database() { }

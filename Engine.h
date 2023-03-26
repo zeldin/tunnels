@@ -28,7 +28,12 @@ public:
   virtual void addStringInputField(byte ch) = 0;
   virtual void eraseStringInputField(unsigned cnt) = 0;
   virtual void drawIoError(bool casette, byte error) = 0;
+  virtual void preparePlayerNameInput(unsigned n) = 0;
+  virtual void preparePlayerClassInput() = 0;
+  virtual void preparePlayerColorInput() = 0;
+  virtual void askCharacterAccept() {};
   virtual void setPlayerColors() {}
+  virtual void setPlayerShapes(unsigned n) {}
 };
 
 class SoundEngine {
@@ -62,6 +67,8 @@ private:
     DIVERSION_AID,
     DIVERSION_UP,
     DIVERSION_DOWN,
+    DIVERSION_REDO,
+    DIVERSION_PROCD,
     DIVERSION_QUIT
   };
   Diversion redoTarget;
@@ -99,6 +106,7 @@ private:
   void restoreState();
   Diversion newOrRestockMenu();
   Diversion createPartyMenu();
+  Diversion createPartyMember(unsigned player);
   Diversion pointOfNoReturnMenu();
   Diversion getKeyNoCursor(byte &kc);
   Diversion getKey(byte &kc);

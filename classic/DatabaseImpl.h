@@ -28,7 +28,8 @@ private:
       byte name[10];
       byte unknown[0xc];
     } classes[4];         // V@>1172
-    byte unknown_11ca[0xb10];
+    byte classPatternTable[4][0x40]; // V@>11CA
+    byte unknown_12ca[0xa10];
     byte maxPlayers;      // V@>1CDA
     byte unknown_1cdb[5];
     byte unknown_1ce0;    // V@>1CE0
@@ -64,10 +65,15 @@ protected:
 public:
   virtual Utils::StringSpan getDescription() const override;
   virtual Utils::StringSpan getPatternTable() const override;
+  virtual void clearPlayerSheet(unsigned n) override;
   virtual Utils::StringSpan getPlayerName(unsigned n) const override;
+  virtual void setPlayerName(unsigned n, Utils::StringSpan name) override;
   virtual byte getPlayerClass(unsigned n) const override { return data.player[n].classId >> 6; }
+  virtual void setPlayerClass(unsigned n, unsigned c) override;
   virtual Utils::StringSpan getClassName(unsigned n) const override;
+  virtual Utils::StringSpan getClassPatternTable(unsigned n) const override;
   virtual byte getMaxPlayers() const override { return data.maxPlayers; }
+  virtual byte getNumClassChoices() const override;
   virtual byte getMaxFloors() const override { return data.maxFloors; }
   virtual byte getNumConfiguredPlayers() const override { return data.numConfPlayers; }
   virtual void setNumConfiguredPlayers(byte num) override { data.numConfPlayers = num; }
@@ -82,6 +88,7 @@ public:
   virtual void setDifficulty(byte dif) override { data.difficulty = dif; }
   virtual byte getUnknown1D01() const override { return data.unknown_1d01; }
   virtual byte getPlayerColor(unsigned n) const override { return data.playerColor[n]; }
+  virtual void setPlayerColor(unsigned n, unsigned c) override;
   virtual Utils::StringSpan getDictionaryWord(byte n) const override;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name)
     override;

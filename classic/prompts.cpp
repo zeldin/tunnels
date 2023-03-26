@@ -553,18 +553,19 @@ void ScreenEngine::promptExtension(byte n)
 	0x88, 0xfb
       };
       screen.fmt(fmt1);
-      unsigned i, n = 3; /* FIXME */
+      unsigned i;
+      byte n = database->getNumClassChoices();
       y = 7; x = 17;
       if (n == 1)
 	screen.hchar(y, 2, ' ', 28);
       else
 	screen.hchar(y, x, screen.gchar(y, x)+n);
       y = 16; x = 4;
-      for (i=1; i<=4; i++) {
-	if (i > n)
+      for (i=0; i<=3; i++) {
+	if (i >= n)
 	  screen.hchar(y, x, ' ', 2);
 	else
-	  screen.hstr(y, x+2, "##########"); /* FIXME */
+	  screen.hstr(y, x+2, database->getClassName(i));
 	y += 2;
       }
       screen.setXpt(x);

@@ -15,14 +15,54 @@ Utils::StringSpan DatabaseImpl::getPatternTable() const
   return data.patternTable;
 }
 
+void DatabaseImpl::clearPlayerSheet(unsigned n)
+{
+  /* FIXME */
+  data.player[n].classId = 0;
+}
+
 Utils::StringSpan DatabaseImpl::getPlayerName(unsigned n) const
 {
   return data.player[n].name;
 }
 
+void DatabaseImpl::setPlayerName(unsigned n, Utils::StringSpan name)
+{
+  name.store(data.player[n].name);
+}
+
+void DatabaseImpl::setPlayerClass(unsigned n, unsigned c)
+{
+  data.player[n].classId = c << 6;
+  for (unsigned i = 0; i < 64; i++)
+    data.patternTable[(n << 6) | i] = data.classPatternTable[c][i];
+}
+
 Utils::StringSpan DatabaseImpl::getClassName(unsigned n) const
 {
   return data.classes[n].name;
+}
+
+Utils::StringSpan DatabaseImpl::getClassPatternTable(unsigned n) const
+{
+  return data.classPatternTable[n];
+}
+
+byte DatabaseImpl::getNumClassChoices() const
+{
+  byte n = data.numClasses;
+  if ((n & 0x80)) {
+    n = -n;
+    if (data.numPlayers != 1)
+      --n;
+  }
+  return n;
+}
+
+void DatabaseImpl::setPlayerColor(unsigned n, unsigned c)
+{
+  static constexpr byte colors[] = { 0xce, 0x4e, 0xde, 0x6e };
+  data.playerColor[n] = colors[c];
 }
 
 Utils::StringSpan DatabaseImpl::getDictionaryWord(byte n) const

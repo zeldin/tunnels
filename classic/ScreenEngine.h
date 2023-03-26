@@ -50,7 +50,12 @@ public:
   virtual void addStringInputField(byte ch) override;
   virtual void eraseStringInputField(unsigned cnt) override;
   virtual void drawIoError(bool casette, byte error) override;
+  virtual void preparePlayerNameInput(unsigned n) override;
+  virtual void preparePlayerClassInput() override;
+  virtual void preparePlayerColorInput() override;
+  virtual void askCharacterAccept() override;
   virtual void setPlayerColors() override;
+  virtual void setPlayerShapes(unsigned n) override;
 
 private:
   void menuScreen();

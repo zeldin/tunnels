@@ -61,12 +61,47 @@ void ScreenEngine::drawIoError(bool casette, byte error)
   screen.setXpt(3);
 }
 
+void ScreenEngine::preparePlayerNameInput(unsigned n)
+{
+  screen.setYpt(3);
+  screen.setXpt(findEndOfLine());
+  screen.hchar(screen.getYpt(), screen.getXpt(),
+	       byte(screen.gchar(screen.getYpt(), screen.getXpt()) + (n+1)));
+  screen.setYpt(screen.getYpt() + 2);
+  screen.setXpt(findEndOfLine() + 1);
+}
+
+void ScreenEngine::preparePlayerClassInput()
+{
+  screen.setYpt(7);
+  screen.setXpt(21);
+}
+
+void ScreenEngine::preparePlayerColorInput()
+{
+  screen.setYpt(9);
+  screen.setXpt(21);
+}
+
+void ScreenEngine::askCharacterAccept()
+{
+  screen.setYpt(11);
+  screen.setXpt(2);
+  drawPrompt(0x17);
+}
+
 void ScreenEngine::setPlayerColors()
 {
   byte color_table[4];
   for (unsigned i=0; i<4; i++)
     color_table[i] = database->getPlayerColor(i);
   screen.loadColorTable(0, color_table);
+}
+
+void ScreenEngine::setPlayerShapes(unsigned n)
+{
+  screen.loadPatterns(n << 3,
+		database->getClassPatternTable(database->getPlayerClass(n)));
 }
 
 void ScreenEngine::refresh()
