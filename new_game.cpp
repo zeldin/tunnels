@@ -67,8 +67,30 @@ GameEngine::Diversion GameEngine::newOrRestockMenu()
     database->setUnknown1CF4(0);
   if ((d = delay(667)))
     return d;
-  // 61D4
+  if (database->getNumConfiguredPlayers() == database->getNumPlayers())
+    return DIVERSION_POINT_OF_NR;
+  else
+    return DIVERSION_CREATE_PARTY;
+}
+
+GameEngine::Diversion GameEngine::createPartyMenu()
+{
+  database->setNumConfiguredPlayers(0);
+  database->setUnknown1CEB(0);
+  // G@>61E5 ...
   return DIVERSION_NULL;
+}
+
+GameEngine::Diversion GameEngine::pointOfNoReturnMenu()
+{
+  screen.setPlayerColors();
+  database->setNumConfiguredPlayers(database->getNumPlayers());
+  screen.drawPrompt(0x23);
+  redoTarget = DIVERSION_CREATE_PARTY;
+  procdTarget = DIVERSION_BUILD_DUNGEON;
+  acceptMask = ACCEPT_PROCD | ACCEPT_REDO;
+  byte kc;
+  return getKeyNoCursor(kc);
 }
 
 }

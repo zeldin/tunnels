@@ -1,6 +1,8 @@
 #include "system.h"
 
 #include "classic/ScreenEngine.h"
+#include "Utils.h"
+#include "Database.h"
 
 namespace Tunnels { namespace Classic {
 
@@ -59,9 +61,25 @@ void ScreenEngine::drawIoError(bool casette, byte error)
   screen.setXpt(3);
 }
 
+void ScreenEngine::setPlayerColors()
+{
+  byte color_table[4];
+  for (unsigned i=0; i<4; i++)
+    color_table[i] = database->getPlayerColor(i);
+  screen.loadColorTable(0, color_table);
+}
+
 void ScreenEngine::refresh()
 {
   screen.refresh(backend);
+}
+
+void ScreenEngine::setDatabase(const Database *db)
+{
+  database = db;
+  if (!db)
+    return;
+  screen.loadPatterns(0, database->getPatternTable());
 }
 
 }}

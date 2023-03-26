@@ -38,7 +38,7 @@ public:
     cursorTimer(*this), borderTimer(*this) {}
 
   virtual void refresh() override;
-  virtual void setDatabase(const Database *db) override { database = db; }
+  virtual void setDatabase(const Database *db) override;
   virtual void drawTitleScreen() override;
   virtual void initMenu() override;
   virtual void drawPrompt(unsigned n) override;
@@ -50,6 +50,7 @@ public:
   virtual void addStringInputField(byte ch) override;
   virtual void eraseStringInputField(unsigned cnt) override;
   virtual void drawIoError(bool casette, byte error) override;
+  virtual void setPlayerColors() override;
 
 private:
   void menuScreen();

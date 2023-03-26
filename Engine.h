@@ -16,7 +16,7 @@ class ScreenEngine {
 public:
   virtual ~ScreenEngine() {}
   virtual void refresh() {}
-  virtual void setDatabase(const Database *database) {};
+  virtual void setDatabase(const Database *database) {}
   virtual void drawTitleScreen() = 0;
   virtual void initMenu() = 0;
   virtual void drawPrompt(unsigned n) = 0;
@@ -28,6 +28,7 @@ public:
   virtual void addStringInputField(byte ch) = 0;
   virtual void eraseStringInputField(unsigned cnt) = 0;
   virtual void drawIoError(bool casette, byte error) = 0;
+  virtual void setPlayerColors() {}
 };
 
 class SoundEngine {
@@ -54,6 +55,9 @@ private:
     DIVERSION_LOAD_SAVE,      // G@>6046
     DIVERSION_LOAD_SAVE_BACK, // G@>6108
     DIVERSION_NEW_OR_RESTOCK, // G@>6114
+    DIVERSION_CREATE_PARTY,   // G@>61DD
+    DIVERSION_POINT_OF_NR,    // G@>62D1
+    DIVERSION_BUILD_DUNGEON,  // G@>62F4
     DIVERSION_CONTINUE_GAME,  // G@>6556
     DIVERSION_AID,
     DIVERSION_UP,
@@ -91,9 +95,11 @@ private:
   Diversion titleScreen();
   Diversion loadSaveMenu();
   Diversion loadSave(bool isSave, unsigned len, Utils::StringSpan name);
-  Diversion newOrRestockMenu();
   void preserveState();
   void restoreState();
+  Diversion newOrRestockMenu();
+  Diversion createPartyMenu();
+  Diversion pointOfNoReturnMenu();
   Diversion getKeyNoCursor(byte &kc);
   Diversion getKey(byte &kc);
   Diversion getNumberKey(byte &n, byte low, byte high);

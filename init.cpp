@@ -73,6 +73,12 @@ EventType GameEngine::run()
     case DIVERSION_NEW_OR_RESTOCK:
       if ((diversion = newOrRestockMenu()))
 	continue;
+    case DIVERSION_CREATE_PARTY:
+      if ((diversion = createPartyMenu()))
+	continue;
+    case DIVERSION_POINT_OF_NR:
+      if ((diversion = pointOfNoReturnMenu()))
+	continue;
     default:
       // internal error...
       return EVENT_NULL;

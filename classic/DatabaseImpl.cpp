@@ -5,6 +5,26 @@
 
 namespace Tunnels { namespace Classic {
 
+Utils::StringSpan DatabaseImpl::getDescription() const
+{
+  return data.description;
+}
+
+Utils::StringSpan DatabaseImpl::getPatternTable() const
+{
+  return data.patternTable;
+}
+
+Utils::StringSpan DatabaseImpl::getPlayerName(unsigned n) const
+{
+  return data.player[n].name;
+}
+
+Utils::StringSpan DatabaseImpl::getClassName(unsigned n) const
+{
+  return data.classes[n].name;
+}
+
 Utils::StringSpan DatabaseImpl::getDictionaryWord(byte n) const
 {
   return data.dictionary[n];

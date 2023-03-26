@@ -186,6 +186,11 @@ void Screen::loadPatterns8(unsigned idx, const byte *p, unsigned n)
   any_pattern_generator_dirty = true;
 }
 
+void Screen::loadPatterns(unsigned idx, Utils::StringSpan p)
+{
+  loadPatterns8(idx, p.ptr(), p.len() >> 3);
+}
+
 void Screen::hchar(unsigned row, unsigned col, byte name, unsigned cnt)
 {
   if (row >= ROWS || col >= COLUMNS || !cnt)

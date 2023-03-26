@@ -175,6 +175,7 @@ class Screen
  public:
   Screen();
 
+  void loadPatterns(unsigned idx, Utils::StringSpan p);
   template <unsigned n, unsigned m>
   void loadPatterns(unsigned idx, const byte (&a)[n][m]) {
     loadPatterns(idx, a[0], n);

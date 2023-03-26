@@ -573,12 +573,12 @@ void ScreenEngine::promptExtension(byte n)
     }
   case Vocab::extPARTY: /* G@>F25B */
     {
-      unsigned i, n = 3; /* FIXME */
+      unsigned i, n = database->getNumPlayers();
       y = 10; x = 6;
       for (i=0; i<n; i++) {
 	putQuad(y, x, i<<3);
-	screen.hstr(y, x+3, "///////////////"); /* FIXME */
-	screen.hstr(y+1, x+3, "##########"); /* FIXME */
+	screen.hstr(y, x+3, database->getPlayerName(i));
+	screen.hstr(y+1, x+3, database->getClassName(database->getPlayerClass(i)));
 	y += 3;
       }
       screen.setXpt(x);
