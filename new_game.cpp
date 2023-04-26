@@ -90,7 +90,7 @@ GameEngine::Diversion GameEngine::createPartyMember(unsigned player)
     sound.honk();
   }
   unsigned classId, classChoices = database->getNumClassChoices();
-  acceptMask = ACCEPT_PROCD | ACCEPT_REDO | ACCEPT_NUMERIC; // PROC'D? Really?
+  acceptMask = ACCEPT_BACK | ACCEPT_REDO | ACCEPT_NUMERIC; // BACK was PROC'D...
   if (classChoices > 1) {
     screen.preparePlayerClassInput();
     Diversion d = getNumber(1, classChoices, classId);
