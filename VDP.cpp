@@ -142,6 +142,11 @@ void Screen::loadColorTable(unsigned idx, const byte *p, unsigned n)
   any_pattern_generator_dirty = true;
 }
 
+void Screen::loadColorTable(unsigned idx, Utils::StringSpan p)
+{
+  loadColorTable(idx, p.ptr(), p.len());
+}
+
 void Screen::loadPatterns7(unsigned idx, const byte *p, unsigned n)
 {
   if (idx >= PATTERNS || !n)

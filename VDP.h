@@ -180,6 +180,7 @@ class Screen
   void loadPatterns(unsigned idx, const byte (&a)[n][m]) {
     loadPatterns(idx, a[0], n);
   }
+  void loadColorTable(unsigned idx, Utils::StringSpan p);
   template <unsigned n> void loadColorTable(unsigned idx, const byte (&a)[n])
   {
     loadColorTable(idx, &a[0], n);

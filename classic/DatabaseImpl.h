@@ -12,6 +12,15 @@ class DatabaseFactory;
 class DatabaseImpl : public Database {
   friend class Classic::DatabaseFactory;
 private:
+  struct msb16 {
+    byte hi, lo;
+    constexpr operator uint16 () const { return (((uint16)hi)<<8)|lo; }
+    const uint16& operator=(const uint16& n) {
+      hi = n>>8;
+      lo = n;
+      return n;
+    }
+  };
   struct {
     byte unknown_0400[0x200]; 
     byte description[384]; // V@>0600
@@ -23,7 +32,11 @@ private:
       byte classId;
       byte unknown2[0x18];
     } player[4];	  // V@>1000
-    byte unknown_10f0[0x82];
+    byte unknown_10f0[0x08];
+    msb16 mapPosition;    // V@>10F8
+    byte unknown_10fa[0x22];
+    byte unknown_111c;    // V@>111C
+    byte unknown_111d[0x55];
     struct {
       byte name[10];
       byte unknown[0xc];
@@ -49,13 +62,17 @@ private:
     byte unknown_1cf9;    // V@>1CF9
     byte currentPlayer;   // V@>1CFA
     byte unknown_1cfb[5];
-    byte unknown_1d00;    // V@>1D00
-    byte unknown_1d01;    // V@>1D01
-    byte unknown_1d02[0x116e];
-    byte playerColor[4];  // V@>2E70
-    byte unknown_2e74[0x41c];
+    byte currentLocation; // V@>1D00
+    byte activeHighPatternTable; // V@>1D01
+    byte unknown_1d02;    // V@>1D02
+    byte unknown_1d03;    // V@>1D03
+    byte unknown_1d04[0x116c];
+    byte patternColors[32];  // V@>2E70
+    byte patternTable2[0x380]; // V@2E90
+    byte unknown_3210[0x80];
     byte dictionary[36][12]; // V@3290
-    byte unknown_3440[0x292];
+    byte unknown_3440[0x78];
+    byte floorMap[17*32-6]; // V@>34B8
     byte pab[10];         // V@>36D2
     byte dsrname[28];     // V@>37DC
     byte unknown_36f8[8];
@@ -65,6 +82,8 @@ protected:
 public:
   virtual Utils::StringSpan getDescription() const override;
   virtual Utils::StringSpan getPatternTable() const override;
+  virtual Utils::StringSpan getHighPatternTable(bool alternate) const override;
+  virtual bool alternateHighPatternsActive() const override { return data.activeHighPatternTable != 1; }
   virtual void clearPlayerSheet(unsigned n) override;
   virtual Utils::StringSpan getPlayerName(unsigned n) const override;
   virtual void setPlayerName(unsigned n, Utils::StringSpan name) override;
@@ -86,12 +105,21 @@ public:
   virtual byte getNumPlayers() const override { return data.numPlayers; }
   virtual void setNumPlayers(byte num) override { data.numPlayers = num; }
   virtual void setDifficulty(byte dif) override { data.difficulty = dif; }
-  virtual byte getUnknown1D01() const override { return data.unknown_1d01; }
-  virtual byte getPlayerColor(unsigned n) const override { return data.playerColor[n]; }
+  virtual Location getCurrentLocation() const override { return static_cast<Location>(data.currentLocation); }
+  virtual byte getPlayerColor(unsigned n) const override { return data.patternColors[n]; }
   virtual void setPlayerColor(unsigned n, unsigned c) override;
+  virtual Utils::StringSpan getColorTable() const override;
   virtual Utils::StringSpan getDictionaryWord(byte n) const override;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name)
     override;
+  virtual MapPosition getMapPosition() const override;
+  virtual void setMapPosition(MapPosition pos) override;
+  virtual void setMapVisited(MapPosition pos, bool visited) override;
+  virtual bool inCombat() const override { return data.unknown_1d03 != 0; }
+  virtual Location mapLocation(MapPosition pos) const override;
+  virtual bool canMove(MapPosition pos, Direction dir, Location &dest) const override;
+  virtual bool blockedForward(MapPosition pos, Direction dir) const override;
+  virtual bool getSecretDoorsRevealed() const override { return data.unknown_111c & 0x8; }
 };
   
 }

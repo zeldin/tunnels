@@ -15,6 +15,7 @@ private:
   VDP::Screen screen;
   VDP::Backend &backend;
   const Database *database;
+  byte activePatternTable;
   class CursorTimer : public Timer::Timer {
   private:
     ScreenEngine &engine;
@@ -34,8 +35,8 @@ private:
 
 public:
   ScreenEngine(VDP::Backend &backend_, Tunnels::Timer::TimerManager &timerManager_) :
-    timerManager(timerManager_), backend(backend_), database(nullptr),
-    cursorTimer(*this), borderTimer(*this) {}
+    timerManager(timerManager_), backend(backend_),
+    cursorTimer(*this), borderTimer(*this) { setDatabase(nullptr); }
 
   virtual void refresh() override;
   virtual void setDatabase(const Database *db) override;
@@ -56,9 +57,14 @@ public:
   virtual void askCharacterAccept() override;
   virtual void setPlayerColors() override;
   virtual void setPlayerShapes(unsigned n) override;
+  virtual void roomScreen() override;
+  virtual void drawGeneralStore() override;
+  virtual void drawStaircase() override; 
 
 private:
   void menuScreen();
+  void initRoom();
+  void clearRoom();
   unsigned putDigit(unsigned y, unsigned x, unsigned d);
   unsigned putNumber(unsigned y, unsigned x, byte n);
   unsigned putNumber(unsigned y, unsigned x, uint16 n);

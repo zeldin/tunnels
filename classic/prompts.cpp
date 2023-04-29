@@ -387,6 +387,11 @@ constexpr const auto prompts = SequencePack::index
 
 void ScreenEngine::initMenu()
 {
+  // FIXME: Kill sprites
+  if (activePatternTable == 1) {
+    screen.loadPatterns(128, database->getHighPatternTable(true));
+    activePatternTable = 2;
+  }
   screen.loadRomFont();
   screen.setBackground(VDP::DARK_RED);
   static constexpr byte up[][VDP::PATTERN_H] {

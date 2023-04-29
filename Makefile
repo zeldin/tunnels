@@ -5,11 +5,11 @@ OPTIMIZE = -g
 
 CLASSIC_ENGINE_SRCS = ScreenEngine.cpp SoundEngine.cpp \
 	DatabaseFactory.cpp DatabaseImpl.cpp \
-	title_screen.cpp title_music.cpp prompts.cpp flashing.cpp
+	room.cpp title_screen.cpp title_music.cpp prompts.cpp flashing.cpp
 
 SRCS = main.cpp SDLBackend.cpp VDP.cpp DCSG.cpp Timer.cpp \
 	StdioFileBackend.cpp \
-	init.cpp input.cpp loadsave.cpp new_game.cpp \
+	init.cpp input.cpp loadsave.cpp new_game.cpp core.cpp \
 	$(addprefix classic/,$(CLASSIC_ENGINE_SRCS))
 
 OBJS = $(addprefix build/,$(SRCS:.cpp=.o))

@@ -30,7 +30,7 @@ void ScreenEngine::setBorderFlashEnabled(bool enabled)
     timerManager.addTimer(borderTimer);
   } else {
     timerManager.removeTimer(borderTimer);
-    if (database == nullptr || database->getUnknown1D01() == 2)
+    if (activePatternTable == 2)
       screen.setBackground(VDP::DARK_RED);
     else
       screen.setBackground(VDP::LIGHT_GREEN);

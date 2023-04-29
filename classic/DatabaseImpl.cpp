@@ -15,6 +15,17 @@ Utils::StringSpan DatabaseImpl::getPatternTable() const
   return data.patternTable;
 }
 
+Utils::StringSpan DatabaseImpl::getHighPatternTable(bool alternate) const
+{
+  if (alternateHighPatternsActive())
+    alternate = !alternate;
+  if (alternate)
+    return data.patternTable2;
+  Utils::StringSpan patterns{data.patternTable};
+  patterns.subspan(0x400, 0x380);
+  return patterns;
+}
+
 void DatabaseImpl::clearPlayerSheet(unsigned n)
 {
   /* FIXME */
@@ -62,7 +73,12 @@ byte DatabaseImpl::getNumClassChoices() const
 void DatabaseImpl::setPlayerColor(unsigned n, unsigned c)
 {
   static constexpr byte colors[] = { 0xce, 0x4e, 0xde, 0x6e };
-  data.playerColor[n] = colors[c];
+  data.patternColors[n] = colors[c];
+}
+
+Utils::StringSpan DatabaseImpl::getColorTable() const
+{
+  return data.patternColors;
 }
 
 Utils::StringSpan DatabaseImpl::getDictionaryWord(byte n) const
@@ -109,6 +125,84 @@ void DatabaseImpl::setFileData(bool isSave, unsigned len,
   data.pab[8] = 0x00; // Screen offset
   data.pab[9] = len;  // DSR name length
   name.store(data.dsrname);
+}
+
+Database::MapPosition DatabaseImpl::getMapPosition() const
+{
+  uint16 mp = data.mapPosition;
+  return MapPosition{byte(mp&0x1f), byte(mp>>5)};
+}
+
+void DatabaseImpl::setMapPosition(Database::MapPosition pos)
+{
+  data.mapPosition = (pos.y << 5) | pos.x;
+}
+
+void DatabaseImpl::setMapVisited(Database::MapPosition pos, bool visited)
+{
+  uint16 p = (pos.y << 5) | pos.x;
+  if (p < sizeof(data.floorMap)/sizeof(data.floorMap[0]))
+    if (visited)
+      data.floorMap[p] &= ~0x10;
+    else
+      data.floorMap[p] |= 0x10;
+}
+
+Database::Location DatabaseImpl::mapLocation(MapPosition pos) const
+{
+  uint16 p = (pos.y << 5) | pos.x;
+  if (p < sizeof(data.floorMap)/sizeof(data.floorMap[0])) {
+    byte tile = data.floorMap[p] & ~0x10;
+    if (tile >= 0x60 && tile < 0x6b) {
+      if (tile < 0x67)
+	return LOCATION_CORRIDOR;
+      static constexpr Location locs[] = {
+	LOCATION_ROOM, LOCATION_ASCENDING_STAIRCASE,
+	LOCATION_DESCENDING_STAIRCASE, LOCATION_FOUNTAIN
+      };
+      return locs[tile-0x67];
+    }
+  }
+  return LOCATION_BLANK;
+}
+
+bool DatabaseImpl::canMove(MapPosition pos, Direction dir, Location &dest) const
+{
+  unsigned blockages = 0;
+  if (blockedForward(pos, dir))
+    blockages++;
+  pos.forward(dir);
+  if (blockedBackward(pos, dir))
+    blockages++;
+  if ((dest = mapLocation(pos)) == LOCATION_BLANK)
+    blockages = 2;
+  pos.backward(dir);
+  if (blockages == 1 && getSecretDoorsRevealed())
+    blockages = 0;
+  return !blockages;
+}
+
+bool DatabaseImpl::blockedForward(MapPosition pos, Direction dir) const
+{
+  uint16 p = (pos.y << 5) | pos.x;
+  if (p < sizeof(data.floorMap)/sizeof(data.floorMap[0])) {
+    byte tile = data.floorMap[p] & ~0x10;
+    if (tile >= 0x60 && tile < 0x6b) {
+      if (tile >= 0x67)
+	return false;
+      static constexpr byte openings[] = {
+	(1<<DIR_EAST) | (1<<DIR_WEST),
+	(1<<DIR_NORTH) | (1<<DIR_SOUTH),
+	(1<<DIR_NORTH) | (1<<DIR_EAST) | (1<<DIR_SOUTH) | (1<<DIR_WEST),
+	(1<<DIR_NORTH) | (1<<DIR_EAST) | (1<<DIR_WEST),
+	(1<<DIR_EAST) | (1<<DIR_SOUTH) | (1<<DIR_WEST),
+	(1<<DIR_NORTH) | (1<<DIR_SOUTH) | (1<<DIR_WEST),
+	(1<<DIR_NORTH) | (1<<DIR_EAST) | (1<<DIR_SOUTH),
+      };
+      return !(openings[tile-0x60] & (1<<dir));
+    }
+  }
+  return true;
 }
 
 }}

@@ -34,6 +34,9 @@ public:
   virtual void askCharacterAccept() {};
   virtual void setPlayerColors() {}
   virtual void setPlayerShapes(unsigned n) {}
+  virtual void roomScreen() = 0;
+  virtual void drawGeneralStore() = 0;
+  virtual void drawStaircase() = 0;
 };
 
 class SoundEngine {
@@ -99,6 +102,8 @@ private:
   Event nextEvent();
   EventType waitForEvent();
   Diversion delay(unsigned ms);
+  Diversion core();
+  Diversion room();
   Diversion titleScreen();
   Diversion loadSaveMenu();
   Diversion loadSave(bool isSave, unsigned len, Utils::StringSpan name);

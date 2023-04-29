@@ -82,6 +82,10 @@ EventType GameEngine::run()
     default:
       // internal error...
       return EVENT_NULL;
+    case DIVERSION_CONTINUE_GAME:
+      if ((diversion = core()))
+	continue;
+      return EVENT_NULL;
     case DIVERSION_QUIT:
       return EVENT_QUIT;
     }
