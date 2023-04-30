@@ -49,6 +49,29 @@ void DatabaseImpl::setPlayerClass(unsigned n, unsigned c)
     data.patternTable[(n << 6) | i] = data.classPatternTable[c][i];
 }
 
+void DatabaseImpl::setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir)
+{
+  static const byte partyPositions[3][4][4][2] =
+    {{{{11, 9}, {11,11}, {13, 9}, {13,11}},
+      {{ 7, 7}, { 9, 7}, { 7, 5}, { 9, 5}},
+      {{ 5,11}, { 5, 9}, { 3,11}, { 3, 9}},
+      {{ 9,13}, { 7,13}, { 9,15}, { 7,15}}},
+     {{{11, 9}, {11,11}, {11, 7}, {11,13}},
+      {{ 7, 7}, { 9, 7}, { 5, 7}, {11, 7}},
+      {{ 5,11}, { 5, 9}, { 5,13}, { 5, 7}},
+      {{ 9,13}, { 7,13}, {11,13}, { 5,13}}},
+     {{{13, 9}, {13,11}, {16, 9}, {16,11}},
+      {{ 7, 5}, { 9, 5}, { 7, 2}, { 9, 2}},
+      {{ 3,11}, { 3, 9}, { 0,11}, { 0, 9}},
+      {{ 9,15}, { 7,15}, { 9,18}, { 7,18}}}};
+  for (unsigned order=0; order<4; order++)
+    if (data.playerOrder[order] == n+1) {
+      data.player[n].row = partyPositions[pos][dir][order][0];
+      data.player[n].column = partyPositions[pos][dir][order][1];
+      return;
+    }
+}
+
 Utils::StringSpan DatabaseImpl::getClassName(unsigned n) const
 {
   return data.classes[n].name;
@@ -68,6 +91,24 @@ byte DatabaseImpl::getNumClassChoices() const
       --n;
   }
   return n;
+}
+
+bool DatabaseImpl::nextPlayerInOrder()
+{
+  unsigned order = 0;
+  if (data.currentPlayer > data.numConfPlayers)
+    data.currentPlayer = 0;
+  if (data.currentPlayer > 0) {
+    while(order < 4 && data.playerOrder[order] != data.currentPlayer)
+      order++;
+    order++;
+  }
+  while(order < 4 && !data.playerOrder[order])
+    order++;
+  if (order >= 4 || data.playerOrder[order] > data.numConfPlayers)
+    return false;
+  data.currentPlayer = data.playerOrder[order];
+  return true;
 }
 
 void DatabaseImpl::setPlayerColor(unsigned n, unsigned c)

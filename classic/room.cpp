@@ -194,4 +194,9 @@ void ScreenEngine::drawStaircase()
   putQuad(13, 15, 0xf4);
 }
 
+void ScreenEngine::drawPlayer(unsigned n)
+{
+  putQuad(database->getPlayerRow(n), database->getPlayerColumn(n), n<<3);
+}
+
 }}

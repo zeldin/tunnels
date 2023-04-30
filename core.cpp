@@ -11,7 +11,25 @@ GameEngine::Diversion GameEngine::room()
   // G@>657E
   sound.stopMusic();
   screen.roomScreen();
-  // ...
+  Database::StartPosition pos = Database::STARTPOS_NORMAL;
+  if (database->getCurrentLocation() == Database::LOCATION_ROOM ||
+      database->getCurrentLocation() > Database::LOCATION_FOUNTAIN) {
+    // FIXME: In doorway...
+  } else {
+    Database::Location nextLocation;
+    if (!database->canMove(database->getMapPosition(),
+			   Database::reverse(static_cast<Database::Direction>(direction)),
+			   nextLocation) ||
+	(nextLocation != Database::LOCATION_CORRIDOR &&
+	 nextLocation != Database::LOCATION_FOUNTAIN))
+      pos = Database::STARTPOS_BACK_AGAINST_WALL;
+  }
+  database->setCurrentPlayer(-1);
+  while (database->nextPlayerInOrder()) {
+    unsigned p = database->getCurrentPlayer();
+    database->setPlayerStartPosition(p, pos, static_cast<Database::Direction>(direction));
+    screen.drawPlayer(p);
+  }
   switch (database->getCurrentLocation()) {
   case Database::LOCATION_ENTRANCE:
     screen.drawGeneralStore();

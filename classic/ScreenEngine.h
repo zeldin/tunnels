@@ -60,6 +60,7 @@ public:
   virtual void roomScreen() override;
   virtual void drawGeneralStore() override;
   virtual void drawStaircase() override; 
+  virtual void drawPlayer(unsigned n) override;
 
 private:
   void menuScreen();

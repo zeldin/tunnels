@@ -37,6 +37,7 @@ public:
   virtual void roomScreen() = 0;
   virtual void drawGeneralStore() = 0;
   virtual void drawStaircase() = 0;
+  virtual void drawPlayer(unsigned n) = 0;
 };
 
 class SoundEngine {
@@ -91,6 +92,7 @@ private:
   };
   byte acceptMask;
 
+  byte direction;
   byte progression;
 
 public:

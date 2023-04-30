@@ -23,6 +23,11 @@ public:
     DIR_SOUTH = 2,
     DIR_WEST = 3
   };
+  enum StartPosition {
+    STARTPOS_NORMAL,
+    STARTPOS_BACK_AGAINST_WALL,
+    STARTPOS_IN_DOORWAY,
+  };
   constexpr static Direction reverse(Direction d)
   {
     return static_cast<Direction>((d+2)&3);
@@ -55,6 +60,11 @@ public:
   virtual void setPlayerName(unsigned n, Utils::StringSpan name) = 0;
   virtual byte getPlayerClass(unsigned n) const = 0;
   virtual void setPlayerClass(unsigned n, unsigned c) = 0;
+  virtual byte getPlayerRow(unsigned n) const = 0;
+  virtual void setPlayerRow(unsigned n, byte row) = 0;
+  virtual byte getPlayerColumn(unsigned n) const = 0;
+  virtual void setPlayerColumn(unsigned n, byte column) = 0;
+  virtual void setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir) = 0;
   virtual Utils::StringSpan getClassName(unsigned n) const = 0;
   virtual Utils::StringSpan getClassPatternTable(unsigned n) const = 0;
   virtual byte getMaxPlayers() const = 0;
@@ -71,7 +81,14 @@ public:
   virtual byte getNumPlayers() const = 0;
   virtual void setNumPlayers(byte num) = 0;
   virtual void setDifficulty(byte dif) = 0;
+  virtual int getCurrentPlayer() const = 0;
+  virtual void setCurrentPlayer(int n) = 0;
+  virtual bool nextPlayerInOrder() = 0;
   virtual Location getCurrentLocation() const = 0;
+  virtual Direction getSavedDirection() const = 0;
+  virtual void setSavedDirection(Direction direction) = 0;
+  virtual byte getSavedProgression() const = 0;
+  virtual void setSavedProgression(byte progression) = 0;
   virtual byte getPlayerColor(unsigned n) const = 0;
   virtual void setPlayerColor(unsigned n, unsigned c) = 0;
   virtual Utils::StringSpan getColorTable() const = 0;

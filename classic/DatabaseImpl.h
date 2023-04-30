@@ -30,7 +30,10 @@ private:
       byte name[15];
       byte unknown1[0x14];
       byte classId;
-      byte unknown2[0x18];
+      byte unknown2[0x2];
+      byte row;
+      byte column;
+      byte unknown3[0x14];
     } player[4];	  // V@>1000
     byte unknown_10f0[0x08];
     msb16 mapPosition;    // V@>10F8
@@ -69,7 +72,13 @@ private:
     byte activeHighPatternTable; // V@>1D01
     byte unknown_1d02;    // V@>1D02
     byte unknown_1d03;    // V@>1D03
-    byte unknown_1d04[0x116c];
+    byte unknown_1d04[0x8ec];
+    byte savedDirection;  // V@>25F0
+    byte unknown_25f1[0xc];
+    byte savedProgression; // V@>25FD
+    byte unknown_25fe[0x78];
+    byte playerOrder[4];  // V@>2676
+    byte unknown_267a[0x7f6];
     byte patternColors[32];  // V@>2E70
     byte patternTable2[0x380]; // V@2E90
     byte unknown_3210[0x80];
@@ -92,6 +101,11 @@ public:
   virtual void setPlayerName(unsigned n, Utils::StringSpan name) override;
   virtual byte getPlayerClass(unsigned n) const override { return data.player[n].classId >> 6; }
   virtual void setPlayerClass(unsigned n, unsigned c) override;
+  virtual byte getPlayerRow(unsigned n) const override { return data.player[n].row; }
+  virtual void setPlayerRow(unsigned n, byte row) override { data.player[n].row = row; }
+  virtual byte getPlayerColumn(unsigned n) const override { return data.player[n].column; }
+  virtual void setPlayerColumn(unsigned n, byte column) override { data.player[n].column = column; }
+  virtual void setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir) override;
   virtual Utils::StringSpan getClassName(unsigned n) const override;
   virtual Utils::StringSpan getClassPatternTable(unsigned n) const override;
   virtual byte getMaxPlayers() const override { return data.maxPlayers; }
@@ -108,7 +122,14 @@ public:
   virtual byte getNumPlayers() const override { return data.numPlayers; }
   virtual void setNumPlayers(byte num) override { data.numPlayers = num; }
   virtual void setDifficulty(byte dif) override { data.difficulty = dif; }
+  virtual int getCurrentPlayer() const override { return data.currentPlayer-1; }
+  virtual void setCurrentPlayer(int n) override { data.currentPlayer = n+1; }
+  virtual bool nextPlayerInOrder() override;
   virtual Location getCurrentLocation() const override { return static_cast<Location>(data.currentLocation); }
+  virtual Direction getSavedDirection() const override { return static_cast<Direction>(data.savedDirection & 3); }
+  virtual void setSavedDirection(Direction direction) override { data.savedDirection = direction; }
+  virtual byte getSavedProgression() const override { return data.savedProgression; }
+  virtual void setSavedProgression(byte progression) override { data.savedProgression = progression; }
   virtual byte getPlayerColor(unsigned n) const override { return data.patternColors[n]; }
   virtual void setPlayerColor(unsigned n, unsigned c) override;
   virtual Utils::StringSpan getColorTable() const override;
