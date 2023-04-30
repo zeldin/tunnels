@@ -6,7 +6,9 @@ namespace Tunnels {
 namespace Utils { class StringSpan; }
 
 namespace VDP {
-     
+
+namespace FMTBuilder { template <uint16 n> struct fmt_sequence; }
+
 constexpr unsigned COLUMNS = 32;
 constexpr unsigned ROWS = 24;
 constexpr unsigned PATTERN_W = 8;
@@ -209,6 +211,7 @@ class Screen
 };
 
 class FMT {
+  template <uint16 n> friend class FMTBuilder::fmt_sequence;
  private:
   Screen &screen;
   const byte *data;

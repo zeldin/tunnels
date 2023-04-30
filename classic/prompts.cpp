@@ -4,6 +4,7 @@
 #include "classic/ScreenEngine.h"
 #include "classic/SequencePack.h"
 #include "Database.h"
+#include "FMTBuilder.h"
 
 namespace Tunnels { namespace Classic {
 
@@ -548,16 +549,14 @@ void ScreenEngine::promptExtension(byte n)
     }
   case Vocab::extCLASSES: /* G@>F1C5 */
     {
-      static constexpr byte fmt1[] = {
-	0xfe, 0x10, 0xff, 0x04, 0x26, 0x31, 0x20, 0x32,
-	0x20, 0x33, 0x20, 0x34, 0xb0, 0x80, 0xc3, 0x21,
-	0x2d, 0x20, 0xfb, 0x00, 0x0f, 0xaf, 0x8c, 0x01,
-	0x31, 0x2d, 0x00, 0x70, 0x03, 0x20, 0x20, 0x33,
-	0x2d, 0x00, 0x80, 0x97, 0xa0, 0x01, 0x32, 0x2d,
-	0x00, 0x78, 0x03, 0x20, 0x20, 0x34, 0x2d, 0x00,
-	0x88, 0xfb
-      };
-      screen.fmt(fmt1);
+      using namespace VDP::FMTBuilder;
+
+      static constexpr const auto fmt1 =
+	fmt(ROW(16), COL(4), VSTR("1 2 3 4"),
+	    DOWN(17), RIGHT(1), RPTB(4, VSTR("- ")), DOWN(16), RIGHT(13),
+	    HSTR("1-"), HSTR("p"), HSTR("  3-"), HSTR("\x80"), RIGHT(24),
+	    DOWN(1), HSTR("2-"), HSTR("x"), HSTR("  4-"), HSTR("\x88"));
+      fmt1(screen);
       unsigned i;
       byte n = database->getNumClassChoices();
       y = 7; x = 17;
