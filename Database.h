@@ -79,6 +79,7 @@ public:
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name) = 0;
   virtual MapPosition getMapPosition() const = 0;
   virtual void setMapPosition(MapPosition pos) = 0;
+  virtual uint16 getPartyGold() const = 0;
   virtual void setMapVisited(MapPosition pos, bool visited) = 0;
   virtual bool inCombat() const = 0;
   virtual Location mapLocation(MapPosition pos) const = 0;

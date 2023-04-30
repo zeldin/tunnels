@@ -34,7 +34,10 @@ private:
     } player[4];	  // V@>1000
     byte unknown_10f0[0x08];
     msb16 mapPosition;    // V@>10F8
-    byte unknown_10fa[0x22];
+    byte unknown_10fa;    // V@>10FA
+    byte unknown_10fb;    // V@>10FB
+    msb16 partyGold;      // V@>10FC
+    byte unknown_10fe[0x1e];
     byte unknown_111c;    // V@>111C
     byte unknown_111d[0x55];
     struct {
@@ -114,6 +117,7 @@ public:
     override;
   virtual MapPosition getMapPosition() const override;
   virtual void setMapPosition(MapPosition pos) override;
+  virtual uint16 getPartyGold() const override { return data.partyGold; }
   virtual void setMapVisited(MapPosition pos, bool visited) override;
   virtual bool inCombat() const override { return data.unknown_1d03 != 0; }
   virtual Location mapLocation(MapPosition pos) const override;

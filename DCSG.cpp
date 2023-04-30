@@ -126,11 +126,12 @@ void PCMSynthesizer::generatePCM(int16 *buffer, int len)
   noiseShift = noise;
 }
 
-void Music::play(const byte *data_, unsigned length_, unsigned pos_)
+void Music::play(const byte *data_, unsigned length_, unsigned pos_, bool post)
 {
   data = data_;
   length = length_;
   pos = pos_;
+  postEvent = post;
   timerManager.addTimer(*this);
 }
 
@@ -166,6 +167,10 @@ void Music::callback()
     data = nullptr;
     length = 0;
     pos = 0;
+    if (postEvent) {
+      postEvent = false;
+      timerManager.postTimerEvent(Event::endOfMusicEvent());
+    }
   } else {
     /* 60 Hz VDP interrupts translate into 16, 17, 17 ms intervals */
     uint32 next = getExpiry() + (n/3)*50;

@@ -44,6 +44,7 @@ public:
   virtual ~SoundEngine() {}
   virtual void stopMusic() = 0;
   virtual void playTitleMusic() = 0;
+  virtual void playGeneralStoreMusic() = 0;
   virtual void beep() = 0;
   virtual void honk() = 0;
 };
@@ -102,6 +103,7 @@ private:
   Event nextEvent();
   EventType waitForEvent();
   Diversion delay(unsigned ms);
+  Diversion waitForMusic();
   Diversion core();
   Diversion room();
   Diversion titleScreen();

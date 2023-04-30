@@ -21,6 +21,14 @@ GameEngine::Diversion GameEngine::room()
     break;
   }
 
+  if (database->getCurrentLocation() == Database::LOCATION_ENTRANCE &&
+      database->getPartyGold() != 0) {
+    sound.playGeneralStoreMusic();
+    if (Diversion d = waitForMusic())
+      return d;
+    // ...
+  }
+
   waitForEvent();
   return DIVERSION_NULL;
 }

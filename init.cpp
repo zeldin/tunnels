@@ -38,6 +38,15 @@ GameEngine::Diversion GameEngine::delay(unsigned ms)
   return (e == EVENT_QUIT? DIVERSION_QUIT : DIVERSION_NULL);
 }
 
+GameEngine::Diversion GameEngine::waitForMusic()
+{
+  for (;;)
+    switch (waitForEvent()) {
+    case EVENT_QUIT: return DIVERSION_QUIT;
+    case EVENT_END_OF_MUSIC: return DIVERSION_NULL;
+    }
+}
+
 GameEngine::Diversion GameEngine::flashBorder()
 {
   EventType e;

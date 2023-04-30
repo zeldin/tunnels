@@ -195,8 +195,9 @@ Event SDLBackend::runEventLoop(Timer::TimerManager& timerManager)
   while (true) {
     uint32 now = SDL_GetTicks();
     uint32 delay = timerManager.getNextDelay(now);
-    if (timerManager.timeoutExpired())
-      return Event::timeoutEvent();
+    Event timerEvent = timerManager.pollTimerEvent();
+    if (timerEvent)
+      return timerEvent;
     else if (delay? SDL_WaitEventTimeout(&event, delay) :
 	     SDL_WaitEvent(&event)) {
       Event handledEvent = handleEvent(event);

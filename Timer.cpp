@@ -12,7 +12,7 @@ Timer::~Timer()
 
 TimerManager::TimerManager() :
   first(nullptr), immediate(nullptr), deferred(nullptr),
-  timeoutHasExpired(false)
+  timerEvent(Event::nullEvent())
 {  
 }
 
@@ -117,19 +117,23 @@ void TimerManager::removeTimer(Timer& timer)
 
 uint32 TimerManager::getNextDelay(uint32 now)
 {
-  while (checkFirstTimer(now))
+  while (!timerEvent && checkFirstTimer(now))
     ;
+  if (timerEvent)
+    return now;
   if (!first)
     return 0;
   return first->expiry - now;
 }
 
-bool TimerManager::timeoutExpired()
+Event TimerManager::pollTimerEvent()
 {
-  if (!timeoutHasExpired)
-    return false;
-  timeoutHasExpired = false;
-  return true;
+  if (timerEvent) {
+    Event e = timerEvent;
+    timerEvent = Event::nullEvent();
+    return e;
+  } else
+    return Event::nullEvent();
 }
 
 bool TimerManager::checkFirstTimer(uint32 now)
@@ -148,7 +152,13 @@ bool TimerManager::checkFirstTimer(uint32 now)
 
 void TimerManager::callback()
 {
-  timeoutHasExpired = true;
+  postTimerEvent(Event::timeoutEvent());
+}
+
+void TimerManager::postTimerEvent(Event &&e)
+{
+  if (e)
+    timerEvent = e;
 }
 
 }}

@@ -1,6 +1,8 @@
 #ifndef TUNNELS_TIMER_H_
 #define TUNNELS_TIMER_H_
 
+#include "EventLoop.h"
+
 namespace Tunnels { namespace Timer {
 
 class TimerManager;
@@ -22,7 +24,7 @@ class Timer {
 class TimerManager : Timer {
  private:
   Timer *first, *immediate, *deferred;
-  bool timeoutHasExpired;
+  Event timerEvent;
  public:
   TimerManager();
   ~TimerManager();
@@ -31,10 +33,11 @@ class TimerManager : Timer {
   void addTimerAfter(Timer& timer, uint32 delay);
   void removeTimer(Timer& timer);
   uint32 getNextDelay(uint32 now);
-  bool timeoutExpired();
+  Event pollTimerEvent();
   void setTimeout(uint32 expiry) { addTimer(*this, expiry); }
   void setTimeoutAfter(uint32 delay) { addTimerAfter(*this, delay); }
   void removeTimeout() { removeTimer(*this); }
+  void postTimerEvent(Event &&e);
 private:
   bool checkFirstTimer(uint32 now);
 protected:

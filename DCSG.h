@@ -58,6 +58,7 @@ class Music : Timer::Timer {
 private:
   const byte *data;
   unsigned pos, length, timing;
+  bool postEvent;
   Backend &backend;
   Tunnels::Timer::TimerManager &timerManager;
 
@@ -65,15 +66,16 @@ public:
   Music(Backend &backend_, Tunnels::Timer::TimerManager &timerManager_) :
     data(nullptr), pos(0), length(0), timing(0),
     backend(backend_), timerManager(timerManager_) {}
-  template <unsigned n> void play(const byte (&a)[n], unsigned offs=0)
+  template <unsigned n> void play(const byte (&a)[n], bool post=false,
+				  unsigned offs=0)
   {
-    play(&a[0], n, offs);
+    play(&a[0], n, offs, post);
   }
 
 protected:
   void callback() override;
 private:
-  void play(const byte *data, unsigned length, unsigned pos);
+  void play(const byte *data, unsigned length, unsigned pos, bool post);
   void submitSoundBytes(const byte *data, unsigned length);
   int update();
 };

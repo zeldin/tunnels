@@ -9,7 +9,8 @@ enum EventType {
   EVENT_NULL,
   EVENT_QUIT,
   EVENT_TIMEOUT,
-  EVENT_KEY
+  EVENT_KEY,
+  EVENT_END_OF_MUSIC
 };
 
 enum KeyCodes {
@@ -49,6 +50,7 @@ public:
   static Event quitEvent() { return Event(EVENT_QUIT); }
   static Event timeoutEvent() { return Event(EVENT_TIMEOUT); }
   static Event nullEvent() { return Event(EVENT_NULL); }
+  static Event endOfMusicEvent() { return Event(EVENT_END_OF_MUSIC); }
 };
 
 class EventLoop {
