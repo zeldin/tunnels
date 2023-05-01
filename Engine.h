@@ -109,6 +109,8 @@ private:
   Diversion waitForMusic();
   Diversion core();
   Diversion room();
+  Diversion corridor();
+  Diversion getMovementKey(byte &kc, Direction &dir);
   Diversion titleScreen();
   Diversion loadSaveMenu();
   Diversion loadSave(bool isSave, unsigned len, Utils::StringSpan name);
