@@ -48,12 +48,13 @@ GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
   if (kc == 'D') dir = DIR_EAST;
   if (kc == 'X') dir = DIR_SOUTH;
   if (kc == 'S') dir = DIR_WEST;
-  if (kc == 'C') {
+  if (kc == database->getKeymapEntry(KEYMAP_CHECK_HIDDEN_DOORS)) {
     /* ... */
   }
-  if (kc == 'K')
+  if (kc == database->getKeymapEntry(KEYMAP_SAVE_GAME))
     return DIVERSION_LOAD_SAVE_BACK;
-  if (kc == 'M' && database->getCurrentLocation() != LOCATION_ENTRANCE) {
+  if (kc == database->getKeymapEntry(KEYMAP_LOOK_AT_MAP)
+      && database->getCurrentLocation() != LOCATION_ENTRANCE) {
     screen.mapScreen();
     acceptMask = ACCEPT_BACK;
     for (;;)

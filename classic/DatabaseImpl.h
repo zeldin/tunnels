@@ -95,7 +95,9 @@ private:
     byte unknown_267a[0x7f6];
     byte patternColors[32];  // V@>2E70
     byte patternTable2[0x380]; // V@2E90
-    byte unknown_3210[0x80];
+    byte unknown_3210[0x2d];
+    byte keymap[11];         // V@323D
+    byte unknown_3248[0x48];
     byte dictionary[36][12]; // V@3290
     byte unknown_3440[0x78];
     byte floorMap[17*32-6]; // V@>34B8
@@ -149,6 +151,7 @@ public:
   virtual byte getPlayerColor(unsigned n) const override { return data.patternColors[n]; }
   virtual void setPlayerColor(unsigned n, unsigned c) override;
   virtual Utils::StringSpan getColorTable() const override;
+  virtual byte getKeymapEntry(KeyMapping k) const override { return data.keymap[k]; }
   virtual Utils::StringSpan getDictionaryWord(byte n) const override;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name)
     override;

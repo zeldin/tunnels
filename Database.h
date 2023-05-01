@@ -53,6 +53,7 @@ public:
   virtual byte getPlayerColor(unsigned n) const = 0;
   virtual void setPlayerColor(unsigned n, unsigned c) = 0;
   virtual Utils::StringSpan getColorTable() const = 0;
+  virtual byte getKeymapEntry(KeyMapping k) const = 0;
   virtual Utils::StringSpan getDictionaryWord(byte n) const = 0;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name) = 0;
   virtual MapPosition getMapPosition() const = 0;

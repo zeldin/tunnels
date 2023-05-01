@@ -27,6 +27,20 @@ enum StartPosition {
   STARTPOS_IN_DOORWAY = 2,
 };
 
+enum KeyMapping {
+  KEYMAP_BREAK_DOOR = 0,
+  KEYMAP_CHECK_HIDDEN_DOORS = 1,
+  KEYMAP_FIRE_RANGED_WEAPON = 2,
+  KEYMAP_CHANGE_WEAPON = 3,
+  KEYMAP_LISTEN_AT_DOOR = 4,
+  KEYMAP_LOOK_AT_MAP = 5,
+  KEYMAP_CHANGE_ORDER = 6,
+  KEYMAP_SAVE_GAME = 7,
+  KEYMAP_TRADE_ITEMS = 8,
+  KEYMAP_USE_ITEM = 9,
+  KEYMAP_ATTEMPT_NEGOTIATION = 10
+};
+
 constexpr Direction reverse(Direction d)
 {
   return static_cast<Direction>((d+2)&3);
