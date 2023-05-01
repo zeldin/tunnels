@@ -24,7 +24,7 @@ void GameEngine::ioError(bool casette, byte error)
 void GameEngine::preserveState()
 {
   // FIXME: G@>608D
-  database->setSavedDirection(static_cast<Database::Direction>(direction));
+  database->setSavedDirection(direction);
   database->setSavedProgression(progression);
 }
 

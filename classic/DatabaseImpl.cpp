@@ -170,18 +170,18 @@ void DatabaseImpl::setFileData(bool isSave, unsigned len,
   name.store(data.dsrname);
 }
 
-Database::MapPosition DatabaseImpl::getMapPosition() const
+MapPosition DatabaseImpl::getMapPosition() const
 {
   uint16 mp = data.mapPosition;
   return MapPosition{byte(mp&0x1f), byte(mp>>5)};
 }
 
-void DatabaseImpl::setMapPosition(Database::MapPosition pos)
+void DatabaseImpl::setMapPosition(MapPosition pos)
 {
   data.mapPosition = (pos.y << 5) | pos.x;
 }
 
-void DatabaseImpl::setMapVisited(Database::MapPosition pos, bool visited)
+void DatabaseImpl::setMapVisited(MapPosition pos, bool visited)
 {
   uint16 p = (pos.y << 5) | pos.x;
   if (p < sizeof(data.floorMap)/sizeof(data.floorMap[0]))
@@ -191,7 +191,7 @@ void DatabaseImpl::setMapVisited(Database::MapPosition pos, bool visited)
       data.floorMap[p] |= 0x10;
 }
 
-Database::Location DatabaseImpl::mapLocation(MapPosition pos) const
+Location DatabaseImpl::mapLocation(MapPosition pos) const
 {
   uint16 p = (pos.y << 5) | pos.x;
   if (p < sizeof(data.floorMap)/sizeof(data.floorMap[0])) {

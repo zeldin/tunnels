@@ -52,13 +52,13 @@ void ScreenEngine::roomScreen()
   screen.all(' ');
   initRoom();
   clearRoom();
-  Database::Location location = database->getCurrentLocation();
-  Database::MapPosition pos = database->getMapPosition();
+  Location location = database->getCurrentLocation();
+  MapPosition pos = database->getMapPosition();
   switch (location) {
-  case Database::LOCATION_ROOM:
-  case Database::LOCATION_DESCENDING_STAIRCASE:
-  case Database::LOCATION_ASCENDING_STAIRCASE:
-  case Database::LOCATION_ENTRANCE:
+  case LOCATION_ROOM:
+  case LOCATION_DESCENDING_STAIRCASE:
+  case LOCATION_ASCENDING_STAIRCASE:
+  case LOCATION_ENTRANCE:
     // Room template
     static constexpr const auto fmt1 =
       fmt(COL(2), ROW(0),
@@ -70,30 +70,30 @@ void ScreenEngine::roomScreen()
 	  RPTB(12, RIGHT(18), HSTR("\xd8"), RIGHT(12), HSTR("\xd8")),
 	  RIGHT(18), HSTR("\xdc"), HCHA(12, 0xd9), HSTR("\xdc"));
     fmt1(screen);
-    if (location == Database::LOCATION_ENTRANCE)
+    if (location == LOCATION_ENTRANCE)
       return;
     // Add doors
-    if (database->canMove(pos, Database::DIR_NORTH)) {
+    if (database->canMove(pos, DIR_NORTH)) {
       static constexpr const auto fmt2 =
 	fmt(COL(9), ROW(2), HCHA(4, 0xdb));
       fmt2(screen);
     }
-    if (database->canMove(pos, Database::DIR_EAST)) {
+    if (database->canMove(pos, DIR_EAST)) {
       static constexpr const auto fmt3 =
 	fmt(COL(17), ROW(7), VCHA(4, 0xda));
       fmt3(screen);
     }
-    if (database->canMove(pos, Database::DIR_SOUTH)) {
+    if (database->canMove(pos, DIR_SOUTH)) {
       static constexpr const auto fmt4 =
 	fmt(COL(9), ROW(15), HCHA(4, 0xdb));
       fmt4(screen);
     }
-    if (database->canMove(pos, Database::DIR_WEST)) {
+    if (database->canMove(pos, DIR_WEST)) {
       static constexpr const auto fmt5 =
 	fmt(COL(4), ROW(7), VCHA(4, 0xda));
       fmt5(screen);
     }
-    if (location != Database::LOCATION_ROOM)
+    if (location != LOCATION_ROOM)
       return;
     if (false /* FIXME */) {
       // Add vault
@@ -103,9 +103,9 @@ void ScreenEngine::roomScreen()
       fmt6(screen);
     }
     break;
-  case Database::LOCATION_BLANK:
-  case Database::LOCATION_CORRIDOR:
-  case Database::LOCATION_FOUNTAIN:
+  case LOCATION_BLANK:
+  case LOCATION_CORRIDOR:
+  case LOCATION_FOUNTAIN:
     // Corridor encounter template
     static constexpr const auto fmt7 =
       fmt(COL(2), ROW(0),
@@ -114,14 +114,14 @@ void ScreenEngine::roomScreen()
 	  COL(6), ROW(4), RPTB(2, HSTR("\xdc"), RIGHT(8), HSTR("\xdc"),
 			       RIGHT(22), DOWN(8)));
     fmt7(screen);
-    Database::Location nextLocation;
-    if (location == Database::LOCATION_ENTRANCE ||
-	!database->canMove(pos, Database::DIR_NORTH, nextLocation)) {
+    Location nextLocation;
+    if (location == LOCATION_ENTRANCE ||
+	!database->canMove(pos, DIR_NORTH, nextLocation)) {
       static constexpr const auto fmt8 =
 	fmt(COL(7), ROW(4), HCHA(8, 0xd9));
       fmt8(screen);
-    } else if (nextLocation == Database::LOCATION_ROOM ||
-	       nextLocation > Database::LOCATION_FOUNTAIN) {
+    } else if (nextLocation == LOCATION_ROOM ||
+	       nextLocation > LOCATION_FOUNTAIN) {
       static constexpr const auto fmt9 =
 	fmt(COL(7), ROW(4), HCHA(2, 0xd9), HCHA(4, 0xdb), HCHA(2, 0xd9));
       fmt9(screen);
@@ -131,13 +131,13 @@ void ScreenEngine::roomScreen()
 	    HCHA(8, 0xdb), DOWN(22), VCHA(4, 0xd8));
       fmt10(screen);
     }
-    if (location == Database::LOCATION_ENTRANCE ||
-	!database->canMove(pos, Database::DIR_EAST, nextLocation)) {
+    if (location == LOCATION_ENTRANCE ||
+	!database->canMove(pos, DIR_EAST, nextLocation)) {
       static constexpr const auto fmt11 =
 	fmt(COL(15), ROW(5), VCHA(8, 0xd8));
       fmt11(screen);
-    } else if (nextLocation == Database::LOCATION_ROOM ||
-	       nextLocation > Database::LOCATION_FOUNTAIN) {
+    } else if (nextLocation == LOCATION_ROOM ||
+	       nextLocation > LOCATION_FOUNTAIN) {
       static constexpr const auto fmt12 =
 	fmt(COL(15), ROW(5), VCHA(2, 0xd8), VCHA(4, 0xda), VCHA(2, 0xd8));
       fmt12(screen);
@@ -147,13 +147,13 @@ void ScreenEngine::roomScreen()
 	    HSTR("\xda"), RIGHT(30), HCHA(4, 0xd9));
       fmt13(screen);
     }
-    if (location == Database::LOCATION_ENTRANCE ||
-	!database->canMove(pos, Database::DIR_SOUTH, nextLocation)) {
+    if (location == LOCATION_ENTRANCE ||
+	!database->canMove(pos, DIR_SOUTH, nextLocation)) {
       static constexpr const auto fmt14 =
 	fmt(COL(7), ROW(13), HCHA(8, 0xd9));
       fmt14(screen);
-    } else if (nextLocation == Database::LOCATION_ROOM ||
-	       nextLocation > Database::LOCATION_FOUNTAIN) {
+    } else if (nextLocation == LOCATION_ROOM ||
+	       nextLocation > LOCATION_FOUNTAIN) {
       static constexpr const auto fmt15 =
 	fmt(COL(7), ROW(13), HCHA(2, 0xd9), HCHA(4, 0xdb), HCHA(2, 0xd9));
       fmt15(screen);
@@ -163,13 +163,13 @@ void ScreenEngine::roomScreen()
 	    HCHA(8, 0xdb), DOWN(23), VCHA(4, 0xd8));
       fmt16(screen);
     }
-    if (location == Database::LOCATION_ENTRANCE ||
-	!database->canMove(pos, Database::DIR_WEST, nextLocation)) {
+    if (location == LOCATION_ENTRANCE ||
+	!database->canMove(pos, DIR_WEST, nextLocation)) {
       static constexpr const auto fmt17 =
 	fmt(COL(6), ROW(5), VCHA(8, 0xd8));
       fmt17(screen);
-    } else if (nextLocation == Database::LOCATION_ROOM ||
-	       nextLocation > Database::LOCATION_FOUNTAIN) {
+    } else if (nextLocation == LOCATION_ROOM ||
+	       nextLocation > LOCATION_FOUNTAIN) {
       static constexpr const auto fmt18 =
 	fmt(COL(6), ROW(5), VCHA(2, 0xd8), VCHA(4, 0xda), VCHA(2, 0xd8));
       fmt18(screen);

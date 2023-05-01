@@ -2,6 +2,7 @@
 #define TUNNELS_ENGINE_H_
 
 #include "EventLoop.h"
+#include "GameTypes.h"
 
 namespace Tunnels {
 
@@ -92,7 +93,7 @@ private:
   };
   byte acceptMask;
 
-  byte direction;
+  Direction direction;
   byte progression;
 
 public:
