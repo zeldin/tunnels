@@ -21,6 +21,17 @@ private:
       return n;
     }
   };
+  class PosWord {
+  private:
+    uint16 v;
+  public:
+    constexpr PosWord(uint16 pos) : v(pos) {}
+    constexpr PosWord(MapPosition pos) : v((pos.y << 5) | pos.x) {}
+    constexpr operator uint16() { return v; }
+    constexpr operator MapPosition()
+    { return MapPosition{byte(v&0x1f), byte(v>>5)}; }
+  };
+
   struct {
     byte unknown_0400[0x200]; 
     byte description[384]; // V@>0600
@@ -136,8 +147,8 @@ public:
   virtual Utils::StringSpan getDictionaryWord(byte n) const override;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name)
     override;
-  virtual MapPosition getMapPosition() const override;
-  virtual void setMapPosition(MapPosition pos) override;
+  virtual MapPosition getMapPosition() const override { return PosWord(data.mapPosition); }
+  virtual void setMapPosition(MapPosition pos) { data.mapPosition = PosWord(pos); }
   virtual uint16 getPartyGold() const override { return data.partyGold; }
   virtual void setMapVisited(MapPosition pos, bool visited) override;
   virtual bool inCombat() const override { return data.unknown_1d03 != 0; }

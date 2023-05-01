@@ -170,20 +170,9 @@ void DatabaseImpl::setFileData(bool isSave, unsigned len,
   name.store(data.dsrname);
 }
 
-MapPosition DatabaseImpl::getMapPosition() const
-{
-  uint16 mp = data.mapPosition;
-  return MapPosition{byte(mp&0x1f), byte(mp>>5)};
-}
-
-void DatabaseImpl::setMapPosition(MapPosition pos)
-{
-  data.mapPosition = (pos.y << 5) | pos.x;
-}
-
 void DatabaseImpl::setMapVisited(MapPosition pos, bool visited)
 {
-  uint16 p = (pos.y << 5) | pos.x;
+  uint16 p = PosWord(pos);
   if (p < sizeof(data.floorMap)/sizeof(data.floorMap[0]))
     if (visited)
       data.floorMap[p] &= ~0x10;
@@ -193,7 +182,7 @@ void DatabaseImpl::setMapVisited(MapPosition pos, bool visited)
 
 Location DatabaseImpl::mapLocation(MapPosition pos) const
 {
-  uint16 p = (pos.y << 5) | pos.x;
+  uint16 p = PosWord(pos);
   if (p < sizeof(data.floorMap)/sizeof(data.floorMap[0])) {
     byte tile = data.floorMap[p] & ~0x10;
     if (tile >= 0x60 && tile < 0x6b) {
@@ -227,7 +216,7 @@ bool DatabaseImpl::canMove(MapPosition pos, Direction dir, Location &dest) const
 
 bool DatabaseImpl::blockedForward(MapPosition pos, Direction dir) const
 {
-  uint16 p = (pos.y << 5) | pos.x;
+  uint16 p = PosWord(pos);
   if (p < sizeof(data.floorMap)/sizeof(data.floorMap[0])) {
     byte tile = data.floorMap[p] & ~0x10;
     if (tile >= 0x60 && tile < 0x6b) {
