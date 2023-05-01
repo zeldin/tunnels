@@ -105,8 +105,10 @@ bool DatabaseImpl::nextPlayerInOrder()
   }
   while(order < 4 && !data.playerOrder[order])
     order++;
-  if (order >= 4 || data.playerOrder[order] > data.numConfPlayers)
+  if (order >= 4 || data.playerOrder[order] > data.numConfPlayers) {
+    data.currentPlayer = 5;
     return false;
+  }
   data.currentPlayer = data.playerOrder[order];
   return true;
 }
