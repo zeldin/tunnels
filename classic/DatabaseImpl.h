@@ -51,7 +51,8 @@ private:
     byte unknown_10fa;    // V@>10FA
     byte unknown_10fb;    // V@>10FB
     msb16 partyGold;      // V@>10FC
-    byte unknown_10fe[0x1e];
+    byte numMappedFloors; // V@>10FE
+    byte unknown_10ff[0x1d];
     byte unknown_111c;    // V@>111C
     byte unknown_111d[0x55];
     struct {
@@ -65,7 +66,9 @@ private:
     byte unknown_1ce0;    // V@>1CE0
     byte numClasses;      // V@>1CE1
     byte maxFloors;       // V@>1CE2
-    byte unknown_1ce3[7]; // V@>1CE3
+    byte unknown_1ce3[5]; // V@>1CE3
+    byte unknown_1ce8;    // V@>1CE8
+    byte unknown_1ce9;    // V@>1CE9
     byte numConfPlayers;  // V@>1CEA
     byte unknown_1ceb;    // V@>1CEB
     byte unknown_1cec;    // V@>1CEC
@@ -122,6 +125,7 @@ public:
   virtual byte getMaxPlayers() const override { return data.maxPlayers; }
   virtual byte getNumClassChoices() const override;
   virtual byte getMaxFloors() const override { return data.maxFloors; }
+  virtual bool hasHiddenMap() const override { return data.unknown_1ce8 != 0; }
   virtual byte getNumConfiguredPlayers() const override { return data.numConfPlayers; }
   virtual void setNumConfiguredPlayers(byte num) override { data.numConfPlayers = num; }
   virtual byte getUnknown1CEB() const override { return data.unknown_1ceb; }
@@ -133,6 +137,7 @@ public:
   virtual byte getNumPlayers() const override { return data.numPlayers; }
   virtual void setNumPlayers(byte num) override { data.numPlayers = num; }
   virtual void setDifficulty(byte dif) override { data.difficulty = dif; }
+  virtual byte getCurrentFloor() const override { return data.currentFloor; }
   virtual int getCurrentPlayer() const override { return data.currentPlayer-1; }
   virtual void setCurrentPlayer(int n) override { data.currentPlayer = n+1; }
   virtual bool nextPlayerInOrder() override;
@@ -150,6 +155,8 @@ public:
   virtual MapPosition getMapPosition() const override { return PosWord(data.mapPosition); }
   virtual void setMapPosition(MapPosition pos) { data.mapPosition = PosWord(pos); }
   virtual uint16 getPartyGold() const override { return data.partyGold; }
+  virtual byte getMappedFloors() const override { return data.numMappedFloors; }
+  virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;
   virtual bool inCombat() const override { return data.unknown_1d03 != 0; }
   virtual Location mapLocation(MapPosition pos) const override;

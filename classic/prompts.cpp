@@ -689,7 +689,7 @@ void ScreenEngine::promptExtension(byte n)
     }
   case Vocab::extFLOORAT: /* G@>F48A */
     {
-      byte n = 17; /* FIXME */
+      byte n = database->getCurrentFloor();
       screen.setXpt(putNumber(y, x, n));
       return;
     }

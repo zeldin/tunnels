@@ -53,8 +53,12 @@ GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
   }
   if (kc == 'K')
     return DIVERSION_LOAD_SAVE_BACK;
-  if (kc == 'M') {
-    /* ... */
+  if (kc == 'M' && database->getCurrentLocation() != LOCATION_ENTRANCE) {
+    screen.mapScreen();
+    acceptMask = ACCEPT_BACK;
+    for (;;)
+      if (Diversion d = getKeyNoCursor(kc))
+	return d;
   }
   return DIVERSION_NULL;
 }

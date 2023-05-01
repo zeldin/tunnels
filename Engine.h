@@ -36,6 +36,7 @@ public:
   virtual void setPlayerColors() {}
   virtual void setPlayerShapes(unsigned n) {}
   virtual void roomScreen() = 0;
+  virtual void mapScreen() = 0;
   virtual void drawGeneralStore() = 0;
   virtual void drawStaircase() = 0;
   virtual void drawPlayer(unsigned n) = 0;

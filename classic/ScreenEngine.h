@@ -58,6 +58,7 @@ public:
   virtual void setPlayerColors() override;
   virtual void setPlayerShapes(unsigned n) override;
   virtual void roomScreen() override;
+  virtual void mapScreen() override;
   virtual void drawGeneralStore() override;
   virtual void drawStaircase() override; 
   virtual void drawPlayer(unsigned n) override;

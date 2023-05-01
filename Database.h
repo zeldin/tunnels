@@ -29,6 +29,7 @@ public:
   virtual byte getMaxPlayers() const = 0;
   virtual byte getNumClassChoices() const = 0;
   virtual byte getMaxFloors() const = 0;
+  virtual bool hasHiddenMap() const = 0;
   virtual byte getNumConfiguredPlayers() const = 0;
   virtual void setNumConfiguredPlayers(byte num) = 0;
   virtual byte getUnknown1CEB() const = 0;
@@ -40,6 +41,7 @@ public:
   virtual byte getNumPlayers() const = 0;
   virtual void setNumPlayers(byte num) = 0;
   virtual void setDifficulty(byte dif) = 0;
+  virtual byte getCurrentFloor() const = 0;
   virtual int getCurrentPlayer() const = 0;
   virtual void setCurrentPlayer(int n) = 0;
   virtual bool nextPlayerInOrder() = 0;
@@ -56,6 +58,8 @@ public:
   virtual MapPosition getMapPosition() const = 0;
   virtual void setMapPosition(MapPosition pos) = 0;
   virtual uint16 getPartyGold() const = 0;
+  virtual byte getMappedFloors() const = 0;
+  virtual Utils::StringSpan getFloorMap() const = 0;
   virtual void setMapVisited(MapPosition pos, bool visited) = 0;
   virtual bool inCombat() const = 0;
   virtual Location mapLocation(MapPosition pos) const = 0;

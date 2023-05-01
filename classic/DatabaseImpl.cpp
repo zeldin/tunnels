@@ -170,6 +170,11 @@ void DatabaseImpl::setFileData(bool isSave, unsigned len,
   name.store(data.dsrname);
 }
 
+Utils::StringSpan DatabaseImpl::getFloorMap() const
+{
+  return data.floorMap;
+}
+
 void DatabaseImpl::setMapVisited(MapPosition pos, bool visited)
 {
   uint16 p = PosWord(pos);

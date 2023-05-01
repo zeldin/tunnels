@@ -7,6 +7,27 @@
 
 namespace Tunnels { namespace Classic {
 
+void ScreenEngine::mapScreen()
+{
+  using namespace VDP::FMTBuilder;
+
+  screen.all(' ');
+  static constexpr const auto fmt1 =
+    fmt(COL(2), ROW(1), RPTB(19, HCHA(28, 'k'), RIGHT(4)));
+  fmt1(screen);
+  screen.hstr(2, 3, database->getFloorMap());
+  drawPrompt(0x62);
+  if (!database->hasHiddenMap() ||
+      database->getMappedFloors() >= database->getCurrentFloor()) {
+    static constexpr byte mapRevealColorTable[] { 0x4e, 0x4e };
+    screen.loadColorTable(14, mapRevealColorTable);
+  }
+  // FIXME: place sprite
+  screen.setYpt(23);
+  screen.setXpt(2);
+  drawPrompt(0x02);
+}
+
 void ScreenEngine::initRoom()
 {
   if (activePatternTable != 1) {
