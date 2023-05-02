@@ -750,7 +750,34 @@ void ScreenEngine::promptExtension(byte n)
   case Vocab::extPARTYSTATUS: /* G@>F65D */
     {
       /* Party status */
-      /* FIXME */
+      screen.hchar(4, putNumberEol(4, database->getPartyGold()), '0');
+      putNumberEol(5, database->getRations());
+      for (unsigned i = 0; i < 8; i++) {
+	unsigned y = i+8;
+	screen.setYpt(y);
+	Utils::StringSpan s = database->questObjectName(i);
+	if (s[0] == ' ')
+	  continue;
+	screen.hstr(y, 6, s);
+	unsigned x = findEndOfLine()+2;
+	screen.hstr(y, x, ": ");
+	x += 2;
+	if (database->isQuestObjectFound(i))
+	  screen.hstr(y, x, "FOUND");
+	else if (!database->isQuestObjectIntact(i))
+	  screen.hstr(y, x, "DESTROYED");
+	else {
+	  uint16 left = database->getTurnsLeft(i);
+	  if (left > 0)
+	    putNumber(y, x, left);
+	}
+      }
+      for (unsigned i = 0; i < database->getNumConfiguredPlayers(); i++) {
+	unsigned x = 4*i+14;
+	putQuad(18, x, i*8);
+	putNumber(20, x, database->getPlayerHP(i));
+	putNumber(21, x, database->getPlayerWD(i));
+      }
       return;
     }
   case Vocab::extNEGOTIATION: /* G@>F787 */
@@ -839,7 +866,11 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  } else {
 	    uint16 addr = (n << 8) | *ptr++;
 	    n = *ptr++;
-	    screen.hchar(y, x, '*', n); /* FIXME */
+	    if (n == 16 && !(addr & 15) &&
+		addr >= 0x3250 && addr <= 0x3280)
+	      screen.hstr(y, x, database->getExtDictionaryWord((addr-0x3250)>>4));
+	    else
+	      screen.hchar(y, x, '*', n); /* FIXME */
 	  }
 	  screen.setXpt(findEndOfLine()+2);
 	}

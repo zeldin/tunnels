@@ -111,6 +111,7 @@ private:
   Diversion core();
   Diversion room();
   Diversion corridor();
+  bool tryMove();
   Diversion getMovementKey(byte &kc, Direction &dir);
   Diversion titleScreen();
   Diversion loadSaveMenu();

@@ -7,7 +7,7 @@ class StringSpan {
 private:
   const byte *p;
   unsigned l;
-
+  
   bool hasPrefix(const byte *pfx, unsigned len)
   {
     if (len > l)
@@ -48,6 +48,11 @@ public:
 	l = len;
     } else
       l = 0;
+  }
+  const byte& operator[](unsigned i) const
+  {
+    static const byte nul = 0;
+    return (i < l? p[i] : nul);
   }
   template <unsigned n> void store(byte (&dst)[n])
   {

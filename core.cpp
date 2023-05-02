@@ -6,6 +6,12 @@
 
 namespace Tunnels {
 
+bool GameEngine::tryMove()
+{
+  // G@A028
+  return false;
+}
+
 GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
 {
   acceptMask =
@@ -39,7 +45,11 @@ GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
     /* ... */
   }
   if (kc == '2') {
-    /* ... */
+    screen.drawPrompt(0x6d);
+    acceptMask = ACCEPT_BACK;
+    for (;;)
+      if (Diversion d = getKeyNoCursor(kc))
+	return d;
   }
   if (kc == '1') {
     /* ... */
@@ -49,7 +59,7 @@ GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
   if (kc == 'X') dir = DIR_SOUTH;
   if (kc == 'S') dir = DIR_WEST;
   if (kc == database->getKeymapEntry(KEYMAP_CHECK_HIDDEN_DOORS)) {
-    /* ... */
+    database->setSecretDoorsRevealed(true);
   }
   if (kc == database->getKeymapEntry(KEYMAP_SAVE_GAME))
     return DIVERSION_LOAD_SAVE_BACK;
@@ -104,19 +114,38 @@ GameEngine::Diversion GameEngine::room()
     // ...
   }
 
-  backTarget = DIVERSION_CONTINUE_GAME;
-  // ...
-  screen.drawPrompt(0x2e);
-  byte keyCode;
-  Direction dir;
-  if (Diversion d = getMovementKey(keyCode, dir))
-    return d;
-  if (dir != DIR_NONE) {
-    /* ... */
-  } else {
-    /* ... */
+  for (;;) {
+    backTarget = DIVERSION_CONTINUE_GAME;
+    // ...
+    screen.drawPrompt(0x2e);
+    byte keyCode;
+    Direction dir;
+    if (Diversion d = getMovementKey(keyCode, dir))
+      return d;
+    if (dir != DIR_NONE) {
+      direction = dir;
+      if (database->getCurrentLocation() == LOCATION_ENTRANCE ||
+	  !tryMove())
+	continue;
+    } else {
+      if (keyCode == database->getKeymapEntry(KEYMAP_USE_ITEM)) {
+	/* ... */
+      }
+      if (keyCode == database->getKeymapEntry(KEYMAP_CHANGE_ORDER)) {
+	/* ... */
+      }
+      if (keyCode == database->getKeymapEntry(KEYMAP_TRADE_ITEMS)) {
+	/* ... */
+      }
+      if (keyCode == KEY_UP) {
+	/* ... */
+      }
+      if (keyCode == KEY_DOWN) {
+	/* ... */
+      }
+    }
+    return DIVERSION_CONTINUE_GAME;
   }
-  return DIVERSION_NULL;
 }
 
 GameEngine::Diversion GameEngine::corridor()

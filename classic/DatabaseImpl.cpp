@@ -113,6 +113,11 @@ bool DatabaseImpl::nextPlayerInOrder()
   return true;
 }
 
+Utils::StringSpan DatabaseImpl::questObjectName(unsigned n) const
+{
+  return data.questObjects[n].name;
+}
+
 void DatabaseImpl::setPlayerColor(unsigned n, unsigned c)
 {
   static constexpr byte colors[] = { 0xce, 0x4e, 0xde, 0x6e };
@@ -122,6 +127,11 @@ void DatabaseImpl::setPlayerColor(unsigned n, unsigned c)
 Utils::StringSpan DatabaseImpl::getColorTable() const
 {
   return data.patternColors;
+}
+
+Utils::StringSpan DatabaseImpl::getExtDictionaryWord(byte n) const
+{
+  return data.extDictionary[n];
 }
 
 Utils::StringSpan DatabaseImpl::getDictionaryWord(byte n) const

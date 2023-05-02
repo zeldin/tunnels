@@ -17,6 +17,8 @@ public:
   virtual void clearPlayerSheet(unsigned n) = 0;
   virtual Utils::StringSpan getPlayerName(unsigned n) const = 0;
   virtual void setPlayerName(unsigned n, Utils::StringSpan name) = 0;
+  virtual byte getPlayerHP(unsigned n) const = 0;
+  virtual byte getPlayerWD(unsigned n) const = 0;
   virtual byte getPlayerClass(unsigned n) const = 0;
   virtual void setPlayerClass(unsigned n, unsigned c) = 0;
   virtual byte getPlayerRow(unsigned n) const = 0;
@@ -24,6 +26,10 @@ public:
   virtual byte getPlayerColumn(unsigned n) const = 0;
   virtual void setPlayerColumn(unsigned n, byte column) = 0;
   virtual void setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir) = 0;
+  virtual bool isQuestObjectFound(unsigned n) const = 0;
+  virtual bool isQuestObjectIntact(unsigned n) const = 0;
+  virtual uint16 getTurnsLeft(unsigned n) const = 0;
+  virtual byte getRations() const = 0;
   virtual Utils::StringSpan getClassName(unsigned n) const = 0;
   virtual Utils::StringSpan getClassPatternTable(unsigned n) const = 0;
   virtual byte getMaxPlayers() const = 0;
@@ -50,10 +56,12 @@ public:
   virtual void setSavedDirection(Direction direction) = 0;
   virtual byte getSavedProgression() const = 0;
   virtual void setSavedProgression(byte progression) = 0;
+  virtual Utils::StringSpan questObjectName(unsigned n) const = 0;
   virtual byte getPlayerColor(unsigned n) const = 0;
   virtual void setPlayerColor(unsigned n, unsigned c) = 0;
   virtual Utils::StringSpan getColorTable() const = 0;
   virtual byte getKeymapEntry(KeyMapping k) const = 0;
+  virtual Utils::StringSpan getExtDictionaryWord(byte n) const = 0;
   virtual Utils::StringSpan getDictionaryWord(byte n) const = 0;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name) = 0;
   virtual MapPosition getMapPosition() const = 0;
@@ -71,6 +79,7 @@ public:
   bool blockedBackward(MapPosition pos, Direction dir) const
   { return blockedForward(pos, reverse(dir)); }
   virtual bool getSecretDoorsRevealed() const = 0;
+  virtual void setSecretDoorsRevealed(bool value) = 0;
   virtual ~Database() { }
 };
 

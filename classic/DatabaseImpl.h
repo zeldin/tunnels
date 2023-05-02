@@ -39,7 +39,9 @@ private:
     byte patternTable[0x800]; // V@>0800
     struct {
       byte name[15];
-      byte unknown1[0x14];
+      byte HP;
+      byte WD;
+      byte unknown1[0x12];
       byte classId;
       byte unknown2[0x2];
       byte row;
@@ -52,7 +54,13 @@ private:
     byte unknown_10fb;    // V@>10FB
     msb16 partyGold;      // V@>10FC
     byte numMappedFloors; // V@>10FE
-    byte unknown_10ff[0x1d];
+    byte unknown_10ff;    // V@>10FF
+    byte foundQuestObjects; // V@>1100
+    byte intactQuestObjects; // V@>1101
+    msb16 turnsLeft[8];   // V@>1102
+    byte unknown_1112;    // V@>1112
+    byte rations;         // V@>1113
+    byte unknown_1114[8];
     byte unknown_111c;    // V@>111C
     byte unknown_111d[0x55];
     struct {
@@ -92,12 +100,18 @@ private:
     byte savedProgression; // V@>25FD
     byte unknown_25fe[0x78];
     byte playerOrder[4];  // V@>2676
-    byte unknown_267a[0x7f6];
+    byte unknown_267a[0x69c];
+    struct {
+      byte name[11];
+      byte unknown[8];
+    } questObjects[8];     // V@>2D16
+    byte unknown_2dae[0xc2];
     byte patternColors[32];  // V@>2E70
     byte patternTable2[0x380]; // V@2E90
     byte unknown_3210[0x2d];
     byte keymap[11];         // V@323D
-    byte unknown_3248[0x48];
+    byte unknown_3248[0x8];
+    byte extDictionary[4][16]; // V@3250
     byte dictionary[36][12]; // V@3290
     byte unknown_3440[0x78];
     byte floorMap[17*32-6]; // V@>34B8
@@ -115,6 +129,8 @@ public:
   virtual void clearPlayerSheet(unsigned n) override;
   virtual Utils::StringSpan getPlayerName(unsigned n) const override;
   virtual void setPlayerName(unsigned n, Utils::StringSpan name) override;
+  virtual byte getPlayerHP(unsigned n) const override { return data.player[n].HP; }
+  virtual byte getPlayerWD(unsigned n) const override { return data.player[n].WD; }
   virtual byte getPlayerClass(unsigned n) const override { return data.player[n].classId >> 6; }
   virtual void setPlayerClass(unsigned n, unsigned c) override;
   virtual byte getPlayerRow(unsigned n) const override { return data.player[n].row; }
@@ -122,6 +138,10 @@ public:
   virtual byte getPlayerColumn(unsigned n) const override { return data.player[n].column; }
   virtual void setPlayerColumn(unsigned n, byte column) override { data.player[n].column = column; }
   virtual void setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir) override;
+  virtual bool isQuestObjectFound(unsigned n) const override { return (data.foundQuestObjects >> n)&1; }
+  virtual bool isQuestObjectIntact(unsigned n) const override { return (data.intactQuestObjects >> n)&1; }
+  virtual uint16 getTurnsLeft(unsigned n) const override { return data.turnsLeft[n]; }
+  virtual byte getRations() const override { return data.rations; }
   virtual Utils::StringSpan getClassName(unsigned n) const override;
   virtual Utils::StringSpan getClassPatternTable(unsigned n) const override;
   virtual byte getMaxPlayers() const override { return data.maxPlayers; }
@@ -148,10 +168,12 @@ public:
   virtual void setSavedDirection(Direction direction) override { data.savedDirection = direction; }
   virtual byte getSavedProgression() const override { return data.savedProgression; }
   virtual void setSavedProgression(byte progression) override { data.savedProgression = progression; }
+  virtual Utils::StringSpan questObjectName(unsigned n) const override;
   virtual byte getPlayerColor(unsigned n) const override { return data.patternColors[n]; }
   virtual void setPlayerColor(unsigned n, unsigned c) override;
   virtual Utils::StringSpan getColorTable() const override;
   virtual byte getKeymapEntry(KeyMapping k) const override { return data.keymap[k]; }
+  virtual Utils::StringSpan getExtDictionaryWord(byte n) const override;
   virtual Utils::StringSpan getDictionaryWord(byte n) const override;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name)
     override;
@@ -166,6 +188,8 @@ public:
   virtual bool canMove(MapPosition pos, Direction dir, Location &dest) const override;
   virtual bool blockedForward(MapPosition pos, Direction dir) const override;
   virtual bool getSecretDoorsRevealed() const override { return data.unknown_111c & 0x8; }
+  virtual void setSecretDoorsRevealed(bool value) override
+  { if(value) data.unknown_111c |= 0x8; else data.unknown_111c &= ~0x8; }
 };
   
 }
