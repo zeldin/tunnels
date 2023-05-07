@@ -384,6 +384,10 @@ void Screen::setBackground(byte color)
 void Screen::setSprite(byte y, byte x, byte name, byte color)
 {
   color &= 0xf;
+  if (color == TRANSPARENT) {
+    clearSprite();
+    return;
+  }
   y++;
   if (!sprite_active || y != sprite_y || x != sprite_x ||
       name != sprite_name || color != sprite_color) {
