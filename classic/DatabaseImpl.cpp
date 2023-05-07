@@ -29,7 +29,7 @@ Utils::StringSpan DatabaseImpl::getHighPatternTable(bool alternate) const
 void DatabaseImpl::clearPlayerSheet(unsigned n)
 {
   /* FIXME */
-  data.player[n].classId = 0;
+  data.player[n].flags = 0;
 }
 
 Utils::StringSpan DatabaseImpl::getPlayerName(unsigned n) const
@@ -44,7 +44,7 @@ void DatabaseImpl::setPlayerName(unsigned n, Utils::StringSpan name)
 
 void DatabaseImpl::setPlayerClass(unsigned n, unsigned c)
 {
-  data.player[n].classId = c << 6;
+  data.player[n].flags = c << 6;
   for (unsigned i = 0; i < 64; i++)
     data.patternTable[(n << 6) | i] = data.classPatternTable[c][i];
 }
@@ -70,6 +70,22 @@ void DatabaseImpl::setPlayerStartPosition(unsigned n, StartPosition pos, Directi
       data.player[n].column = partyPositions[pos][dir][order][1];
       return;
     }
+}
+
+void DatabaseImpl::compactPlayerMagicItems(unsigned n)
+{
+  unsigned i, j=0;
+  for (i=0; i<8; i++)
+    if (data.player[n].magicItems[i].id) {
+      if (j < i)
+	data.player[n].magicItems[j] = data.player[n].magicItems[i];
+      j++;
+    }
+  while (j<8) {
+    data.player[n].magicItems[j].id = 0;
+    data.player[n].magicItems[j].remainingUses = 0;
+    j++;
+  }
 }
 
 Utils::StringSpan DatabaseImpl::getClassName(unsigned n) const
@@ -113,9 +129,62 @@ bool DatabaseImpl::nextPlayerInOrder()
   return true;
 }
 
-Utils::StringSpan DatabaseImpl::questObjectName(unsigned n) const
+Utils::StringSpan DatabaseImpl::getItemName(ItemCategory cat, byte id) const
 {
-  return data.questObjects[n].name;
+  if (id--)
+    switch(cat) {
+    case ITEM_ARMORS:
+      if (id < 8)
+	return data.armors[id].name;
+      id -= 8;
+      /* FALLTHROUGH */
+    case ITEM_SHIELDS:
+      if (id < 6)
+	return data.shields[id].name;
+      break;
+    case ITEM_WEAPONS:
+      if (id < 8)
+	return data.weapons[id].name;
+      id -= 8;
+      /* FALLTHROUGH */
+    case ITEM_RANGED_WEAPONS:
+      if (id < 8)
+	return data.rangedWeapons[id].name;
+      break;
+    case ITEM_MAGIC_ITEMS:
+      if (id & 0x80) {
+	id = (byte(~id)-1) / 5;
+	if (id < 8)
+	  return data.magicItemCategories[id].name;
+      } else if (id < 40)
+	  return data.magicItems[id].name;
+      break;
+    case ITEM_QUEST_OBJECTS:
+      if (id < 8)
+	return data.questObjects[id].name;
+      break;
+    }
+  return Utils::StringSpan();
+}
+
+int8 DatabaseImpl::getRangedWeaponAmmoType(unsigned id) const
+{
+  if (id > 8)
+    id -= 8;
+  if (id > 0 && id <= 6)
+    return data.rangedWeapons[id-1].ammoType;
+  else
+    return 0;
+}
+
+Utils::StringSpan DatabaseImpl::getRangedWeaponAmmoName(unsigned id) const
+{
+  if (id > 8)
+    id -= 8;
+  if (id > 0 && id <= 6)
+    return data.rangedWeapons[id-1].ammoName;
+  else
+    return Utils::StringSpan();
 }
 
 void DatabaseImpl::setPlayerColor(unsigned n, unsigned c)
@@ -137,6 +206,20 @@ Utils::StringSpan DatabaseImpl::getExtDictionaryWord(byte n) const
 Utils::StringSpan DatabaseImpl::getDictionaryWord(byte n) const
 {
   return data.dictionary[n];
+}
+
+void DatabaseImpl::getMagicEffectDescriptor(byte b, Base36Number (&effect)[3]) const
+{
+  unsigned n = b >> 2;
+  if (n < 32) {
+    effect[0] = Base36Number{data.magicEffect[n][0]};
+    effect[1] = Base36Number{data.magicEffect[n][1]};
+    effect[2] = Base36Number{data.magicEffect[n][2]};
+  } else {
+    effect[0] = Base36Number{' '};
+    effect[1] = Base36Number{' '};
+    effect[2] = Base36Number{' '};
+  }
 }
 
 void DatabaseImpl::setFileData(bool isSave, unsigned len,

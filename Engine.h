@@ -32,6 +32,7 @@ public:
   virtual void preparePlayerNameInput(unsigned n) = 0;
   virtual void preparePlayerClassInput() = 0;
   virtual void preparePlayerColorInput() = 0;
+  virtual void prepareItemNumberInput() = 0;
   virtual void askCharacterAccept() {};
   virtual void setPlayerColors() {}
   virtual void setPlayerShapes(unsigned n) {}
@@ -40,6 +41,9 @@ public:
   virtual void drawGeneralStore() = 0;
   virtual void drawStaircase() = 0;
   virtual void drawPlayer(unsigned n) = 0;
+  virtual void drawPlayerStatusHeader(unsigned n) = 0;
+  virtual void drawMagicEffectDescription(byte id) = 0;
+  virtual void drawMagicItemDescription(unsigned id) = 0;
 };
 
 class SoundEngine {

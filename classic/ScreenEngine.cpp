@@ -83,6 +83,12 @@ void ScreenEngine::preparePlayerColorInput()
   screen.setXpt(21);
 }
 
+void ScreenEngine::prepareItemNumberInput()
+{
+  screen.setYpt(17);
+  screen.setXpt(findEndOfLine() + 2);
+}
+
 void ScreenEngine::askCharacterAccept()
 {
   screen.setYpt(11);

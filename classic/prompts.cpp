@@ -451,6 +451,15 @@ unsigned ScreenEngine::putNumber(unsigned y, unsigned x, byte n)
   return ++x;
 }
 
+unsigned ScreenEngine::putNumber(unsigned y, unsigned x, int8 n)
+{
+  if (n < 0) {
+    screen.hchar(y, x++, '-');
+    return putNumber(y, x, (byte)-n);
+  } else
+    return putNumber(y, x, (byte)n);
+}
+
 unsigned ScreenEngine::putNumber(unsigned y, unsigned x, uint16 n)
 {
   screen.hchar(y, x, ' ', 5);
@@ -682,8 +691,8 @@ void ScreenEngine::promptExtension(byte n)
     }
   case Vocab::extAMMO: /* G@>F478 */
     {
-      x = findEndOfLine();
-      screen.hstr(y, x, "============="); /* FIXME */
+      x = findEndOfLine()+2;
+      screen.hstr(y, x, database->getRangedWeaponAmmoName(displayedWeaponId));
       screen.setXpt(findEndOfLine()+2);
       return;
     }
@@ -738,13 +747,42 @@ void ScreenEngine::promptExtension(byte n)
   case Vocab::extPLAYERSTATUS: /* G@>F581 */
     {
       /* Player status */
-      /* FIXME */
+      Utils::StringSpan className =
+	database->getClassName(database->getPlayerClass(displayedPlayer));
+      unsigned offs = className.center();
+      screen.hstr(5, 11+offs, className);
+      putNumberEol(7, database->getPlayerHP(displayedPlayer));
+      putNumberEol(8, database->getPlayerWD(displayedPlayer));
+      screen.hchar(9, putNumberEol(9, database->getPlayerExp(displayedPlayer)),
+		   '0');
+      putNumberEol(10, database->getPlayerLevel(displayedPlayer));
+      putNumber(12, 26, database->getPlayerWeaponBonus(displayedPlayer));
+      putWeaponDescription(13, 3, false, true);
+      putWeaponDescription(15, 3, true, true);
+      screen.hchar((database->isPlayerWeaponSwapped(displayedPlayer)? 15:13),
+		   2, '\\');
+      putNumber(20, 15,
+		int8(database->getPlayerBaseProtection(displayedPlayer)+
+		     database->getPlayerArmorProtection(displayedPlayer)+
+		     database->getPlayerShieldProtection(displayedPlayer)));
+      putArmorDescription(18, 15, false);
+      putArmorDescription(19, 15, true);
       return;
     }
   case Vocab::extITEMS: /* G@>F620 */
     {
       /* Magical item list */
-      /* FIXME */
+      for (unsigned i = 0; i < 8; i++) {
+	byte id = database->getPlayerMagicItemId(displayedPlayer, i);
+	if (!id)
+	  break;
+	screen.setYpt(i+7);
+	screen.setXpt(9);
+	if ((id & 0x80))
+	  drawPrompt(0x85);
+	screen.hstr(screen.getYpt(), screen.getXpt(),
+		    database->getItemName(ITEM_MAGIC_ITEMS, id));
+      }
       return;
     }
   case Vocab::extPARTYSTATUS: /* G@>F65D */
@@ -755,7 +793,7 @@ void ScreenEngine::promptExtension(byte n)
       for (unsigned i = 0; i < 8; i++) {
 	unsigned y = i+8;
 	screen.setYpt(y);
-	Utils::StringSpan s = database->questObjectName(i);
+	Utils::StringSpan s = database->getItemName(ITEM_QUEST_OBJECTS, i+1);
 	if (s[0] == ' ')
 	  continue;
 	screen.hstr(y, 6, s);
@@ -793,6 +831,116 @@ void ScreenEngine::promptExtension(byte n)
       return;
     }
   }
+}
+
+void ScreenEngine::putWeaponDescription(unsigned y, unsigned x,
+					bool secondWeapon, bool showDamage)
+{
+  byte id = database->getPlayerWeaponId(displayedPlayer, secondWeapon);
+  displayedWeaponId = id;
+  screen.setYpt(y);
+  screen.setXpt(x);
+  if (id == 0)
+    drawPrompt(0x5e);
+  else
+    screen.hstr(y, x, database->getItemName(ITEM_WEAPONS, id));
+  if (showDamage)
+    putNumber(y, findEndOfLine()+1,
+	      database->getPlayerWeaponDamage(displayedPlayer, secondWeapon));
+  if (id > 8) {
+    screen.setYpt(y+1);
+    screen.setXpt(x+1);
+    int8 ammoType = database->getRangedWeaponAmmoType(id);
+    if (ammoType < 0)
+      ammoType = -ammoType;
+    switch(ammoType) {
+    case 0:
+      drawPrompt(0x5f);
+      break;
+    case 1:
+      screen.setXpt(putNumber(y+1, x+1,
+			      database->getPlayerWeaponAmmo(displayedPlayer,
+							    secondWeapon)));
+      promptExtension(Vocab::extAMMO);
+      break;
+    case 2:
+      drawPrompt(0x60);
+      break;
+    }
+  }
+}
+
+void ScreenEngine::putArmorDescription(unsigned y, unsigned x, bool shield)
+{
+  byte id = (shield? database->getPlayerShieldId(displayedPlayer) :
+	     database->getPlayerArmorId(displayedPlayer));
+  if (!id) {
+    screen.setYpt(y);
+    screen.setXpt(x);
+    drawPrompt(0x5d);
+  } else {
+    if (shield)
+      id |= 8;
+    screen.hstr(y, x, database->getItemName(ITEM_ARMORS, id));
+  }
+}
+
+void ScreenEngine::drawPlayerStatusHeader(unsigned n)
+{
+  putQuad(3, 4, n<<3);
+  putQuad(3, 26, (n<<3)+4);
+  Utils::StringSpan name = database->getPlayerName(n);
+  unsigned offs = name.center();
+  screen.hstr(3, 9+offs, name);
+  displayedPlayer = n;
+}
+
+void ScreenEngine::drawMagicEffectDescription(byte n)
+{
+  if (n & 0x80)
+    n = byte(-n);
+  /* G@>76AE */
+  Base36Number effect[3];
+  database->getMagicEffectDescriptor(n, effect);
+  if (n < 0x74) {
+    unsigned x = screen.getXpt();
+    drawPrompt((n&1)? 0x51 : 0x50);
+    screen.setXpt(findEndOfLine()+2);
+    if (effect[0])
+      screen.hstr(screen.getYpt(), screen.getXpt(),
+		  database->getDictionaryWord(effect[0]));
+    screen.setYpt(screen.getYpt()+1);
+    screen.setXpt(x);
+    if (effect[1])
+      screen.hstr(screen.getYpt(), screen.getXpt(),
+		  database->getDictionaryWord(effect[1]));
+    screen.setXpt(findEndOfLine()+2);
+    if (effect[2])
+      screen.hstr(screen.getYpt(), screen.getXpt(),
+		  database->getDictionaryWord(effect[2]));
+  } else
+    switch(n) {
+    case 0x74: drawPrompt(0x52); break;
+    case 0x78: drawPrompt(0x53); break;
+    case 0x79: drawPrompt(0x54); break;
+    }
+}
+
+void ScreenEngine::drawMagicItemDescription(unsigned n)
+{
+  /* G@>93D3 */
+  screen.setYpt(18);
+  screen.hchar(18, 2, ' ', 28);
+  screen.hchar(19, 2, ' ', 28);
+  screen.hchar(20, 2, ' ', 28);
+  screen.hstr(18, 2, database->getItemName(ITEM_MAGIC_ITEMS, byte(-n)));
+  unsigned x = findEndOfLine()+1;
+  screen.hchar(18, x++, ':');
+  screen.hstr(18, x, database->getItemName(ITEM_MAGIC_ITEMS, n));
+  /* G@>9423 */
+  screen.setXpt(2);
+  screen.setYpt(19);
+  drawMagicEffectDescription(database->getMagicItemEffect(n));
 }
 
 void ScreenEngine::drawPrompt(unsigned n)

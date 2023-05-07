@@ -41,12 +41,30 @@ private:
       byte name[15];
       byte HP;
       byte WD;
-      byte unknown1[0x12];
-      byte classId;
-      byte unknown2[0x2];
+      byte armorId;
+      int8 armorProtection;
+      byte shieldId;
+      int8 shieldProtection;
+      byte primaryWeaponId;
+      byte primaryWeaponDamage;
+      byte primaryWeaponAmmo;
+      byte secondaryWeaponId;
+      byte secondaryWeaponDamage;
+      byte secondaryWeaponAmmo;
+      int8 baseProtection;
+      int8 weaponBonus;
+      byte unknown2;
+      msb16 exp;
+      byte unknown3[0x2];
+      byte level;
+      byte flags;
+      byte unknown4[0x2];
       byte row;
       byte column;
-      byte unknown3[0x14];
+      struct {
+	byte id;
+	byte remainingUses;
+      } magicItems[10];
     } player[4];	  // V@>1000
     byte unknown_10f0[0x08];
     msb16 mapPosition;    // V@>10F8
@@ -100,7 +118,36 @@ private:
     byte savedProgression; // V@>25FD
     byte unknown_25fe[0x78];
     byte playerOrder[4];  // V@>2676
-    byte unknown_267a[0x69c];
+    byte unknown_267a[0x7e];
+    struct {
+      byte name[15];
+      byte unknown[3];
+    } weapons[8]; // V@>26F8
+    struct {
+      byte name[15];
+      byte unknown1[4];
+      int8 ammoType;
+      byte unknown2;
+      byte ammoName[13];
+    } rangedWeapons[8]; // V@>2788
+    struct {
+      byte name[15];
+      byte unknown[3];
+    } armors[8]; // V@>2898
+    struct {
+      byte name[15];
+      byte unknown[3];
+    } shields[6]; // V@>2928
+    struct {
+      byte name[11];
+      byte unknown[5];
+    } magicItemCategories[8]; // V@>2994
+    struct {
+      byte name[15];
+      byte effect;
+      byte unknown[2];
+    } magicItems[40]; // V@>2a14
+    byte unknown_2ce4[0x32];
     struct {
       byte name[11];
       byte unknown[8];
@@ -113,7 +160,8 @@ private:
     byte unknown_3248[0x8];
     byte extDictionary[4][16]; // V@3250
     byte dictionary[36][12]; // V@3290
-    byte unknown_3440[0x78];
+    byte magicEffect[32][3]; // V@3440
+    byte roomFeatureName[2][12]; // V@34A0
     byte floorMap[17*32-6]; // V@>34B8
     byte pab[10];         // V@>36D2
     byte dsrname[28];     // V@>37DC
@@ -131,13 +179,29 @@ public:
   virtual void setPlayerName(unsigned n, Utils::StringSpan name) override;
   virtual byte getPlayerHP(unsigned n) const override { return data.player[n].HP; }
   virtual byte getPlayerWD(unsigned n) const override { return data.player[n].WD; }
-  virtual byte getPlayerClass(unsigned n) const override { return data.player[n].classId >> 6; }
+  virtual byte getPlayerArmorId(unsigned n) const override { return data.player[n].armorId; }
+  virtual int8 getPlayerArmorProtection(unsigned n) const override { return data.player[n].armorProtection; }
+  virtual byte getPlayerShieldId(unsigned n) const override { return data.player[n].shieldId; }
+  virtual int8 getPlayerShieldProtection(unsigned n) const override { return data.player[n].shieldProtection; }
+  virtual byte getPlayerWeaponId(unsigned n, bool secondary) const override { return (secondary? data.player[n].secondaryWeaponId : data.player[n].primaryWeaponId); }
+  virtual byte getPlayerWeaponDamage(unsigned n, bool secondary) const override { return (secondary? data.player[n].secondaryWeaponDamage : data.player[n].primaryWeaponDamage); }
+  virtual byte getPlayerWeaponAmmo(unsigned n, bool secondary) const override { return (secondary? data.player[n].secondaryWeaponAmmo : data.player[n].primaryWeaponAmmo); }
+  virtual int8 getPlayerBaseProtection(unsigned n) const override { return data.player[n].baseProtection; }
+  virtual byte getPlayerWeaponBonus(unsigned n) const override { return data.player[n].weaponBonus; }
+  virtual uint16 getPlayerExp(unsigned n) const override { return data.player[n].exp; }
+  virtual byte getPlayerLevel(unsigned n) const override { return data.player[n].level; }
+  virtual byte getPlayerClass(unsigned n) const override { return data.player[n].flags >> 6; }
   virtual void setPlayerClass(unsigned n, unsigned c) override;
+  virtual bool isPlayerWeaponSwapped(unsigned n) const override { return (data.player[n].flags >> 5) & 1; }
+  virtual void swapPlayerWeapon(unsigned n) override { data.player[n].flags ^= 0x20; }
   virtual byte getPlayerRow(unsigned n) const override { return data.player[n].row; }
   virtual void setPlayerRow(unsigned n, byte row) override { data.player[n].row = row; }
   virtual byte getPlayerColumn(unsigned n) const override { return data.player[n].column; }
   virtual void setPlayerColumn(unsigned n, byte column) override { data.player[n].column = column; }
   virtual void setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir) override;
+  virtual byte getPlayerMagicItemId(unsigned n, unsigned m) const override { return data.player[n].magicItems[m].id; }
+  virtual byte getPlayerMagicItemRemainingUses(unsigned n, unsigned m) const override { return data.player[n].magicItems[m].remainingUses; }
+  virtual void compactPlayerMagicItems(unsigned n) override;
   virtual bool isQuestObjectFound(unsigned n) const override { return (data.foundQuestObjects >> n)&1; }
   virtual bool isQuestObjectIntact(unsigned n) const override { return (data.intactQuestObjects >> n)&1; }
   virtual uint16 getTurnsLeft(unsigned n) const override { return data.turnsLeft[n]; }
@@ -168,13 +232,17 @@ public:
   virtual void setSavedDirection(Direction direction) override { data.savedDirection = direction; }
   virtual byte getSavedProgression() const override { return data.savedProgression; }
   virtual void setSavedProgression(byte progression) override { data.savedProgression = progression; }
-  virtual Utils::StringSpan questObjectName(unsigned n) const override;
+  virtual Utils::StringSpan getItemName(ItemCategory cat, byte id) const override;
+  virtual int8 getRangedWeaponAmmoType(unsigned id) const override;
+  virtual Utils::StringSpan getRangedWeaponAmmoName(unsigned id) const override;
+  virtual byte getMagicItemEffect(byte n) const override { return data.magicItems[n-1].effect; }
   virtual byte getPlayerColor(unsigned n) const override { return data.patternColors[n]; }
   virtual void setPlayerColor(unsigned n, unsigned c) override;
   virtual Utils::StringSpan getColorTable() const override;
   virtual byte getKeymapEntry(KeyMapping k) const override { return data.keymap[k]; }
   virtual Utils::StringSpan getExtDictionaryWord(byte n) const override;
   virtual Utils::StringSpan getDictionaryWord(byte n) const override;
+  virtual void getMagicEffectDescriptor(byte b, Base36Number (&effect)[3]) const override;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name)
     override;
   virtual MapPosition getMapPosition() const override { return PosWord(data.mapPosition); }

@@ -41,6 +41,15 @@ enum KeyMapping {
   KEYMAP_ATTEMPT_NEGOTIATION = 10
 };
 
+enum ItemCategory {
+  ITEM_ARMORS = 0,
+  ITEM_SHIELDS = 1,
+  ITEM_WEAPONS = 2,
+  ITEM_RANGED_WEAPONS = 3,
+  ITEM_MAGIC_ITEMS = 4,
+  ITEM_QUEST_OBJECTS = 5
+};
+
 constexpr Direction reverse(Direction d)
 {
   return static_cast<Direction>((d+2)&3);
@@ -62,6 +71,17 @@ struct MapPosition {
     }
   }
   void backward(Direction d) { forward(reverse(d)); }
+};
+
+struct Base36Number {
+  byte n;
+  operator bool() const { return n != ' '; }
+  operator byte() const {
+    byte r = n-'0';
+    if (r >= 10)
+      r -= 7;
+    return (r < 36? r : 0);
+  };
 };
 
 }

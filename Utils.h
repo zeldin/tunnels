@@ -34,7 +34,7 @@ public:
   }
   unsigned center() {
     unsigned offs = 0;
-    while (l>0 && p[l-1] == ' ') if ((--l & 1))	offs++;
+    while (l>0 && p[l-1] == ' ') if (!(--l & 1)) offs++;
     return offs;
   }
   void uncenter() {

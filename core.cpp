@@ -42,6 +42,7 @@ GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
     }
   }
   if (kc == '3' && database->inCombat()) {
+    screen.drawPrompt(0x6a);
     /* ... */
   }
   if (kc == '2') {
@@ -52,7 +53,67 @@ GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
 	return d;
   }
   if (kc == '1') {
-    /* ... */
+    bool items = false;
+    int player = database->getCurrentPlayer();
+    for (;;) {
+      if (player < 0)
+	player = database->getNumConfiguredPlayers()-1;
+      if (player >= database->getNumConfiguredPlayers())
+	player = 0;
+      screen.drawPrompt(0x27); // ?!
+      screen.drawPrompt(0x10);
+      screen.drawPlayerStatusHeader(player);
+      if (!items) {
+	screen.drawPrompt(0x6b);
+	do {
+	  acceptMask = ACCEPT_BACK | ACCEPT_UP_DOWN | ACCEPT_ALPHANUMERIC;
+	  if (Diversion d = getKeyNoCursor(kc))
+	    return d;
+	} while (kc > KEY_BACK &&
+		 kc != database->getKeymapEntry(KEYMAP_CHANGE_WEAPON));
+	if (kc == database->getKeymapEntry(KEYMAP_CHANGE_WEAPON) &&
+	    !database->inCombat())
+	  database->swapPlayerWeapon(player);
+      } else {
+	database->compactPlayerMagicItems(player);
+	screen.drawPrompt(0x6c);
+	screen.prepareItemNumberInput();
+	acceptMask = ACCEPT_BACK | ACCEPT_UP_DOWN | ACCEPT_NUMERIC;
+	unsigned itemNumber;
+	if (Diversion d = getNumber(1, 10, itemNumber))
+	  switch(d) {
+	  case DIVERSION_UP:
+	    kc = KEY_UP;
+	    break;
+	  case DIVERSION_DOWN:
+	    kc = KEY_DOWN;
+	    break;
+	  default:
+	    return d;
+	  }
+	else {
+	  --itemNumber;
+	  byte id = database->getPlayerMagicItemId(player, itemNumber);
+	  if (int8(id) <= 0 ||
+	      !database->getPlayerMagicItemRemainingUses(player, itemNumber))
+	    sound.honk();
+	  else {
+	    screen.drawMagicItemDescription(id);
+	    if ((d = flashBorder()))
+	      return d;
+	  }
+	  continue;
+	}
+      }
+      if (kc == KEY_UP) {
+	if (!(items = !items))
+	  player++;
+      }
+      if (kc == KEY_DOWN) {
+	if ((items = !items))
+	  --player;
+      }
+    }
   }
   if (kc == 'E') dir = DIR_NORTH;
   if (kc == 'D') dir = DIR_EAST;
@@ -105,6 +166,8 @@ GameEngine::Diversion GameEngine::room()
     screen.drawStaircase();
     break;
   }
+
+  database->setCurrentPlayer(-1);
 
   if (database->getCurrentLocation() == LOCATION_ENTRANCE &&
       database->getPartyGold() != 0) {

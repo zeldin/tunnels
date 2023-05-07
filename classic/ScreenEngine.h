@@ -16,6 +16,8 @@ private:
   VDP::Backend &backend;
   const Database *database;
   byte activePatternTable;
+  byte displayedPlayer;
+  byte displayedWeaponId;
   class CursorTimer : public Timer::Timer {
   private:
     ScreenEngine &engine;
@@ -54,6 +56,7 @@ public:
   virtual void preparePlayerNameInput(unsigned n) override;
   virtual void preparePlayerClassInput() override;
   virtual void preparePlayerColorInput() override;
+  virtual void prepareItemNumberInput() override;
   virtual void askCharacterAccept() override;
   virtual void setPlayerColors() override;
   virtual void setPlayerShapes(unsigned n) override;
@@ -62,6 +65,9 @@ public:
   virtual void drawGeneralStore() override;
   virtual void drawStaircase() override; 
   virtual void drawPlayer(unsigned n) override;
+  virtual void drawPlayerStatusHeader(unsigned n) override;
+  virtual void drawMagicEffectDescription(byte id) override;
+  virtual void drawMagicItemDescription(unsigned id) override;
 
 private:
   void menuScreen();
@@ -69,11 +75,15 @@ private:
   void clearRoom();
   unsigned putDigit(unsigned y, unsigned x, unsigned d);
   unsigned putNumber(unsigned y, unsigned x, byte n);
+  unsigned putNumber(unsigned y, unsigned x, int8 n);
   unsigned putNumber(unsigned y, unsigned x, uint16 n);
   unsigned putNumberEol(unsigned y, byte n);
   unsigned putNumberEol(unsigned y, uint16 n);
   unsigned putPlural();
   void putQuad(unsigned y, unsigned x, byte base);
+  void putWeaponDescription(unsigned y, unsigned x,
+			    bool secondWeapon, bool showDamage);
+  void putArmorDescription(unsigned y, unsigned x, bool shield);
   unsigned findEndOfLine();
   void promptExtension(byte n);
   void cursorCallback(uint32 expiry);
