@@ -98,6 +98,8 @@ class Renderer {
 protected:
   virtual void drawPattern(unsigned row, unsigned col,
 			   const byte *pat, byte colors) = 0;
+  virtual void drawSprite(byte y, byte x, const byte *pat, byte color) = 0;
+  virtual void removeSprite() = 0;
   virtual void drawBorder(byte color) { };
   virtual void endRender() { };
 };
@@ -108,15 +110,20 @@ private:
   int pitch;
   unsigned border_w;
   unsigned border_h;
+  unsigned sprite_su_y, sprite_su_x, sprite_su_h, sprite_su_w;
+  byte sprite_save_under[2*PATTERN_H][2*PATTERN_W];
 protected:
   BytemapRenderer(byte *data_ = nullptr, int pitch_ = 0,
 		  unsigned border_w_ = 0, unsigned border_h_ = 0) :
-    data(data_), pitch(pitch_), border_w(border_w_), border_h(border_h_) { }
+    data(data_), pitch(pitch_), border_w(border_w_), border_h(border_h_),
+    sprite_su_h(0), sprite_su_w(0) { }
   void set(byte *data_ = nullptr, int pitch_ = 0, unsigned border_w_ = 0,
 	   unsigned border_h_ = 0)
   { data = data_; pitch = pitch_; border_w = border_w_; border_h = border_h_; }
   virtual void drawPattern(unsigned row, unsigned col, const byte *pat,
 			   byte colors) override;
+  virtual void drawSprite(byte y, byte x, const byte *pat, byte color) override;
+  virtual void removeSprite() override;
   virtual void drawBorder(byte color) override;
 };
 
@@ -128,6 +135,12 @@ public:
   ~ScopedRender() { target->endRender(); }
   void drawPattern(unsigned row, unsigned col, const byte *pat, byte colors) {
     target->drawPattern(row, col, pat, colors);
+  }
+  void drawSprite(byte y, byte x, const byte *pat, byte color) {
+    target->drawSprite(y, x, pat, color);
+  }
+  void removeSprite() {
+    target->removeSprite();
   }
   void drawBorder(byte color) {
     target->drawBorder(color);
@@ -153,12 +166,17 @@ class Screen
   byte pattern_generator[PATTERNS][PATTERN_H];
   byte color_table[COLOR_TABLE_ENTRIES];
   byte name_table[ROWS][COLUMNS];
+  byte sprite_pattern_generator[PATTERNS][PATTERN_H];
   bool pattern_generator_dirty[PATTERNS];
   bool name_table_dirty[ROWS][COLUMNS];
   bool any_pattern_generator_dirty;
   bool any_name_table_dirty;
   bool border_dirty;
-  
+  bool sprite_dirty;
+  bool sprite_displayed;
+  bool sprite_active;
+
+  byte sprite_y, sprite_x, sprite_name, sprite_color;
   byte background;
   byte xpt;
   byte ypt;
@@ -167,6 +185,7 @@ class Screen
   void loadColorTable(unsigned idx, const byte *p, unsigned n);
   void loadPatterns7(unsigned idx, const byte *p, unsigned n);
   void loadPatterns8(unsigned idx, const byte *p, unsigned n);
+  void loadSpritePatterns(unsigned idx, const byte *p, unsigned n);
   void loadPatterns(unsigned idx, const byte (&a)[7], unsigned n) {
     loadPatterns7(idx, &a[0], n);
   }
@@ -178,9 +197,14 @@ class Screen
   Screen();
 
   void loadPatterns(unsigned idx, Utils::StringSpan p);
+  void loadSpritePatterns(unsigned idx, Utils::StringSpan p);
   template <unsigned n, unsigned m>
   void loadPatterns(unsigned idx, const byte (&a)[n][m]) {
     loadPatterns(idx, a[0], n);
+  }
+  template <unsigned n>
+  void loadSpritePatterns(unsigned idx, const byte (&a)[n][8]) {
+    loadSpritePatterns(idx, a[0], n);
   }
   void loadColorTable(unsigned idx, Utils::StringSpan p);
   template <unsigned n> void loadColorTable(unsigned idx, const byte (&a)[n])
@@ -200,6 +224,8 @@ class Screen
   Utils::StringSpan gstr(unsigned row, unsigned col, unsigned len);
   void all(byte name);
   void setBackground(byte color);
+  void setSprite(byte y, byte x, byte name, byte color);
+  void clearSprite();
   void refresh(Backend &backend);
 
   byte getXpt() const { return xpt; }

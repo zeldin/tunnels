@@ -22,7 +22,8 @@ void ScreenEngine::mapScreen()
     static constexpr byte mapRevealColorTable[] { 0x4e, 0x4e };
     screen.loadColorTable(14, mapRevealColorTable);
   }
-  // FIXME: place sprite
+  MapPosition mapPos = database->getMapPosition();
+  screen.setSprite((mapPos.y+2)*8-5, (mapPos.x+3)*8-4, 0x90, VDP::DARK_RED);
   screen.setYpt(23);
   screen.setXpt(2);
   drawPrompt(0x02);
@@ -69,7 +70,7 @@ void ScreenEngine::roomScreen()
 
   screen.setXpt(0);
   screen.setYpt(0);
-  // FIXME: Kill sprites
+  screen.clearSprite();
   screen.all(' ');
   initRoom();
   clearRoom();

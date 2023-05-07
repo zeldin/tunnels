@@ -10,6 +10,7 @@ namespace File { class ReadHandle; class WriteHandle; }
 
 class Database {
 public:
+  virtual Utils::StringSpan getSpritePatternTable() const = 0;
   virtual Utils::StringSpan getDescription() const = 0;
   virtual Utils::StringSpan getPatternTable() const = 0;
   virtual Utils::StringSpan getHighPatternTable(bool alternate) const = 0;

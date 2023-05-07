@@ -388,7 +388,7 @@ constexpr const auto prompts = SequencePack::index
 
 void ScreenEngine::initMenu()
 {
-  // FIXME: Kill sprites
+  screen.clearSprite();
   if (activePatternTable == 1) {
     screen.loadPatterns(128, database->getHighPatternTable(true));
     activePatternTable = 2;

@@ -5,6 +5,11 @@
 
 namespace Tunnels { namespace Classic {
 
+Utils::StringSpan DatabaseImpl::getSpritePatternTable() const
+{
+  return data.spritePatternTable;
+}
+
 Utils::StringSpan DatabaseImpl::getDescription() const
 {
   return data.description;

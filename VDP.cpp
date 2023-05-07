@@ -21,6 +21,48 @@ void BytemapRenderer::drawPattern(unsigned row, unsigned col,
   }
 }
 
+void BytemapRenderer::drawSprite(byte y, byte x, const byte *pat, byte color)
+{
+  if (y >= PIXELS_H || x>= PIXELS_W) {
+    sprite_su_w = sprite_su_h = 0;
+    return;
+  }
+  byte *pix = data + (y + border_h)*pitch + x + border_w;
+  unsigned h = 2 * PATTERN_H;
+  unsigned w = 2 * PATTERN_H;
+  if (y + h > PIXELS_H)
+    h = PIXELS_H - y;
+  if (x + w > PIXELS_W)
+    w = PIXELS_W - x;
+  sprite_su_y = y;
+  sprite_su_x = x;
+  sprite_su_w = w;
+  sprite_su_h = h;
+  for (unsigned i = 0; i < h; i++) {
+    uint16 p = (pat[0] << 8) | pat[16];
+    for (unsigned j = 0; j < w; j++, p <<= 1) {
+      sprite_save_under[i][j] = pix[j];
+      if ((p & 0x8000))
+	pix[j] = color;
+    }
+    pix += pitch;
+    pat++;
+  }
+}
+
+void BytemapRenderer::removeSprite()
+{
+  if (!sprite_su_w || !sprite_su_h)
+    return;
+  byte *pix = data + (sprite_su_y + border_h)*pitch + sprite_su_x + border_w;
+  for (unsigned i = 0; i < sprite_su_h; i++) {
+    for (unsigned j = 0; j < sprite_su_w; j++)
+      pix[j] = sprite_save_under[i][j];
+    pix += pitch;
+  }
+  sprite_su_w = sprite_su_h = 0;
+}
+
 void BytemapRenderer::drawBorder(byte color)
 {
   if (!data) return;
@@ -191,9 +233,35 @@ void Screen::loadPatterns8(unsigned idx, const byte *p, unsigned n)
   any_pattern_generator_dirty = true;
 }
 
+void Screen::loadSpritePatterns(unsigned idx, const byte *p, unsigned n)
+{
+  if (idx >= PATTERNS || !n)
+    return;
+  if (n > PATTERNS - idx)
+    n = PATTERNS - idx;
+  if (sprite_active && sprite_name >= idx && n > sprite_name-idx)
+    sprite_dirty = true;
+  byte *g = sprite_pattern_generator[idx];
+  while (n--) {
+    *g++ = *p++;
+    *g++ = *p++;
+    *g++ = *p++;
+    *g++ = *p++;
+    *g++ = *p++;
+    *g++ = *p++;
+    *g++ = *p++;
+    *g++ = *p++;
+  }
+}
+
 void Screen::loadPatterns(unsigned idx, Utils::StringSpan p)
 {
   loadPatterns8(idx, p.ptr(), p.len() >> 3);
+}
+
+void Screen::loadSpritePatterns(unsigned idx, Utils::StringSpan p)
+{
+  loadSpritePatterns(idx, p.ptr(), p.len() >> 3);
 }
 
 void Screen::hchar(unsigned row, unsigned col, byte name, unsigned cnt)
@@ -313,9 +381,34 @@ void Screen::setBackground(byte color)
   }
 }
 
+void Screen::setSprite(byte y, byte x, byte name, byte color)
+{
+  color &= 0xf;
+  y++;
+  if (!sprite_active || y != sprite_y || x != sprite_x ||
+      name != sprite_name || color != sprite_color) {
+    sprite_y = y;
+    sprite_x = x;
+    sprite_name = name;
+    sprite_color = color;
+    sprite_active = true;
+    sprite_dirty = true;
+  }
+}
+
+void Screen::clearSprite()
+{
+  if (sprite_active) {
+    sprite_active = false;
+    sprite_dirty = true;
+  }
+}
+
+
 void Screen::refresh(Backend &backend)
 {
-  if (!any_name_table_dirty && !any_pattern_generator_dirty && !border_dirty)
+  if (!any_name_table_dirty && !any_pattern_generator_dirty &&
+      !border_dirty && !sprite_dirty)
     return;
   unsigned i, j;
   if (any_name_table_dirty || any_pattern_generator_dirty)
@@ -328,9 +421,11 @@ void Screen::refresh(Backend &backend)
 	break;
     }
   else i=ROWS;
-  if (i<ROWS || border_dirty) {
+  if (i<ROWS || border_dirty || sprite_dirty) {
     ScopedRender r{backend.startRender()};
     byte name;
+    if (sprite_displayed)
+      r.removeSprite();
     if (border_dirty) {
       r.drawBorder(background);
       border_dirty = false;
@@ -346,6 +441,13 @@ void Screen::refresh(Backend &backend)
 	  r.drawPattern(i, j, pattern_generator[name], c);
 	  name_table_dirty[i][j] = false;
 	}
+    if (sprite_active) {
+      r.drawSprite(sprite_y, sprite_x, sprite_pattern_generator[sprite_name],
+		   sprite_color);
+      sprite_displayed = true;
+    } else
+      sprite_displayed = false;
+    sprite_dirty = false;
   }
   any_name_table_dirty = false;
   if (any_pattern_generator_dirty) {
@@ -359,12 +461,16 @@ Screen::Screen()
   memset(pattern_generator, 0, sizeof(pattern_generator));
   memset(color_table, 0, sizeof(color_table));
   memset(name_table, 0, sizeof(name_table));
+  memset(sprite_pattern_generator, 0, sizeof(pattern_generator));
   memset(pattern_generator_dirty, 0, sizeof(pattern_generator_dirty));
   memset(name_table_dirty, 0, sizeof(name_table_dirty));
   pattern_generator_dirty[0] = true;
   any_pattern_generator_dirty = true;
   any_name_table_dirty = false;
   border_dirty = true;
+  sprite_dirty = true;
+  sprite_displayed = false;
+  sprite_active = false;
   background = 0;
   xpt = 0;
   ypt = 0;

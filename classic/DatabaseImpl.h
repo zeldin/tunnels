@@ -33,7 +33,7 @@ private:
   };
 
   struct {
-    byte unknown_0400[0x200]; 
+    byte spritePatternTable[0x200]; // V@>0400
     byte description[384]; // V@>0600
     byte unknown_0780[0x80];
     byte patternTable[0x800]; // V@>0800
@@ -170,6 +170,7 @@ private:
 protected:
   DatabaseImpl() { }
 public:
+  virtual Utils::StringSpan getSpritePatternTable() const override;
   virtual Utils::StringSpan getDescription() const override;
   virtual Utils::StringSpan getPatternTable() const override;
   virtual Utils::StringSpan getHighPatternTable(bool alternate) const override;

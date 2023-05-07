@@ -122,6 +122,7 @@ void ScreenEngine::setDatabase(const Database *db)
   if (!db)
     return;
   screen.loadPatterns(0, database->getPatternTable());
+  screen.loadSpritePatterns(0x80, database->getSpritePatternTable());
   if (!database->alternateHighPatternsActive())
     activePatternTable = 1;
 }
