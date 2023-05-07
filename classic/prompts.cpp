@@ -1008,18 +1008,28 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  unsigned x = screen.getXpt();
 	  unsigned y = screen.getYpt();
 	  byte n = *ptr++;
+	  Utils::StringSpan text;
 	  if ((n & 0x80)) {
 	    n = ~n;
-	    screen.hstr(y, x, database->getDictionaryWord(n));
+	    text = database->getDictionaryWord(n);
 	  } else {
 	    uint16 addr = (n << 8) | *ptr++;
 	    n = *ptr++;
 	    if (n == 16 && !(addr & 15) &&
 		addr >= 0x3250 && addr <= 0x3280)
-	      screen.hstr(y, x, database->getExtDictionaryWord((addr-0x3250)>>4));
-	    else
-	      screen.hchar(y, x, '*', n); /* FIXME */
+	      text = database->getExtDictionaryWord((addr-0x3250)>>4);
+	    else {
+	      /* FIXME */
+	      byte buf[n];
+	      for (unsigned i = 0; i<n; i++)
+		buf[i] = '*';
+	      text = Utils::StringSpan(buf, n);
+	    }
 	  }
+	  unsigned margin = 30 - screen.getXpt();
+	  if (margin < text.len() && text.len() < 32)
+	    text.subspan(0, margin);
+	  screen.hstr(y, x, text);
 	  screen.setXpt(findEndOfLine()+2);
 	}
 	break;
