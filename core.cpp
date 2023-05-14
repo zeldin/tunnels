@@ -318,8 +318,6 @@ GameEngine::Diversion GameEngine::corridor()
 	/* FIXME G@>67F2 */
       } else if (keyCode == database->getKeymapEntry(KEYMAP_TRADE_ITEMS)) {
 	/* FIXME G@>6820 */
-      } else {
-	/* FIXME G@>682C */
       }
     }
   }
