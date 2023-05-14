@@ -197,6 +197,7 @@ GameEngine::Diversion GameEngine::room()
   switch (database->getCurrentLocation()) {
   case LOCATION_ENTRANCE:
     screen.drawGeneralStore();
+    screen.setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
   case LOCATION_DESCENDING_STAIRCASE:
   case LOCATION_ASCENDING_STAIRCASE:
     screen.drawStaircase();
@@ -240,8 +241,12 @@ GameEngine::Diversion GameEngine::room()
       }
       if (keyCode == KEY_UP) {
 	/* ... */
+	screen.setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
+	/* ... */
       }
       if (keyCode == KEY_DOWN) {
+	/* ... */
+	screen.setRoomFixtureShape(FIXTURE_ASCENDING_STAIRS);
 	/* ... */
       }
     }
