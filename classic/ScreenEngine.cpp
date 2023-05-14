@@ -114,7 +114,15 @@ void ScreenEngine::setRoomFixtureShape(RoomFixture f)
 {
   Utils::StringSpan patterns = database->getHighPatternTable(false);
   patterns.subspan(unsigned(f)*(4*8), 4*8);
+  patterns.store(fixturePattern);
   screen.loadPatterns(244, patterns);
+}
+
+void ScreenEngine::clearRoomFixtures()
+{
+  static constexpr byte zeroes[8*8] = {0,};
+  Utils::StringSpan(zeroes).store(fixturePattern);
+  screen.loadPatterns(240, zeroes);
 }
 
 void ScreenEngine::refresh()
@@ -128,7 +136,10 @@ void ScreenEngine::setDatabase(const Database *db)
   activePatternsAndColors = APAC_MENU;
   if (!db)
     return;
-  screen.loadPatterns(0, database->getPatternTable());
+  Utils::StringSpan patterns = database->getPatternTable();
+  screen.loadPatterns(0, patterns);
+  patterns.subspan(244*8, 4*8);
+  patterns.store(fixturePattern);
   screen.loadSpritePatterns(0x80, database->getSpritePatternTable());
   if (!database->alternateHighPatternsActive())
     activePatternsAndColors = APAC_ROOM;

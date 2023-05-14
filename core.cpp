@@ -15,7 +15,7 @@ bool GameEngine::tryMove()
   /* FIXME: Clear room descriptor */
   if (!database->canMove(pos, direction, loc))
     return false;
-  /* FIXME: Clear patterns 240-247 */
+  screen.clearRoomFixtures();
   /* FIXME: Clear monster name */
   /* FIXME: Set zero enemies */
   switch (loc) {
@@ -338,11 +338,21 @@ GameEngine::Diversion GameEngine::corridor()
 	if (!tryMove())
 	  break;
 	loc = database->getCurrentLocation();
-	if (loc != LOCATION_ROOM && ! loc >= LOCATION_DESCENDING_STAIRCASE)
+	if (loc != LOCATION_ROOM && !(loc >= LOCATION_DESCENDING_STAIRCASE))
 	  return DIVERSION_CORRIDOR_MAIN;
 	if (keyCode == database->getKeymapEntry(KEYMAP_BREAK_DOOR))
 	  lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
-	/* FIXME: G@>A02A */
+	sound.stopMusic();
+	for (unsigned n = 0; n < 8; n++) {
+	  screen.drawDoorReveal(n);
+	  if (n==3)
+	    ; /* FIXME: G@>C03A */
+	  if (lastActionKey != 'B') // Not using keymap! G@>A6B4
+	    if (Diversion d = delay(50))
+	      return d;
+	}
+	if (Diversion d = delay(500))
+	  return d;
 	return DIVERSION_CONTINUE_GAME;
       } else if (keyCode == database->getKeymapEntry(KEYMAP_USE_ITEM)) {
 	/* FIXME G@>67DF */

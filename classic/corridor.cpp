@@ -403,6 +403,24 @@ void ScreenEngine::drawCorridorRightWall(unsigned n)
   }
 }
 
+void ScreenEngine::drawDoorReveal(unsigned n)
+{
+  unsigned x = 19-n;
+  unsigned offs = 16;
+  if (n >= 4) {
+    offs = 0;
+    n -= 4;
+  }
+  n *= 2;
+  screen.vchar(3, x, 0xc8, 3);
+  for (unsigned i = 0; i < 8; i++) {
+    byte top = (fixturePattern[offs++] >> n) & 3;
+    byte bottom = (fixturePattern[offs++] >> n) & 3;
+    screen.vchar(6+i, x, 0xc8 + (bottom << 2) + top);
+  }
+  screen.vchar(14, x, 0xc8, 2);
+}
+
 void ScreenEngine::showCompass(Direction dir)
 {
   screen.setSprite(8, 120, 0x80+(dir << 2), VDP::BLACK);

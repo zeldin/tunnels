@@ -37,6 +37,7 @@ public:
   virtual void setPlayerColors() {}
   virtual void setPlayerShapes(unsigned n) {}
   virtual void setRoomFixtureShape(RoomFixture f) {}
+  virtual void clearRoomFixtures() {}
   virtual void roomScreen() = 0;
   virtual void corridorScreen() = 0;
   virtual void mapScreen() = 0;
@@ -48,6 +49,7 @@ public:
   virtual void drawCorridorRightJunction(unsigned n, Location loc) = 0;
   virtual void drawCorridorLeftWall(unsigned n) = 0;
   virtual void drawCorridorRightWall(unsigned n) = 0;
+  virtual void drawDoorReveal(unsigned n) = 0;
   virtual void showCompass(Direction dir) = 0;
   virtual void drawPlayer(unsigned n) = 0;
   virtual void drawPlayerStatusHeader(unsigned n) = 0;

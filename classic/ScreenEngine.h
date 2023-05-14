@@ -22,6 +22,7 @@ private:
   } activePatternsAndColors;
   byte displayedPlayer;
   byte displayedWeaponId;
+  byte fixturePattern[32];
   class CursorTimer : public Timer::Timer {
   private:
     ScreenEngine &engine;
@@ -65,6 +66,7 @@ public:
   virtual void setPlayerColors() override;
   virtual void setPlayerShapes(unsigned n) override;
   virtual void setRoomFixtureShape(RoomFixture f) override;
+  virtual void clearRoomFixtures() override;
   virtual void roomScreen() override;
   virtual void corridorScreen() override;
   virtual void mapScreen() override;
@@ -76,6 +78,7 @@ public:
   virtual void drawCorridorRightJunction(unsigned n, Location loc) override;
   virtual void drawCorridorLeftWall(unsigned n) override;
   virtual void drawCorridorRightWall(unsigned n) override;
+  virtual void drawDoorReveal(unsigned n) override;
   virtual void showCompass(Direction dir) override;
   virtual void drawPlayer(unsigned n) override;
   virtual void drawPlayerStatusHeader(unsigned n) override;
