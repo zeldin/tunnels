@@ -221,15 +221,12 @@ GameEngine::Diversion GameEngine::room()
 
 GameEngine::Diversion GameEngine::corridor()
 {
-  // -> G@>66F7
-  /* FIXME: If no direction set previous direction */
-  screen.corridorScreen();
+  MapPosition pos = database->getMapPosition();
+  Location loc = database->mapLocation(pos);
+  database->setCurrentLocation(loc);
+  if (loc == LOCATION_ROOM || loc > LOCATION_FOUNTAIN)
+    return DIVERSION_CONTINUE_GAME;
   for (;;) {
-    MapPosition pos = database->getMapPosition();
-    Location loc = database->mapLocation(pos);
-    database->setCurrentLocation(loc);
-    if (loc == LOCATION_ROOM || loc > LOCATION_FOUNTAIN)
-      return DIVERSION_CONTINUE_GAME;
     screen.clearMessages();
     /* FIXME: V@>111D */
     database->setMapVisited(pos, true);
@@ -275,51 +272,56 @@ GameEngine::Diversion GameEngine::corridor()
     if (database->getCurrentLocation() == LOCATION_FOUNTAIN) {
       /* FIXME */
     }
-    /* FIXME: V@>1D02 */
-    backTarget = DIVERSION_CORRIDOR;
-    /* FIXME: Advance time, clear stuff */
-    byte keyCode;
-    Direction dir;
-    if (Diversion d = getMovementKey(keyCode, dir))
-      return d;
-    if (dir == DIR_NONE) {
-      if (keyCode == database->getKeymapEntry(KEYMAP_CHECK_HIDDEN_DOORS)) {
-	lastActionKey = keyCode;
-	/* FIXME G@>67CE */
+    for (;;) {
+      /* G@>675C */
+
+      /* FIXME: V@>1D02 */
+      backTarget = DIVERSION_CORRIDOR;
+      /* FIXME: Advance time, clear stuff */
+      byte keyCode;
+      Direction dir;
+      if (Diversion d = getMovementKey(keyCode, dir))
+	return d;
+      if (dir == DIR_NONE) {
+	if (keyCode == database->getKeymapEntry(KEYMAP_CHECK_HIDDEN_DOORS)) {
+	  lastActionKey = keyCode;
+	  /* FIXME G@>67CE */
+	  break;
+	}
+	if (keyCode == database->getKeymapEntry(KEYMAP_BREAK_DOOR))
+	  dir = DIR_NORTH;
       }
-      if (keyCode == database->getKeymapEntry(KEYMAP_BREAK_DOOR))
-	dir = DIR_NORTH;
-    }
-    if (dir != DIR_NONE) {
-      dir = direction + dir;
-      if (dir != direction) {
-	direction = dir;
-	/* FIXME: G@>A028 */
-	continue;
-      }
-      /* FIXME */
-      if (keyCode == database->getKeymapEntry(KEYMAP_BREAK_DOOR))
-	lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
-      MapPosition pos = database->getMapPosition();
-      if (database->canMove(pos, direction, loc) &&
-	  (loc == LOCATION_CORRIDOR || loc == LOCATION_FOUNTAIN)) {
+      if (dir != DIR_NONE) {
+	dir = direction + dir;
+	if (dir != direction) {
+	  direction = dir;
+	  /* FIXME: G@>A07A */
+	  return DIVERSION_CORRIDOR_MAIN;
+	}
+	/* FIXME G@>697C */
+	if (!database->canMove(pos, direction, loc))
+	  break;
+	MapPosition pos = database->getMapPosition();
 	pos.forward(direction);
 	database->setMapPosition(pos);
+	if (loc != LOCATION_ROOM && ! loc >= LOCATION_DESCENDING_STAIRCASE)
+	  return DIVERSION_CORRIDOR_MAIN;
+	if (keyCode == database->getKeymapEntry(KEYMAP_BREAK_DOOR))
+	  lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
+	/* FIXME: G@>A02A */
+	return DIVERSION_CONTINUE_GAME;
+      } else if (keyCode == database->getKeymapEntry(KEYMAP_USE_ITEM)) {
+	/* FIXME G@>67DF */
+      } else if (keyCode == database->getKeymapEntry(KEYMAP_CHANGE_ORDER)) {
+	/* FIXME G@>67E8 */
+      } else if (keyCode == database->getKeymapEntry(KEYMAP_LISTEN_AT_DOOR)) {
+	/* FIXME G@>67F2 */
+      } else if (keyCode == database->getKeymapEntry(KEYMAP_TRADE_ITEMS)) {
+	/* FIXME G@>6820 */
+      } else {
+	/* FIXME G@>682C */
       }
-      continue;
-    } else if (keyCode == database->getKeymapEntry(KEYMAP_USE_ITEM)) {
-      /* FIXME G@>67DF */
-    } else if (keyCode == database->getKeymapEntry(KEYMAP_CHANGE_ORDER)) {
-      /* FIXME G@>67E8 */
-    } else if (keyCode == database->getKeymapEntry(KEYMAP_LISTEN_AT_DOOR)) {
-      /* FIXME G@>67F2 */
-    } else if (keyCode == database->getKeymapEntry(KEYMAP_TRADE_ITEMS)) {
-      /* FIXME G@>6820 */
-    } else {
-      /* FIXME G@>682C */
     }
-
-    return DIVERSION_NULL;
   }
 }
 

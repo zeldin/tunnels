@@ -96,6 +96,10 @@ EventType GameEngine::run()
 	continue;
       return EVENT_NULL;
     case DIVERSION_CORRIDOR:
+      // -> G@>66F7
+      /* FIXME: If no direction set previous direction */
+      screen.corridorScreen();
+    case DIVERSION_CORRIDOR_MAIN:
       if ((diversion = corridor()))
 	continue;
       return EVENT_NULL;
