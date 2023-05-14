@@ -64,6 +64,7 @@ public:
   virtual void askCharacterAccept() override;
   virtual void setPlayerColors() override;
   virtual void setPlayerShapes(unsigned n) override;
+  virtual void setRoomFixtureShape(RoomFixture f) override;
   virtual void roomScreen() override;
   virtual void corridorScreen() override;
   virtual void mapScreen() override;

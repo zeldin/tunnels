@@ -36,6 +36,7 @@ public:
   virtual void askCharacterAccept() {};
   virtual void setPlayerColors() {}
   virtual void setPlayerShapes(unsigned n) {}
+  virtual void setRoomFixtureShape(RoomFixture f) {}
   virtual void roomScreen() = 0;
   virtual void corridorScreen() = 0;
   virtual void mapScreen() = 0;

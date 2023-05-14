@@ -9,7 +9,37 @@ namespace Tunnels {
 bool GameEngine::tryMove()
 {
   // G@A028
-  return false;
+  // G@A9B5
+  MapPosition pos = database->getMapPosition();
+  Location loc;
+  /* FIXME: Clear room descriptor */
+  if (!database->canMove(pos, direction, loc))
+    return false;
+  /* FIXME: Clear patterns 240-247 */
+  /* FIXME: Clear monster name */
+  /* FIXME: Set zero enemies */
+  switch (loc) {
+  case LOCATION_ROOM:
+    /* FIXME */
+    break;
+  case LOCATION_FOUNTAIN:
+    screen.setRoomFixtureShape(FIXTURE_FOUNTAIN);
+    break;
+  case LOCATION_DESCENDING_STAIRCASE:
+    screen.setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
+    break;
+  case LOCATION_ASCENDING_STAIRCASE:
+    screen.setRoomFixtureShape(FIXTURE_ASCENDING_STAIRS);
+    break;
+  }
+  // G@>A76B
+  pos.forward(direction);
+  database->setMapPosition(pos);
+  loc = database->mapLocation(pos);
+  database->setCurrentLocation(loc);
+  /* FIXME: clear V@>2684 */
+  database->setSecretDoorsRevealed(false);
+  return true;
 }
 
 GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
@@ -298,12 +328,9 @@ GameEngine::Diversion GameEngine::corridor()
 	  /* FIXME: G@>A07A */
 	  return DIVERSION_CORRIDOR_MAIN;
 	}
-	/* FIXME G@>697C */
-	if (!database->canMove(pos, direction, loc))
+	if (!tryMove())
 	  break;
-	MapPosition pos = database->getMapPosition();
-	pos.forward(direction);
-	database->setMapPosition(pos);
+	loc = database->getCurrentLocation();
 	if (loc != LOCATION_ROOM && ! loc >= LOCATION_DESCENDING_STAIRCASE)
 	  return DIVERSION_CORRIDOR_MAIN;
 	if (keyCode == database->getKeymapEntry(KEYMAP_BREAK_DOOR))

@@ -50,6 +50,15 @@ enum ItemCategory {
   ITEM_QUEST_OBJECTS = 5
 };
 
+enum RoomFixture {
+  FIXTURE_FOUNTAIN = 0,
+  FIXTURE_LIVING_STATUE = 1,
+  FIXTURE_ASCENDING_STAIRS = 2,
+  FIXTURE_DESCENDING_STAIRS = 3,
+  FIXTURE_GENERAL_STORE = 4,
+  FIXTURE_VAULT = 5
+};
+
 constexpr Direction operator+(Direction a, Direction b)
 {
   return static_cast<Direction>((unsigned(a)+unsigned(b))&3);
