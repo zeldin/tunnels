@@ -50,19 +50,24 @@ enum ItemCategory {
   ITEM_QUEST_OBJECTS = 5
 };
 
+constexpr Direction operator+(Direction a, Direction b)
+{
+  return static_cast<Direction>((unsigned(a)+unsigned(b))&3);
+}
+
 constexpr Direction reverse(Direction d)
 {
-  return static_cast<Direction>((d+2)&3);
+  return d + DIR_SOUTH;
 }
 
 constexpr Direction left(Direction d)
 {
-  return static_cast<Direction>((d-1)&3);
+  return d + DIR_WEST;
 }
 
 constexpr Direction right(Direction d)
 {
-  return static_cast<Direction>((d+1)&3);
+  return d + DIR_EAST;
 }
 
 struct MapPosition {

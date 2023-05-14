@@ -216,65 +216,85 @@ GameEngine::Diversion GameEngine::corridor()
   // -> G@>66F7
   /* FIXME: If no direction set previous direction */
   screen.corridorScreen();
-  MapPosition pos = database->getMapPosition();
-  Location loc = database->mapLocation(pos);
-  database->setCurrentLocation(loc);
-  if (loc == LOCATION_ROOM || loc > LOCATION_FOUNTAIN)
-    return DIVERSION_CONTINUE_GAME;
-  screen.clearMessages();
-  /* FIXME: V@>111D */
-  database->setMapVisited(pos, true);
-  for (unsigned n = 0; ;) {
-    screen.drawCorridorSegment(n, loc);
-    if (n != 0 && loc != LOCATION_CORRIDOR && loc != LOCATION_FOUNTAIN)
-      break;
-    if (n == 4)
-      break;
-    Location loc2;
-    if (database->canMove(pos, left(direction), loc2)) {
-      if (loc == LOCATION_ROOM && n == 0 &&
-	  (loc2 == LOCATION_CORRIDOR || loc2 == LOCATION_FOUNTAIN))
-	loc2 = LOCATION_ROOM;
-      else if (loc == LOCATION_FOUNTAIN &&
-	       loc2 != LOCATION_BLANK && loc2 != LOCATION_FOUNTAIN)
-	loc2 = LOCATION_CORRIDOR;
-      screen.drawCorridorLeftJunction(n, loc2);
-    } else
-      screen.drawCorridorLeftWall(n);
-    if (database->canMove(pos, right(direction), loc2)) {
-      if (loc == LOCATION_ROOM && n == 0 &&
-	  (loc2 == LOCATION_CORRIDOR || loc2 == LOCATION_FOUNTAIN))
-	loc2 = LOCATION_ROOM;
-      else if (loc == LOCATION_FOUNTAIN &&
-	       loc2 != LOCATION_BLANK && loc2 != LOCATION_FOUNTAIN)
-	loc2 = LOCATION_CORRIDOR;
-      screen.drawCorridorRightJunction(n, loc2);
-    } else
-      screen.drawCorridorRightWall(n);
-    n++;
-    if (!database->canMove(pos, direction, loc)) {
-      loc = LOCATION_BLANK;
+  for (;;) {
+    MapPosition pos = database->getMapPosition();
+    Location loc = database->mapLocation(pos);
+    database->setCurrentLocation(loc);
+    if (loc == LOCATION_ROOM || loc > LOCATION_FOUNTAIN)
+      return DIVERSION_CONTINUE_GAME;
+    screen.clearMessages();
+    /* FIXME: V@>111D */
+    database->setMapVisited(pos, true);
+    for (unsigned n = 0; ;) {
+      screen.drawCorridorSegment(n, loc);
+      if (n != 0 && loc != LOCATION_CORRIDOR && loc != LOCATION_FOUNTAIN)
+	break;
+      if (n == 4)
+	break;
+      Location loc2;
+      if (database->canMove(pos, left(direction), loc2)) {
+	if (loc == LOCATION_ROOM && n == 0 &&
+	    (loc2 == LOCATION_CORRIDOR || loc2 == LOCATION_FOUNTAIN))
+	  loc2 = LOCATION_ROOM;
+	else if (loc == LOCATION_FOUNTAIN &&
+		 loc2 != LOCATION_BLANK && loc2 != LOCATION_FOUNTAIN)
+	  loc2 = LOCATION_CORRIDOR;
+	screen.drawCorridorLeftJunction(n, loc2);
+      } else
+	screen.drawCorridorLeftWall(n);
+      if (database->canMove(pos, right(direction), loc2)) {
+	if (loc == LOCATION_ROOM && n == 0 &&
+	    (loc2 == LOCATION_CORRIDOR || loc2 == LOCATION_FOUNTAIN))
+	  loc2 = LOCATION_ROOM;
+	else if (loc == LOCATION_FOUNTAIN &&
+		 loc2 != LOCATION_BLANK && loc2 != LOCATION_FOUNTAIN)
+	  loc2 = LOCATION_CORRIDOR;
+	screen.drawCorridorRightJunction(n, loc2);
+      } else
+	screen.drawCorridorRightWall(n);
+      n++;
+      if (!database->canMove(pos, direction, loc)) {
+	loc = LOCATION_BLANK;
+	continue;
+      } else if(loc == LOCATION_ROOM)
+	continue;
+      pos.forward(direction);
+      loc = database->mapLocation(pos);
+      if ((loc == LOCATION_CORRIDOR || loc == LOCATION_FOUNTAIN) && n != 4)
+	database->setMapVisited(pos, true);
+    }
+    screen.showCompass(direction);
+    if (database->getCurrentLocation() == LOCATION_FOUNTAIN) {
+      /* FIXME */
+    }
+    /* FIXME: V@>1D02 */
+    backTarget = DIVERSION_CORRIDOR;
+    /* FIXME: Advance time, clear stuff */
+    byte keyCode;
+    Direction dir;
+    if (Diversion d = getMovementKey(keyCode, dir))
+      return d;
+    if (dir != DIR_NONE) {
+      dir = direction + dir;
+      if (dir != direction) {
+	direction = dir;
+	/* FIXME: G@>A028 */
+	continue;
+      }
+      /* FIXME */
+      MapPosition pos = database->getMapPosition();
+      if (database->canMove(pos, direction, loc) &&
+	  (loc == LOCATION_CORRIDOR || loc == LOCATION_FOUNTAIN)) {
+	pos.forward(direction);
+	database->setMapPosition(pos);
+      }
       continue;
-    } else if(loc == LOCATION_ROOM)
-      continue;
-    pos.forward(direction);
-    loc = database->mapLocation(pos);
-    if ((loc == LOCATION_CORRIDOR || loc == LOCATION_FOUNTAIN) && n != 4)
-      database->setMapVisited(pos, true);
-  }
-  screen.showCompass(direction);
-  if (database->getCurrentLocation() == LOCATION_FOUNTAIN) {
-    /* FIXME */
-  }
-  /* FIXME: V@>1D02 */
-  backTarget = DIVERSION_CORRIDOR;
-  /* FIXME: Advance time, clear stuff */
-  byte keyCode;
-  Direction dir;
-  if (Diversion d = getMovementKey(keyCode, dir))
-    return d;
+    } else {
+      /* FIXME */
+    }
 
-  return DIVERSION_NULL;
+    return DIVERSION_NULL;
+  }
 }
 
 GameEngine::Diversion GameEngine::core()
