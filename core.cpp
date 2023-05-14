@@ -259,6 +259,8 @@ GameEngine::Diversion GameEngine::corridor()
   for (;;) {
     screen.clearMessages();
     /* FIXME: V@>111D */
+    pos = database->getMapPosition();
+    loc = database->getCurrentLocation();
     database->setMapVisited(pos, true);
     for (unsigned n = 0; ;) {
       screen.drawCorridorSegment(n, loc);
