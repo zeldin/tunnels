@@ -9,12 +9,7 @@ namespace Tunnels { namespace Classic {
 
 void ScreenEngine::mapScreen()
 {
-  using namespace VDP::FMTBuilder;
-
-  screen.all(' ');
-  static constexpr const auto fmt1 =
-    fmt(COL(2), ROW(1), RPTB(19, HCHA(28, 'k'), RIGHT(4)));
-  fmt1(screen);
+  clearMapOrCorridor();
   screen.hstr(2, 3, database->getFloorMap());
   drawPrompt(0x62);
   if (!database->hasHiddenMap() ||
@@ -31,12 +26,25 @@ void ScreenEngine::mapScreen()
 
 void ScreenEngine::initRoom()
 {
-  if (activePatternTable != 1) {
+  if (activePatternsAndColors != APAC_ROOM) {
     screen.loadPatterns(128, database->getHighPatternTable(false));
     screen.setBackground(VDP::LIGHT_GREEN);
-    activePatternTable = 1;
   }
   screen.loadColorTable(0, database->getColorTable());
+  activePatternsAndColors = APAC_ROOM;
+}
+
+void ScreenEngine::clearMessages()
+{
+  using namespace VDP::FMTBuilder;
+
+  // Clear message display
+  if (screen.gchar(18, 2) < 0x60) screen.hchar(18, 2, ' ', 28);
+  if (screen.gchar(19, 2) < 0x60) screen.hchar(19, 2, ' ', 28);
+  // Clear bottom 4 lines
+  static constexpr const auto fmt1 =
+    fmt(ROW(20), COL(0), RPTB(4, RIGHT(2), HCHA(28, ' '), RIGHT(2)));
+  fmt1(screen);
 }
 
 void ScreenEngine::clearRoom()
@@ -55,13 +63,7 @@ void ScreenEngine::clearRoom()
   static constexpr const auto fmt2 =
     fmt(RPTB(18, RIGHT(20), HCHA(10, ' '), RIGHT(2)));
   fmt2(screen);
-  // Clear message display
-  if (screen.gchar(18, 2) < 0x60) screen.hchar(18, 2, ' ', 28);
-  if (screen.gchar(19, 2) < 0x60) screen.hchar(19, 2, ' ', 28);
-  // Clear current player indicator
-  static constexpr const auto fmt3 =
-    fmt(ROW(20), COL(0), RPTB(4, RIGHT(2), HCHA(28, ' '), RIGHT(2)));
-  fmt3(screen);
+  clearMessages();
 }
 
 void ScreenEngine::roomScreen()

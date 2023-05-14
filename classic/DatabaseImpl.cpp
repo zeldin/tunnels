@@ -198,6 +198,16 @@ void DatabaseImpl::setPlayerColor(unsigned n, unsigned c)
   data.patternColors[n] = colors[c];
 }
 
+Utils::StringSpan DatabaseImpl::getFloorColorTable(unsigned floor) const
+{
+  if (floor != 0) {
+    floor = (floor-1) >> 1;
+    if (floor < 5)
+      return data.corridorColors[floor];
+  }
+  return Utils::StringSpan();
+}
+
 Utils::StringSpan DatabaseImpl::getColorTable() const
 {
   return data.patternColors;

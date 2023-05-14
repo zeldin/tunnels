@@ -152,7 +152,8 @@ private:
       byte name[11];
       byte unknown[8];
     } questObjects[8];     // V@>2D16
-    byte unknown_2dae[0xc2];
+    byte unknown_2dae[0x90];
+    byte corridorColors[5][10]; // V@>2E3E
     byte patternColors[32];  // V@>2E70
     byte patternTable2[0x380]; // V@2E90
     byte unknown_3210[0x2d];
@@ -229,6 +230,7 @@ public:
   virtual void setCurrentPlayer(int n) override { data.currentPlayer = n+1; }
   virtual bool nextPlayerInOrder() override;
   virtual Location getCurrentLocation() const override { return static_cast<Location>(data.currentLocation); }
+  virtual void setCurrentLocation(Location loc) override { data.currentLocation = loc; }
   virtual Direction getSavedDirection() const override { return static_cast<Direction>(data.savedDirection & 3); }
   virtual void setSavedDirection(Direction direction) override { data.savedDirection = direction; }
   virtual byte getSavedProgression() const override { return data.savedProgression; }
@@ -239,6 +241,7 @@ public:
   virtual byte getMagicItemEffect(byte n) const override { return data.magicItems[n-1].effect; }
   virtual byte getPlayerColor(unsigned n) const override { return data.patternColors[n]; }
   virtual void setPlayerColor(unsigned n, unsigned c) override;
+  virtual Utils::StringSpan getFloorColorTable(unsigned floor) const override;
   virtual Utils::StringSpan getColorTable() const override;
   virtual byte getKeymapEntry(KeyMapping k) const override { return data.keymap[k]; }
   virtual Utils::StringSpan getExtDictionaryWord(byte n) const override;

@@ -15,7 +15,11 @@ private:
   VDP::Screen screen;
   VDP::Backend &backend;
   const Database *database;
-  byte activePatternTable;
+  enum {
+    APAC_CORRIDOR = 0,
+    APAC_ROOM = 1,
+    APAC_MENU = 2
+  } activePatternsAndColors;
   byte displayedPlayer;
   byte displayedWeaponId;
   class CursorTimer : public Timer::Timer {
@@ -61,9 +65,17 @@ public:
   virtual void setPlayerColors() override;
   virtual void setPlayerShapes(unsigned n) override;
   virtual void roomScreen() override;
+  virtual void corridorScreen() override;
   virtual void mapScreen() override;
+  virtual void clearMessages() override;
   virtual void drawGeneralStore() override;
   virtual void drawStaircase() override; 
+  virtual void drawCorridorSegment(unsigned n, Location loc) override;
+  virtual void drawCorridorLeftJunction(unsigned n, Location loc) override;
+  virtual void drawCorridorRightJunction(unsigned n, Location loc) override;
+  virtual void drawCorridorLeftWall(unsigned n) override;
+  virtual void drawCorridorRightWall(unsigned n) override;
+  virtual void showCompass(Direction dir) override;
   virtual void drawPlayer(unsigned n) override;
   virtual void drawPlayerStatusHeader(unsigned n) override;
   virtual void drawMagicEffectDescription(byte id) override;
@@ -73,6 +85,10 @@ private:
   void menuScreen();
   void initRoom();
   void clearRoom();
+  void initCorridor();
+  void clearMapOrCorridor();
+  void drawCorridorSideWall(unsigned x0, unsigned x1);
+  void drawCorridorFloor(unsigned y0, unsigned y1);
   unsigned putDigit(unsigned y, unsigned x, unsigned d);
   unsigned putNumber(unsigned y, unsigned x, byte n);
   unsigned putNumber(unsigned y, unsigned x, int8 n);

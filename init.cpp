@@ -95,6 +95,10 @@ EventType GameEngine::run()
       if ((diversion = core()))
 	continue;
       return EVENT_NULL;
+    case DIVERSION_CORRIDOR:
+      if ((diversion = corridor()))
+	continue;
+      return EVENT_NULL;
     case DIVERSION_QUIT:
       return EVENT_QUIT;
     }

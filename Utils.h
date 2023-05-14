@@ -49,6 +49,7 @@ public:
     } else
       l = 0;
   }
+  operator bool() const { return l != 0; }
   const byte& operator[](unsigned i) const
   {
     static const byte nul = 0;

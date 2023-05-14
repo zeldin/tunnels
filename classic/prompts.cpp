@@ -389,10 +389,8 @@ constexpr const auto prompts = SequencePack::index
 void ScreenEngine::initMenu()
 {
   screen.clearSprite();
-  if (activePatternTable == 1) {
+  if (activePatternsAndColors == APAC_ROOM)
     screen.loadPatterns(128, database->getHighPatternTable(true));
-    activePatternTable = 2;
-  }
   screen.loadRomFont();
   screen.setBackground(VDP::DARK_RED);
   static constexpr byte up[][VDP::PATTERN_H] {
@@ -418,6 +416,12 @@ void ScreenEngine::initMenu()
     0x00, 0x00, 0x00, 0x00, 0x4b, 0x1b, 0x1b
   };
   screen.loadColorTable(4, color_table);
+  if (database != nullptr) {
+    Utils::StringSpan player_colors = database->getColorTable();
+    player_colors.subspan(0, 4);
+    screen.loadColorTable(0, player_colors);
+  }
+  activePatternsAndColors = APAC_MENU;
 }
 
 void ScreenEngine::menuScreen()

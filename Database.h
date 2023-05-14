@@ -69,6 +69,7 @@ public:
   virtual void setCurrentPlayer(int n) = 0;
   virtual bool nextPlayerInOrder() = 0;
   virtual Location getCurrentLocation() const = 0;
+  virtual void setCurrentLocation(Location loc) = 0;
   virtual Direction getSavedDirection() const = 0;
   virtual void setSavedDirection(Direction direction) = 0;
   virtual byte getSavedProgression() const = 0;
@@ -79,6 +80,7 @@ public:
   virtual byte getMagicItemEffect(byte n) const = 0;
   virtual byte getPlayerColor(unsigned n) const = 0;
   virtual void setPlayerColor(unsigned n, unsigned c) = 0;
+  virtual Utils::StringSpan getFloorColorTable(unsigned floor) const = 0;
   virtual Utils::StringSpan getColorTable() const = 0;
   virtual byte getKeymapEntry(KeyMapping k) const = 0;
   virtual Utils::StringSpan getExtDictionaryWord(byte n) const = 0;

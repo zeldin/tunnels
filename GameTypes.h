@@ -54,7 +54,17 @@ constexpr Direction reverse(Direction d)
 {
   return static_cast<Direction>((d+2)&3);
 }
-  
+
+constexpr Direction left(Direction d)
+{
+  return static_cast<Direction>((d-1)&3);
+}
+
+constexpr Direction right(Direction d)
+{
+  return static_cast<Direction>((d+1)&3);
+}
+
 struct MapPosition {
   byte x;
   byte y;

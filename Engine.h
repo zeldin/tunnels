@@ -37,9 +37,17 @@ public:
   virtual void setPlayerColors() {}
   virtual void setPlayerShapes(unsigned n) {}
   virtual void roomScreen() = 0;
+  virtual void corridorScreen() = 0;
   virtual void mapScreen() = 0;
+  virtual void clearMessages() = 0;
   virtual void drawGeneralStore() = 0;
   virtual void drawStaircase() = 0;
+  virtual void drawCorridorSegment(unsigned n, Location loc) = 0;
+  virtual void drawCorridorLeftJunction(unsigned n, Location loc) = 0;
+  virtual void drawCorridorRightJunction(unsigned n, Location loc) = 0;
+  virtual void drawCorridorLeftWall(unsigned n) = 0;
+  virtual void drawCorridorRightWall(unsigned n) = 0;
+  virtual void showCompass(Direction dir) = 0;
   virtual void drawPlayer(unsigned n) = 0;
   virtual void drawPlayerStatusHeader(unsigned n) = 0;
   virtual void drawMagicEffectDescription(byte id) = 0;
@@ -75,6 +83,7 @@ private:
     DIVERSION_POINT_OF_NR,    // G@>62D1
     DIVERSION_BUILD_DUNGEON,  // G@>62F4
     DIVERSION_CONTINUE_GAME,  // G@>6556
+    DIVERSION_CORRIDOR,       // G@>66F7
     DIVERSION_AID,
     DIVERSION_UP,
     DIVERSION_DOWN,

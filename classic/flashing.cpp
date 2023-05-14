@@ -30,7 +30,7 @@ void ScreenEngine::setBorderFlashEnabled(bool enabled)
     timerManager.addTimer(borderTimer);
   } else {
     timerManager.removeTimer(borderTimer);
-    if (activePatternTable == 2)
+    if (activePatternsAndColors == APAC_MENU)
       screen.setBackground(VDP::DARK_RED);
     else
       screen.setBackground(VDP::LIGHT_GREEN);
