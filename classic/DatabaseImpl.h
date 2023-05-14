@@ -114,7 +114,8 @@ private:
     byte unknown_1d03;    // V@>1D03
     byte unknown_1d04[0x8ec];
     byte savedDirection;  // V@>25F0
-    byte unknown_25f1[0xc];
+    byte unknown_25f1[0xb];
+    byte savedActionKey;   // V@>25FC
     byte savedProgression; // V@>25FD
     byte unknown_25fe[0x78];
     byte playerOrder[4];  // V@>2676
@@ -233,6 +234,8 @@ public:
   virtual void setCurrentLocation(Location loc) override { data.currentLocation = loc; }
   virtual Direction getSavedDirection() const override { return static_cast<Direction>(data.savedDirection & 3); }
   virtual void setSavedDirection(Direction direction) override { data.savedDirection = direction; }
+  virtual byte getSavedActionKey() const override { return data.savedActionKey; }
+  virtual void setSavedActionKey(byte actionKey) override { data.savedActionKey = actionKey; }
   virtual byte getSavedProgression() const override { return data.savedProgression; }
   virtual void setSavedProgression(byte progression) override { data.savedProgression = progression; }
   virtual Utils::StringSpan getItemName(ItemCategory cat, byte id) const override;

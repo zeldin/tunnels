@@ -72,6 +72,8 @@ public:
   virtual void setCurrentLocation(Location loc) = 0;
   virtual Direction getSavedDirection() const = 0;
   virtual void setSavedDirection(Direction direction) = 0;
+  virtual byte getSavedActionKey() const = 0;
+  virtual void setSavedActionKey(byte actionKey) = 0;
   virtual byte getSavedProgression() const = 0;
   virtual void setSavedProgression(byte progression) = 0;
   virtual Utils::StringSpan getItemName(ItemCategory cat, byte id) const = 0;

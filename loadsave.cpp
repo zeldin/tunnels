@@ -25,6 +25,7 @@ void GameEngine::preserveState()
 {
   // FIXME: G@>608D
   database->setSavedDirection(direction);
+  database->setSavedActionKey(lastActionKey);
   database->setSavedProgression(progression);
 }
 
@@ -32,6 +33,7 @@ void GameEngine::restoreState()
 {
   // FIXME: G@>610D
   direction = database->getSavedDirection();
+  lastActionKey = database->getSavedActionKey();
   progression = database->getSavedProgression();
 }
 

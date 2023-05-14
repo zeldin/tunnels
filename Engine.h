@@ -108,6 +108,7 @@ private:
   byte acceptMask;
 
   Direction direction;
+  byte lastActionKey;
   byte progression;
 
 public:

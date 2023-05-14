@@ -140,10 +140,16 @@ GameEngine::Diversion GameEngine::room()
   // G@>657E
   sound.stopMusic();
   screen.roomScreen();
+  if (database->getCurrentLocation() == LOCATION_ENTRANCE)
+    lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
+  else  {
+    // FIXME G@>658F
+  }
   StartPosition pos = STARTPOS_NORMAL;
   if (database->getCurrentLocation() == LOCATION_ROOM ||
       database->getCurrentLocation() > LOCATION_FOUNTAIN) {
-    // FIXME: In doorway...
+    if (lastActionKey != database->getKeymapEntry(KEYMAP_BREAK_DOOR))
+      pos = STARTPOS_IN_DOORWAY;
   } else {
     Location nextLocation;
     if (!database->canMove(database->getMapPosition(), reverse(direction),
@@ -166,7 +172,9 @@ GameEngine::Diversion GameEngine::room()
     screen.drawStaircase();
     break;
   }
-
+  if (lastActionKey == 'C') // Not using keymap! G@>65A2
+    database->setSecretDoorsRevealed(false);
+  lastActionKey = 0;
   database->setCurrentPlayer(-1);
 
   if (database->getCurrentLocation() == LOCATION_ENTRANCE &&
@@ -274,6 +282,14 @@ GameEngine::Diversion GameEngine::corridor()
     Direction dir;
     if (Diversion d = getMovementKey(keyCode, dir))
       return d;
+    if (dir == DIR_NONE) {
+      if (keyCode == database->getKeymapEntry(KEYMAP_CHECK_HIDDEN_DOORS)) {
+	lastActionKey = keyCode;
+	/* FIXME G@>67CE */
+      }
+      if (keyCode == database->getKeymapEntry(KEYMAP_BREAK_DOOR))
+	dir = DIR_NORTH;
+    }
     if (dir != DIR_NONE) {
       dir = direction + dir;
       if (dir != direction) {
@@ -282,6 +298,8 @@ GameEngine::Diversion GameEngine::corridor()
 	continue;
       }
       /* FIXME */
+      if (keyCode == database->getKeymapEntry(KEYMAP_BREAK_DOOR))
+	lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
       MapPosition pos = database->getMapPosition();
       if (database->canMove(pos, direction, loc) &&
 	  (loc == LOCATION_CORRIDOR || loc == LOCATION_FOUNTAIN)) {
@@ -289,8 +307,16 @@ GameEngine::Diversion GameEngine::corridor()
 	database->setMapPosition(pos);
       }
       continue;
+    } else if (keyCode == database->getKeymapEntry(KEYMAP_USE_ITEM)) {
+      /* FIXME G@>67DF */
+    } else if (keyCode == database->getKeymapEntry(KEYMAP_CHANGE_ORDER)) {
+      /* FIXME G@>67E8 */
+    } else if (keyCode == database->getKeymapEntry(KEYMAP_LISTEN_AT_DOOR)) {
+      /* FIXME G@>67F2 */
+    } else if (keyCode == database->getKeymapEntry(KEYMAP_TRADE_ITEMS)) {
+      /* FIXME G@>6820 */
     } else {
-      /* FIXME */
+      /* FIXME G@>682C */
     }
 
     return DIVERSION_NULL;
