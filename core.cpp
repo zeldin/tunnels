@@ -6,6 +6,12 @@
 
 namespace Tunnels {
 
+void GameEngine::setRoomFixtureShape(RoomFixture f)
+{
+  database->setRoomFixture(f);
+  screen.setRoomFixtureShapes();
+}
+
 bool GameEngine::tryMove()
 {
   // G@A028
@@ -15,7 +21,8 @@ bool GameEngine::tryMove()
   /* FIXME: Clear room descriptor */
   if (!database->canMove(pos, direction, loc))
     return false;
-  screen.clearRoomFixtures();
+  database->clearRoomFixtures();
+  screen.setRoomFixtureShapes();
   /* FIXME: Clear monster name */
   /* FIXME: Set zero enemies */
   switch (loc) {
@@ -23,13 +30,13 @@ bool GameEngine::tryMove()
     /* FIXME */
     break;
   case LOCATION_FOUNTAIN:
-    screen.setRoomFixtureShape(FIXTURE_FOUNTAIN);
+    setRoomFixtureShape(FIXTURE_FOUNTAIN);
     break;
   case LOCATION_DESCENDING_STAIRCASE:
-    screen.setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
+    setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
     break;
   case LOCATION_ASCENDING_STAIRCASE:
-    screen.setRoomFixtureShape(FIXTURE_ASCENDING_STAIRS);
+    setRoomFixtureShape(FIXTURE_ASCENDING_STAIRS);
     break;
   }
   // G@>A76B
@@ -197,7 +204,7 @@ GameEngine::Diversion GameEngine::room()
   switch (database->getCurrentLocation()) {
   case LOCATION_ENTRANCE:
     screen.drawGeneralStore();
-    screen.setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
+    setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
   case LOCATION_DESCENDING_STAIRCASE:
   case LOCATION_ASCENDING_STAIRCASE:
     screen.drawStaircase();
@@ -241,12 +248,12 @@ GameEngine::Diversion GameEngine::room()
       }
       if (keyCode == KEY_UP) {
 	/* ... */
-	screen.setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
+	setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
 	/* ... */
       }
       if (keyCode == KEY_DOWN) {
 	/* ... */
-	screen.setRoomFixtureShape(FIXTURE_ASCENDING_STAIRS);
+	setRoomFixtureShape(FIXTURE_ASCENDING_STAIRS);
 	/* ... */
       }
     }

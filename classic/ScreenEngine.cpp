@@ -110,19 +110,13 @@ void ScreenEngine::setPlayerShapes(unsigned n)
 		database->getClassPatternTable(database->getPlayerClass(n)));
 }
 
-void ScreenEngine::setRoomFixtureShape(RoomFixture f)
+void ScreenEngine::setRoomFixtureShapes()
 {
-  Utils::StringSpan patterns = database->getHighPatternTable(false);
-  patterns.subspan(unsigned(f)*(4*8), 4*8);
+  Utils::StringSpan patterns = database->getPatternTable();
+  patterns.subspan(240*8, 8*8);
+  screen.loadPatterns(240, patterns);
+  patterns.subspan(4*8, 4*8);
   patterns.store(fixturePattern);
-  screen.loadPatterns(244, patterns);
-}
-
-void ScreenEngine::clearRoomFixtures()
-{
-  static constexpr byte zeroes[8*8] = {0,};
-  Utils::StringSpan(zeroes).store(fixturePattern);
-  screen.loadPatterns(240, zeroes);
 }
 
 void ScreenEngine::refresh()

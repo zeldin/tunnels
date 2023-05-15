@@ -55,11 +55,11 @@ public:
     static const byte nul = 0;
     return (i < l? p[i] : nul);
   }
-  template <unsigned n> void store(byte (&dst)[n])
+  template <unsigned n> void store(byte (&dst)[n], unsigned offset=0)
   {
-    unsigned len = (n>l? l : n);
+    unsigned len = (offset >= n? 0 : (n-offset>l? l : n-offset));
     for (unsigned i=0; i<len; i++)
-      dst[i] = p[i];
+      dst[i+offset] = p[i];
   }
   template <unsigned n> void store(char (&dst)[n])
   {

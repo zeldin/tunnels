@@ -36,8 +36,7 @@ public:
   virtual void askCharacterAccept() {};
   virtual void setPlayerColors() {}
   virtual void setPlayerShapes(unsigned n) {}
-  virtual void setRoomFixtureShape(RoomFixture f) {}
-  virtual void clearRoomFixtures() {}
+  virtual void setRoomFixtureShapes() {}
   virtual void roomScreen() = 0;
   virtual void corridorScreen() = 0;
   virtual void mapScreen() = 0;
@@ -126,6 +125,7 @@ private:
   EventType waitForEvent();
   Diversion delay(unsigned ms);
   Diversion waitForMusic();
+  void setRoomFixtureShape(RoomFixture f);
   Diversion core();
   Diversion room();
   Diversion corridor();

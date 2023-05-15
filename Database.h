@@ -14,6 +14,8 @@ public:
   virtual Utils::StringSpan getDescription() const = 0;
   virtual Utils::StringSpan getPatternTable() const = 0;
   virtual Utils::StringSpan getHighPatternTable(bool alternate) const = 0;
+  virtual void clearRoomFixtures() = 0;
+  virtual void setRoomFixture(RoomFixture fixture) = 0;
   virtual bool alternateHighPatternsActive() const { return false; };
   virtual void clearPlayerSheet(unsigned n) = 0;
   virtual Utils::StringSpan getPlayerName(unsigned n) const = 0;

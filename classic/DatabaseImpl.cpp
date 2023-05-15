@@ -31,6 +31,19 @@ Utils::StringSpan DatabaseImpl::getHighPatternTable(bool alternate) const
   return patterns;
 }
 
+void DatabaseImpl::clearRoomFixtures()
+{
+  static constexpr byte zeroes[8*8] = {0,};
+  Utils::StringSpan(zeroes).store(data.patternTable, 240*8);
+}
+
+void DatabaseImpl::setRoomFixture(RoomFixture fixture)
+{
+  Utils::StringSpan patterns = getHighPatternTable(false);
+  patterns.subspan(unsigned(fixture)*(4*8), 4*8);
+  patterns.store(data.patternTable, 244*8);
+}
+
 void DatabaseImpl::clearPlayerSheet(unsigned n)
 {
   /* FIXME */

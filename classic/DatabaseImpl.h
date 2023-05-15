@@ -176,6 +176,8 @@ public:
   virtual Utils::StringSpan getDescription() const override;
   virtual Utils::StringSpan getPatternTable() const override;
   virtual Utils::StringSpan getHighPatternTable(bool alternate) const override;
+  virtual void clearRoomFixtures() override;
+  virtual void setRoomFixture(RoomFixture fixture) override;
   virtual bool alternateHighPatternsActive() const override { return data.activeHighPatternTable != 1; }
   virtual void clearPlayerSheet(unsigned n) override;
   virtual Utils::StringSpan getPlayerName(unsigned n) const override;
