@@ -23,8 +23,7 @@ bool GameEngine::tryMove(bool checkOnly)
     return false;
   database->clearRoomFixtures();
   screen.setRoomFixtureShapes();
-  /* FIXME: Clear monster name */
-  /* FIXME: Set zero enemies */
+  database->clearRoomEnemies();
   switch (loc) {
   case LOCATION_ROOM:
     pos.forward(direction);

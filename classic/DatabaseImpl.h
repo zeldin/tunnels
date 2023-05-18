@@ -86,7 +86,32 @@ private:
     byte rations;         // V@>1113
     byte unknown_1114[8];
     byte unknown_111c;    // V@>111C
-    byte unknown_111d[0x55];
+    byte unknown_111d[9];
+    byte monsterName[12]; // V@>1126
+    byte monsterMaxHp;    // V@>1132
+    byte monsterDefense;  // V@>1133
+    byte monsterAttack;   // V@>1134
+    byte monsterMaxDamage; // V@>1135
+    byte monsterSpecialAttackChance; // V@>1136
+    byte monsterSpecialAttackName; // V@>1137
+    byte unknown_1138;   // V@>1138
+    byte unknown_1139;   // V@>1139
+    byte monsterPatternNumber; // V@>113A
+    byte monsterNegotiation; // V@>113B
+    byte monsterMobility;   // V@>113C
+    byte monsterResistance; // V@>113D
+    byte unknown_113e;      // V@>113E
+    byte monsterSpeed;      // V@>113F
+    byte unknown_1140[8];
+    struct {
+      byte row;
+      byte column;
+    } monsterPosition[7]; // V@>1148
+    byte unknown_1156;  // V@>1156
+    byte unknown_1157;  // V@>1157
+    byte unknown_1158[6];
+    byte unknown_115e;  // V@>115E
+    byte unknown_115f[0x13];
     struct {
       byte name[10];
       byte unknown[0xc];
@@ -94,9 +119,16 @@ private:
     byte classPatternTable[4][0x40]; // V@>11CA
     struct {
       byte name[12];
-      byte unknown1[7];
-      byte pattern;
-      byte unknown2[2];
+      byte maxHp;
+      byte defense;
+      byte attack;
+      byte maxDamage;
+      byte specialAttackChance;
+      byte specialAttackName;
+      byte unknown1;
+      byte unknown2;
+      byte unknown3;
+      byte unknown4;
     } monsters[56];       // V@>12CA
     byte unknown_179a[0x140];
     byte monsterPatternTable[16][0x40]; // V@>18DA
@@ -127,7 +159,7 @@ private:
     byte currentLocation; // V@>1D00
     byte activeHighPatternTable; // V@>1D01
     byte unknown_1d02;    // V@>1D02
-    byte unknown_1d03;    // V@>1D03
+    byte monsterInfo;     // V@>1D03
     msb16 descriptorBytesPerFloor; // V@>1D04
     msb16 ascendingStairsDescriptorOffset; // V@>1D06
     msb16 descendingStairsDescriptorOffset; // V@>1D08
@@ -288,12 +320,13 @@ public:
   virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const override { return findDescriptor(PosWord(pos)); }
   virtual byte getFixtureId(DescriptorHandle room) const override { return roomDescriptor(room)->fixtureId; }
   virtual bool roomHasEnemies(DescriptorHandle room) const override { return (roomDescriptor(room)->monsterInfo & 0xe0) != 0; }
+  virtual void clearRoomEnemies() override;
   virtual void prepareRoomEnemies(DescriptorHandle room) override;
   virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;
   virtual void prepareFloorMap(unsigned floor) override;
   virtual void restoreFloorVisitedMarkers() override;
-  virtual bool inCombat() const override { return data.unknown_1d03 != 0; }
+  virtual bool inCombat() const override { return data.monsterInfo != 0; }
   virtual Location mapLocation(MapPosition pos) const override;
   virtual bool canMove(MapPosition pos, Direction dir, Location &dest) const override;
   virtual bool blockedForward(MapPosition pos, Direction dir) const override;

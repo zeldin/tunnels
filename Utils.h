@@ -78,6 +78,22 @@ public:
   { if (hasPrefix(pfx)) { p+=n-1; l-=n-1; } }
 };
 
+template <unsigned n, typename T> void clearArray(T (&dst)[n], T value=0)
+{
+  for (unsigned i=0; i<n; i++)
+    dst[i] = value;
+}
+
+template <unsigned n, typename T> void clearArray(T (&dst)[n], unsigned offs, unsigned count, T value=0)
+{
+  if (offs >= n)
+    return;
+  if (count > n-offs)
+    count = n-offs;
+  for (unsigned i=0; i<count; i++)
+    dst[offs+i] = value;
+}
+
 }}
 
 #endif // TUNNELS_UTILS_H_

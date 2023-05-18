@@ -33,8 +33,7 @@ Utils::StringSpan DatabaseImpl::getHighPatternTable(bool alternate) const
 
 void DatabaseImpl::clearRoomFixtures()
 {
-  static constexpr byte zeroes[8*8] = {0,};
-  Utils::StringSpan(zeroes).store(data.patternTable, 240*8);
+  Utils::clearArray(data.patternTable, 240*8, 8*8);
 }
 
 void DatabaseImpl::setRoomFixture(RoomFixture fixture)
@@ -315,15 +314,56 @@ Utils::StringSpan DatabaseImpl::getFloorMap() const
   return data.floorMap;
 }
 
+void DatabaseImpl::clearRoomEnemies()
+{
+  Utils::clearArray(data.monsterName);
+  data.monsterMaxHp = 0;
+  data.monsterDefense = 0;
+  data.monsterAttack = 0;
+  data.monsterMaxDamage = 0;
+  data.monsterSpecialAttackChance = 0;
+  data.monsterSpecialAttackName = 0;
+  data.unknown_1138 = 0;
+  data.unknown_1139 = 0;
+  data.monsterPatternNumber = 0;
+  data.monsterNegotiation = 0;
+  data.monsterMobility = 0;
+  data.monsterResistance = 0;
+  data.unknown_113e = 0;
+  data.monsterSpeed = 0;
+  Utils::clearArray(data.unknown_1140);
+  Utils::clearArray(data.monsterPosition, {0, 0});
+  data.unknown_1156 = 0;
+  data.unknown_1157 = 0;
+  data.monsterInfo = 0;
+}
+
 void DatabaseImpl::prepareRoomEnemies(DescriptorHandle room)
 {
   byte info = roomDescriptor(room)->monsterInfo;
-  // data.unknown_1d03 = info;
-  // FIXME: G@>AA57
+  data.monsterInfo = info;
+  data.unknown_115e = 0;
   unsigned n = data.unknown_1cfb * (data.currentFloor - 1) * 4 + (info & 0x1f);
-  Utils::StringSpan patterns{data.monsterPatternTable[data.monsters[n].pattern >> 4]};
+  Utils::StringSpan{data.monsters[n].name}.store(data.monsterName);
+  data.monsterMaxHp = data.monsters[n].maxHp;
+  data.monsterDefense = data.monsters[n].defense;
+  data.monsterAttack = data.monsters[n].attack;
+  data.monsterMaxDamage = data.monsters[n].maxDamage;
+  data.monsterSpecialAttackChance = data.monsters[n].specialAttackChance;
+  data.monsterSpecialAttackName = data.monsters[n].specialAttackName;
+  data.unknown_1138 = data.monsters[n].unknown1;
+  data.unknown_113e = data.monsters[n].unknown4 & 0xf;
+  data.monsterSpeed = data.monsters[n].unknown4 >> 4;
+  data.monsterNegotiation = data.monsters[n].unknown3 >> 6;
+  data.monsterMobility = ((data.monsters[n].unknown3 & 0x30) >> 4) + 1;
+  data.monsterResistance = data.monsters[n].unknown3 & 0xf;
+  data.monsterPatternNumber = data.monsters[n].unknown2 >> 4;
+  data.unknown_1139 = data.monsters[n].unknown2 & 0xf;
+  Utils::StringSpan patterns{data.monsterPatternTable[data.monsterPatternNumber]};
   patterns.store(data.patternTable, 240*8);
   patterns.store(data.patternTable, 244*8);
+  Utils::clearArray(data.unknown_1140);
+  /* FIXME: G@>AB02 */
 }
 
 void DatabaseImpl::setMapVisited(MapPosition pos, bool visited)
