@@ -56,6 +56,7 @@ public:
   virtual byte getMonsterMaxDamage() const = 0;
   virtual byte getMonsterSpecialAttackChance() const = 0;
   virtual byte getMonsterSpecialAttackId() const = 0;
+  virtual int getMonsterSound() = 0;
   virtual byte getMonsterNegotiation() const = 0;
   virtual byte getMonsterMobility() const = 0;
   virtual byte getMonsterResistance() const = 0;

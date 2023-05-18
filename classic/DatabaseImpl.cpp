@@ -110,6 +110,22 @@ Utils::StringSpan DatabaseImpl::getMonsterName() const
   return data.monsterName;
 }
 
+int DatabaseImpl::getMonsterSound()
+{
+  if (data.monsterInfo < 0x20)
+    return -1;
+  byte snd = data.monsterSoundTable[data.monsterSound];
+  if (snd > 16)
+    return -1;
+  static const uint16 addrTable[] = {
+    0xc745,  0xc75b,  0xc771,  0xc787,  0xc79d,  0xc7b3, 0xc7c8,  0xc7de,
+    0xc7f4,  0xc809,  0xc81f,  0xc835,  0xc84d,  0xc864, 0xc87a,  0xc890,
+    0xc9fc,
+  };
+  data.monsterSoundAddress = addrTable[snd];
+  return snd;
+}
+
 Utils::StringSpan DatabaseImpl::getClassName(unsigned n) const
 {
   return data.classes[n].name;
@@ -337,7 +353,7 @@ void DatabaseImpl::clearRoomEnemies()
   data.monsterSpecialAttackChance = 0;
   data.monsterSpecialAttackId = 0;
   data.unknown_1138 = 0;
-  data.unknown_1139 = 0;
+  data.monsterSound = 0;
   data.monsterPatternNumber = 0;
   data.monsterNegotiation = 0;
   data.monsterMobility = 0;
@@ -371,7 +387,7 @@ void DatabaseImpl::prepareRoomEnemies(DescriptorHandle room)
   data.monsterMobility = ((data.monsters[n].unknown3 & 0x30) >> 4) + 1;
   data.monsterResistance = data.monsters[n].unknown3 & 0xf;
   data.monsterPatternNumber = data.monsters[n].unknown2 >> 4;
-  data.unknown_1139 = data.monsters[n].unknown2 & 0xf;
+  data.monsterSound = data.monsters[n].unknown2 & 0xf;
   Utils::StringSpan patterns{data.monsterPatternTable[data.monsterPatternNumber]};
   patterns.store(data.patternTable, 240*8);
   patterns.store(data.patternTable, 244*8);

@@ -64,6 +64,7 @@ public:
   virtual void playTitleMusic() = 0;
   virtual void playStairMusic() = 0;
   virtual void playGeneralStoreMusic() = 0;
+  virtual void playMonsterSound(unsigned n) = 0;
   virtual void beep() = 0;
   virtual void honk() = 0;
 };

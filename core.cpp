@@ -406,8 +406,11 @@ GameEngine::Diversion GameEngine::corridor()
 	sound.stopMusic();
 	for (unsigned n = 0; n < 8; n++) {
 	  screen.drawDoorReveal(n);
-	  if (n==3)
-	    ; /* FIXME: G@>C03A */
+	  if (n==3) {
+	    int s = database->getMonsterSound();
+	    if (s >= 0)
+	      sound.playMonsterSound(s);
+	  }
 	  if (lastActionKey != 'B') // Not using keymap! G@>A6B4
 	    if (Diversion d = delay(50))
 	      return d;

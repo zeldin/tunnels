@@ -95,7 +95,7 @@ private:
     byte monsterSpecialAttackChance; // V@>1136
     byte monsterSpecialAttackId; // V@>1137
     byte unknown_1138;   // V@>1138
-    byte unknown_1139;   // V@>1139
+    byte monsterSound;   // V@>1139
     byte monsterPatternNumber; // V@>113A
     byte monsterNegotiation; // V@>113B
     byte monsterMobility;   // V@>113C
@@ -168,7 +168,10 @@ private:
     msb16 descendingStairsDescriptorOffset; // V@>1D08
     msb16 fountainDescriptorOffset; // V@>1D0A
     byte floorDescriptors[0x85c]; // V@>1D0C
-    byte unknown_2568[0x88];
+    byte unknown_2568[0x3c];
+    byte monsterSoundTable[16]; // V@>25A4
+    msb16 monsterSoundAddress;  // V@>25B4
+    byte unknown_25b6[0x3a];
     byte savedDirection;  // V@>25F0
     byte unknown_25f1[0x3];
     msb16 savedFloorDescriptorAddr; // V@>25F4
@@ -277,6 +280,7 @@ public:
   virtual byte getMonsterMaxDamage() const override { return data.monsterMaxDamage; }
   virtual byte getMonsterSpecialAttackChance() const override { return data.monsterSpecialAttackChance; }
   virtual byte getMonsterSpecialAttackId() const override { return data.monsterSpecialAttackId; }
+  virtual int getMonsterSound() override;
   virtual byte getMonsterNegotiation() const override { return data.monsterNegotiation * 25; }
   virtual byte getMonsterMobility() const override { return data.monsterMobility * 25; }
   virtual byte getMonsterResistance() const override { return data.monsterResistance * 10; }
