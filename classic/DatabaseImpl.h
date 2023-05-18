@@ -31,6 +31,12 @@ private:
     constexpr operator MapPosition()
     { return MapPosition{byte(v&0x1f), byte(v>>5)}; }
   };
+  struct RoomDescriptor {
+    uint16 pos;
+    byte fixtureId;
+    byte monsterInfo;
+    byte unknown[6];
+  };
 
   struct {
     byte spritePatternTable[0x200]; // V@>0400
@@ -86,7 +92,14 @@ private:
       byte unknown[0xc];
     } classes[4];         // V@>1172
     byte classPatternTable[4][0x40]; // V@>11CA
-    byte unknown_12ca[0xa10];
+    struct {
+      byte name[12];
+      byte unknown1[7];
+      byte pattern;
+      byte unknown2[2];
+    } monsters[56];       // V@>12CA
+    byte unknown_179a[0x140];
+    byte monsterPatternTable[16][0x40]; // V@>18DA
     byte maxPlayers;      // V@>1CDA
     byte unknown_1cdb[5];
     byte unknown_1ce0;    // V@>1CE0
@@ -109,7 +122,8 @@ private:
     byte currentFloor;    // V@>1CF8
     byte unknown_1cf9;    // V@>1CF9
     byte currentPlayer;   // V@>1CFA
-    byte unknown_1cfb[5];
+    byte unknown_1cfb;    // V@>1CFB
+    byte unknown_1cfc[4];
     byte currentLocation; // V@>1D00
     byte activeHighPatternTable; // V@>1D01
     byte unknown_1d02;    // V@>1D02
@@ -121,7 +135,10 @@ private:
     byte floorDescriptors[0x85c]; // V@>1D0C
     byte unknown_2568[0x88];
     byte savedDirection;  // V@>25F0
-    byte unknown_25f1[0xb];
+    byte unknown_25f1[0x3];
+    msb16 savedFloorDescriptorAddr; // V@>25F4
+    msb16 savedRoomDescriptorAddr; // V@>25F6
+    byte unknown_25f8[0x4];
     byte savedActionKey;   // V@>25FC
     byte savedProgression; // V@>25FD
     byte unknown_25fe[0x78];
@@ -244,6 +261,8 @@ public:
   virtual void setCurrentLocation(Location loc) override { data.currentLocation = loc; }
   virtual Direction getSavedDirection() const override { return static_cast<Direction>(data.savedDirection & 3); }
   virtual void setSavedDirection(Direction direction) override { data.savedDirection = direction; }
+  virtual DescriptorHandle getSavedRoomAddress() const override;
+  virtual void setSavedRoomAddress(DescriptorHandle room) override;
   virtual byte getSavedActionKey() const override { return data.savedActionKey; }
   virtual void setSavedActionKey(byte actionKey) override { data.savedActionKey = actionKey; }
   virtual byte getSavedProgression() const override { return data.savedProgression; }
@@ -266,6 +285,10 @@ public:
   virtual void setMapPosition(MapPosition pos) { data.mapPosition = PosWord(pos); }
   virtual uint16 getPartyGold() const override { return data.partyGold; }
   virtual byte getMappedFloors() const override { return data.numMappedFloors; }
+  virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const override { return findDescriptor(PosWord(pos)); }
+  virtual byte getFixtureId(DescriptorHandle room) const override { return roomDescriptor(room)->fixtureId; }
+  virtual bool roomHasEnemies(DescriptorHandle room) const override { return (roomDescriptor(room)->monsterInfo & 0xe0) != 0; }
+  virtual void prepareRoomEnemies(DescriptorHandle room) override;
   virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;
   virtual void prepareFloorMap(unsigned floor) override;
@@ -280,13 +303,15 @@ public:
 
 private:
   void clearMap(unsigned mode);
-  unsigned findDescriptor(uint16 pos, unsigned offs, unsigned cnt, unsigned delta);
-  unsigned findDescriptor(uint16 pos) { return findDescriptor(pos, 0, data.numRoomsPerFloor, 10); }
+  unsigned findDescriptor(uint16 pos, unsigned offs, unsigned cnt, unsigned delta) const;
+  unsigned findDescriptor(uint16 pos) const { return findDescriptor(pos, 0, data.numRoomsPerFloor, 10); }
   void addMapFeatures(unsigned offs, unsigned cnt, byte code, unsigned delta);
   unsigned countBlankNeighbors(unsigned offs);
   void addMapVerticalCorridors();
   void addMapHorizontalCorridors();
   void fixupConnections();
+  RoomDescriptor *roomDescriptor(DescriptorHandle h) { return reinterpret_cast<RoomDescriptor *>(data.floorDescriptors + (h > sizeof(data.floorDescriptors)/sizeof(data.floorDescriptors[0])-10? 0 : h)); }
+  const RoomDescriptor *roomDescriptor(DescriptorHandle h) const { return reinterpret_cast<const RoomDescriptor *>(data.floorDescriptors + (h > sizeof(data.floorDescriptors)/sizeof(data.floorDescriptors[0])-10? 0 : h)); }
 };
   
 }

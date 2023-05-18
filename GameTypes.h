@@ -108,6 +108,9 @@ struct Base36Number {
   };
 };
 
+typedef unsigned DescriptorHandle;
+constexpr DescriptorHandle invalidHandle() { return ~0u; }
+
 }
 
 #endif // TUNNELS_GAMETYPES_H_

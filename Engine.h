@@ -116,6 +116,7 @@ private:
   byte acceptMask;
 
   Direction direction;
+  DescriptorHandle currentRoom;
   byte lastActionKey;
   byte progression;
 
@@ -136,7 +137,7 @@ private:
   Diversion entrance();
   Diversion room();
   Diversion corridor();
-  bool tryMove();
+  bool tryMove(bool checkOnly = false);
   Diversion getMovementKey(byte &kc, Direction &dir);
   Diversion titleScreen();
   Diversion loadSaveMenu();

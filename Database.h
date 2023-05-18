@@ -75,6 +75,8 @@ public:
   virtual void setCurrentLocation(Location loc) = 0;
   virtual Direction getSavedDirection() const = 0;
   virtual void setSavedDirection(Direction direction) = 0;
+  virtual DescriptorHandle getSavedRoomAddress() const = 0;
+  virtual void setSavedRoomAddress(DescriptorHandle room) = 0;
   virtual byte getSavedActionKey() const = 0;
   virtual void setSavedActionKey(byte actionKey) = 0;
   virtual byte getSavedProgression() const = 0;
@@ -96,6 +98,10 @@ public:
   virtual void setMapPosition(MapPosition pos) = 0;
   virtual uint16 getPartyGold() const = 0;
   virtual byte getMappedFloors() const = 0;
+  virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const = 0;
+  virtual byte getFixtureId(DescriptorHandle room) const = 0;
+  virtual bool roomHasEnemies(DescriptorHandle room) const = 0;
+  virtual void prepareRoomEnemies(DescriptorHandle room) = 0;
   virtual Utils::StringSpan getFloorMap() const = 0;
   virtual void setMapVisited(MapPosition pos, bool visited) = 0;
   virtual void prepareFloorMap(unsigned floor) = 0;

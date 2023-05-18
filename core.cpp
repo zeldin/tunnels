@@ -12,13 +12,13 @@ void GameEngine::setRoomFixtureShape(RoomFixture f)
   screen.setRoomFixtureShapes();
 }
 
-bool GameEngine::tryMove()
+bool GameEngine::tryMove(bool checkOnly)
 {
   // G@A028
   // G@A9B5
   MapPosition pos = database->getMapPosition();
   Location loc;
-  /* FIXME: Clear room descriptor */
+  currentRoom = invalidHandle();
   if (!database->canMove(pos, direction, loc))
     return false;
   database->clearRoomFixtures();
@@ -27,7 +27,22 @@ bool GameEngine::tryMove()
   /* FIXME: Set zero enemies */
   switch (loc) {
   case LOCATION_ROOM:
-    /* FIXME */
+    pos.forward(direction);
+    currentRoom = database->getRoomDescriptor(pos);
+    pos.backward(direction);
+    {
+      byte f = database->getFixtureId(currentRoom);
+      if (f & 0x80)
+	f = -f;
+      if (f) {
+	setRoomFixtureShape(RoomFixture(FIXTURE_GENERAL_STORE + (f-1)));
+	break;
+      }
+    }
+    if (database->roomHasEnemies(currentRoom)) {
+      database->prepareRoomEnemies(currentRoom);
+      screen.setRoomFixtureShapes();
+    }
     break;
   case LOCATION_FOUNTAIN:
     setRoomFixtureShape(FIXTURE_FOUNTAIN);
@@ -40,6 +55,8 @@ bool GameEngine::tryMove()
     break;
   }
   // G@>A76B
+  if (checkOnly)
+    return true;
   pos.forward(direction);
   database->setMapPosition(pos);
   loc = database->mapLocation(pos);
@@ -374,8 +391,8 @@ GameEngine::Diversion GameEngine::corridor()
 	dir = direction + dir;
 	if (dir != direction) {
 	  direction = dir;
-	  /* FIXME: G@>A07A */
-	  return DIVERSION_CORRIDOR_MAIN;
+	  if (tryMove(true))
+	    return DIVERSION_CORRIDOR_MAIN;
 	}
 	if (!tryMove())
 	  break;
@@ -419,7 +436,7 @@ GameEngine::Diversion GameEngine::core()
     case LOCATION_FOUNTAIN:
       return DIVERSION_CORRIDOR;
     case LOCATION_ROOM:
-      /* FIXME: Find current room descriptor */
+      currentRoom = database->getRoomDescriptor(database->getMapPosition());
     case LOCATION_DESCENDING_STAIRCASE:
     case LOCATION_ASCENDING_STAIRCASE:
     case LOCATION_ENTRANCE:

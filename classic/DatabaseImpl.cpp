@@ -147,6 +147,25 @@ bool DatabaseImpl::nextPlayerInOrder()
   return true;
 }
 
+DescriptorHandle DatabaseImpl::getSavedRoomAddress() const
+{
+  uint16 addr = data.savedRoomDescriptorAddr;
+  if (addr >= 0x1D0C)
+    return addr - 0x1D0C;
+  else
+    return invalidHandle();
+}
+
+void DatabaseImpl::setSavedRoomAddress(DescriptorHandle room)
+{
+  if (room == ~0u)
+    data.savedRoomDescriptorAddr = 0;
+  else
+    data.savedRoomDescriptorAddr = 0x1D0C + room;
+  data.savedFloorDescriptorAddr =
+    0x1D0C + (data.currentFloor-1) * data.descriptorBytesPerFloor;
+}
+
 Utils::StringSpan DatabaseImpl::getItemName(ItemCategory cat, byte id) const
 {
   if (id--)
@@ -296,6 +315,17 @@ Utils::StringSpan DatabaseImpl::getFloorMap() const
   return data.floorMap;
 }
 
+void DatabaseImpl::prepareRoomEnemies(DescriptorHandle room)
+{
+  byte info = roomDescriptor(room)->monsterInfo;
+  // data.unknown_1d03 = info;
+  // FIXME: G@>AA57
+  unsigned n = data.unknown_1cfb * (data.currentFloor - 1) * 4 + (info & 0x1f);
+  Utils::StringSpan patterns{data.monsterPatternTable[data.monsters[n].pattern >> 4]};
+  patterns.store(data.patternTable, 240*8);
+  patterns.store(data.patternTable, 244*8);
+}
+
 void DatabaseImpl::setMapVisited(MapPosition pos, bool visited)
 {
   uint16 p = PosWord(pos);
@@ -324,7 +354,7 @@ void DatabaseImpl::clearMap(unsigned mode)
 }
 
 unsigned DatabaseImpl::findDescriptor(uint16 pos, unsigned offs, unsigned cnt,
-				      unsigned delta)
+				      unsigned delta) const
 {
   offs += (data.currentFloor-1) * data.descriptorBytesPerFloor;
   while (cnt--) {
@@ -334,7 +364,7 @@ unsigned DatabaseImpl::findDescriptor(uint16 pos, unsigned offs, unsigned cnt,
       return offs;
     offs += delta;
   }
-  return 0;
+  return ~0u;
 }
 
 void DatabaseImpl::addMapFeatures(unsigned offs, unsigned cnt, byte code,
@@ -538,9 +568,12 @@ void DatabaseImpl::restoreFloorVisitedMarkers()
   for (uint16 p = 0; p < sizeof(data.floorMap)/sizeof(data.floorMap[0]); p++) {
     if (data.floorMap[p] >= 0x60)
       data.floorMap[p] |= 0x10;
-    if (data.floorMap[p] == 0x77 &&
-	(data.floorDescriptors[findDescriptor(p)+4]&8))
-      data.floorMap[p] &= ~0x10;
+    if (data.floorMap[p] == 0x77) {
+      unsigned offs = findDescriptor(p);
+      if (offs != ~0u &&
+	  (data.floorDescriptors[offs+4] & 8))
+	data.floorMap[p] &= ~0x10;
+    }
   }
 }
 

@@ -113,7 +113,7 @@ void ScreenEngine::setPlayerShapes(unsigned n)
 void ScreenEngine::setRoomFixtureShapes()
 {
   Utils::StringSpan patterns = database->getPatternTable();
-  patterns.subspan(240*8, 8*8);
+  patterns.subspan(240*8, 12*8);
   screen.loadPatterns(240, patterns);
   patterns.subspan(4*8, 4*8);
   patterns.store(fixturePattern);
