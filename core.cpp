@@ -96,7 +96,10 @@ GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
   }
   if (kc == '3' && database->inCombat()) {
     screen.drawPrompt(0x6a);
-    /* ... */
+    acceptMask = ACCEPT_BACK;
+    for (;;)
+      if (Diversion d = getKeyNoCursor(kc))
+	return d;
   }
   if (kc == '2') {
     screen.drawPrompt(0x6d);

@@ -709,32 +709,27 @@ void ScreenEngine::promptExtension(byte n)
   case Vocab::extMONSTERREPORT: /* G@>F4D0 */
     {
       /* Monster report */
-      Utils::StringSpan name{"****        "}; /* FIXME */
+      Utils::StringSpan name = database->getMonsterName();
       unsigned offs = name.center();
       screen.hstr(3, 11+offs, name);
-      unsigned n = 6; /* FIXME */
-      putNumberEol(5, byte(n*6));
-      n = 12345; /* FIXME */
-      screen.hchar(6, putNumberEol(6, uint16(n))-1, '0');
-      n = 0xfe; /* FIXME */
+      putNumberEol(5, database->getMonsterMaxHP());
+      screen.hchar(6, putNumberEol(6, uint16(12345 /* FIXME */)), '0');
+      byte n = database->getMonsterAttack();
       putNumberEol(9, byte((n&0x80)? 256-n : n));
       if ((n&0x80)) {
 	screen.setXpt(findEndOfLine()+2);
 	drawPrompt(0x83);
       }
-      putNumberEol(10, byte(4)); /* FIXME */
-      putNumberEol(11, byte(5)); /* FIXME */
-      n = 4; /* FIXME */
-      screen.hchar(13, putNumberEol(13, byte(10*n)), '%');
-      putNumber(14, 11, byte(9)); /* FIXME */
-      n = 1; /* FIXME */
-      screen.hchar(14, putNumberEol(14, byte(25*n)), '%');
-      n = 2; /* FIXME */
-      screen.hchar(15, putNumberEol(15, byte(25*n)), '%');
-      n = 8; /* FIXME */
-      screen.hchar(17, putNumberEol(17, byte(n)), '%');
+      putNumberEol(10, database->getMonsterMaxDamage());
+      putNumberEol(11, database->getMonsterDefense());
+      screen.hchar(13, putNumberEol(13, database->getMonsterResistance()), '%');
+      putNumber(14, 11, database->getMonsterSpeed());
+      screen.hchar(14, putNumberEol(14, database->getMonsterMobility()), '%');
+      screen.hchar(15, putNumberEol(15, database->getMonsterNegotiation()), '%');
+      n = database->getMonsterSpecialAttackChance();
+      screen.hchar(17, putNumberEol(17, n), '%');
       if (n > 0) {
-	n = 0xfd;
+	n = database->getMonsterSpecialAttackId();
 	if ((n & 0x80)) {
 	  screen.setYpt(18); screen.setXpt(19);
 	  drawPrompt(0x83);
@@ -743,8 +738,10 @@ void ScreenEngine::promptExtension(byte n)
 	screen.hchar(18, 2, ' ', 28);
 	screen.hchar(19, 2, ' ', 28);
 	screen.hchar(20, 2, ' ', 28);
-	screen.hstr(18, 3, "###############"); /* FIXME */
-	/* FIXME */
+	screen.hstr(18, 3, database->getSpecialAttackName(n));
+	screen.setXpt(3);
+	screen.setYpt(19);
+	drawMagicEffectDescription(database->getSpecialAttackEffect(n));
       }
       return;
     }

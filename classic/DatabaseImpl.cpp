@@ -105,6 +105,11 @@ void DatabaseImpl::compactPlayerMagicItems(unsigned n)
   }
 }
 
+Utils::StringSpan DatabaseImpl::getMonsterName() const
+{
+  return data.monsterName;
+}
+
 Utils::StringSpan DatabaseImpl::getClassName(unsigned n) const
 {
   return data.classes[n].name;
@@ -113,6 +118,14 @@ Utils::StringSpan DatabaseImpl::getClassName(unsigned n) const
 Utils::StringSpan DatabaseImpl::getClassPatternTable(unsigned n) const
 {
   return data.classPatternTable[n];
+}
+
+Utils::StringSpan DatabaseImpl::getSpecialAttackName(unsigned n) const
+{
+  if (n>0 && n<=sizeof(data.specialAttacks)/sizeof(data.specialAttacks[0]))
+    return data.specialAttacks[n-1].name;
+  else
+    return Utils::StringSpan();
 }
 
 byte DatabaseImpl::getNumClassChoices() const
@@ -317,12 +330,12 @@ Utils::StringSpan DatabaseImpl::getFloorMap() const
 void DatabaseImpl::clearRoomEnemies()
 {
   Utils::clearArray(data.monsterName);
-  data.monsterMaxHp = 0;
+  data.monsterBaseHP = 0;
   data.monsterDefense = 0;
   data.monsterAttack = 0;
   data.monsterMaxDamage = 0;
   data.monsterSpecialAttackChance = 0;
-  data.monsterSpecialAttackName = 0;
+  data.monsterSpecialAttackId = 0;
   data.unknown_1138 = 0;
   data.unknown_1139 = 0;
   data.monsterPatternNumber = 0;
@@ -345,12 +358,12 @@ void DatabaseImpl::prepareRoomEnemies(DescriptorHandle room)
   data.unknown_115e = 0;
   unsigned n = data.unknown_1cfb * (data.currentFloor - 1) * 4 + (info & 0x1f);
   Utils::StringSpan{data.monsters[n].name}.store(data.monsterName);
-  data.monsterMaxHp = data.monsters[n].maxHp;
+  data.monsterBaseHP = data.monsters[n].baseHP;
   data.monsterDefense = data.monsters[n].defense;
   data.monsterAttack = data.monsters[n].attack;
   data.monsterMaxDamage = data.monsters[n].maxDamage;
   data.monsterSpecialAttackChance = data.monsters[n].specialAttackChance;
-  data.monsterSpecialAttackName = data.monsters[n].specialAttackName;
+  data.monsterSpecialAttackId = data.monsters[n].specialAttackId;
   data.unknown_1138 = data.monsters[n].unknown1;
   data.unknown_113e = data.monsters[n].unknown4 & 0xf;
   data.monsterSpeed = data.monsters[n].unknown4 >> 4;

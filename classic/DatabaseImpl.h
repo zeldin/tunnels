@@ -88,12 +88,12 @@ private:
     byte unknown_111c;    // V@>111C
     byte unknown_111d[9];
     byte monsterName[12]; // V@>1126
-    byte monsterMaxHp;    // V@>1132
+    byte monsterBaseHP;   // V@>1132
     byte monsterDefense;  // V@>1133
     byte monsterAttack;   // V@>1134
     byte monsterMaxDamage; // V@>1135
     byte monsterSpecialAttackChance; // V@>1136
-    byte monsterSpecialAttackName; // V@>1137
+    byte monsterSpecialAttackId; // V@>1137
     byte unknown_1138;   // V@>1138
     byte unknown_1139;   // V@>1139
     byte monsterPatternNumber; // V@>113A
@@ -119,18 +119,21 @@ private:
     byte classPatternTable[4][0x40]; // V@>11CA
     struct {
       byte name[12];
-      byte maxHp;
+      byte baseHP;
       byte defense;
       byte attack;
       byte maxDamage;
       byte specialAttackChance;
-      byte specialAttackName;
+      byte specialAttackId;
       byte unknown1;
       byte unknown2;
       byte unknown3;
       byte unknown4;
     } monsters[56];       // V@>12CA
-    byte unknown_179a[0x140];
+    struct {
+      byte name[15];
+      byte effect;
+    } specialAttacks[20]; // V@>179A
     byte monsterPatternTable[16][0x40]; // V@>18DA
     byte maxPlayers;      // V@>1CDA
     byte unknown_1cdb[5];
@@ -267,8 +270,21 @@ public:
   virtual bool isQuestObjectIntact(unsigned n) const override { return (data.intactQuestObjects >> n)&1; }
   virtual uint16 getTurnsLeft(unsigned n) const override { return data.turnsLeft[n]; }
   virtual byte getRations() const override { return data.rations; }
+  virtual Utils::StringSpan getMonsterName() const override;
+  virtual byte getMonsterMaxHP() const override { return data.monsterBaseHP*6; }
+  virtual byte getMonsterDefense() const override { return data.monsterDefense; }
+  virtual byte getMonsterAttack() const override { return data.monsterAttack; }
+  virtual byte getMonsterMaxDamage() const override { return data.monsterMaxDamage; }
+  virtual byte getMonsterSpecialAttackChance() const override { return data.monsterSpecialAttackChance; }
+  virtual byte getMonsterSpecialAttackId() const override { return data.monsterSpecialAttackId; }
+  virtual byte getMonsterNegotiation() const override { return data.monsterNegotiation * 25; }
+  virtual byte getMonsterMobility() const override { return data.monsterMobility * 25; }
+  virtual byte getMonsterResistance() const override { return data.monsterResistance * 10; }
+  virtual byte getMonsterSpeed() const override { return data.monsterSpeed; }
   virtual Utils::StringSpan getClassName(unsigned n) const override;
   virtual Utils::StringSpan getClassPatternTable(unsigned n) const override;
+  virtual Utils::StringSpan getSpecialAttackName(unsigned n) const override;
+  virtual byte getSpecialAttackEffect(unsigned n) const override { return data.specialAttacks[n-1].effect; }
   virtual byte getMaxPlayers() const override { return data.maxPlayers; }
   virtual byte getNumClassChoices() const override;
   virtual byte getMaxFloors() const override { return data.maxFloors; }
