@@ -43,6 +43,7 @@ public:
   virtual void clearMessages() = 0;
   virtual void drawGeneralStore() = 0;
   virtual void drawStaircase() = 0;
+  virtual void stairMovement(bool ascending) = 0;
   virtual void drawCorridorSegment(unsigned n, Location loc) = 0;
   virtual void drawCorridorLeftJunction(unsigned n, Location loc) = 0;
   virtual void drawCorridorRightJunction(unsigned n, Location loc) = 0;
@@ -61,6 +62,7 @@ public:
   virtual ~SoundEngine() {}
   virtual void stopMusic() = 0;
   virtual void playTitleMusic() = 0;
+  virtual void playStairMusic() = 0;
   virtual void playGeneralStoreMusic() = 0;
   virtual void beep() = 0;
   virtual void honk() = 0;
@@ -84,7 +86,10 @@ private:
     DIVERSION_CREATE_PARTY,   // G@>61DD
     DIVERSION_POINT_OF_NR,    // G@>62D1
     DIVERSION_BUILD_DUNGEON,  // G@>62F4
+    DIVERSION_STAIRCASE,      // G@>64F1
+    DIVERSION_ENTRANCE,       // G@>6538
     DIVERSION_CONTINUE_GAME,  // G@>6556
+    DIVERSION_ROOM,           // G@>657E
     DIVERSION_CORRIDOR,       // G@>66F7
     DIVERSION_CORRIDOR_MAIN,  // G@>670B
     DIVERSION_AID,
@@ -127,6 +132,8 @@ private:
   Diversion waitForMusic();
   void setRoomFixtureShape(RoomFixture f);
   Diversion core();
+  Diversion staircase();
+  Diversion entrance();
   Diversion room();
   Diversion corridor();
   bool tryMove();

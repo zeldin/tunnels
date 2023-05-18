@@ -172,6 +172,29 @@ GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
   return DIVERSION_NULL;
 }
 
+GameEngine::Diversion GameEngine::staircase()
+{
+  // G@>64F1
+  if (database->getCurrentLocation() == LOCATION_ENTRANCE)
+    return DIVERSION_ROOM;
+  lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
+  sound.playStairMusic();
+  if (Diversion d = delay(2000))
+    return d;
+  database->prepareFloorMap(database->getCurrentFloor());
+  database->restoreFloorVisitedMarkers();
+  return DIVERSION_CONTINUE_GAME;
+}
+
+GameEngine::Diversion GameEngine::entrance()
+{
+  // G@>6538
+  database->setCurrentLocation(LOCATION_ENTRANCE);
+  lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
+  setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
+  return DIVERSION_ROOM;
+}
+
 GameEngine::Diversion GameEngine::room()
 {
   // G@>657E
@@ -247,14 +270,26 @@ GameEngine::Diversion GameEngine::room()
 	/* ... */
       }
       if (keyCode == KEY_UP) {
-	/* ... */
+	if (database->getCurrentLocation() != LOCATION_ASCENDING_STAIRCASE)
+	  continue;
+	database->setCurrentFloor(database->getCurrentFloor()-1);
+	if (database->getCurrentFloor() == 0)
+	  return DIVERSION_ENTRANCE;
+	database->setCurrentLocation(LOCATION_DESCENDING_STAIRCASE);
+	screen.stairMovement(true);
 	setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
-	/* ... */
+	return DIVERSION_STAIRCASE;
       }
       if (keyCode == KEY_DOWN) {
-	/* ... */
+	if (database->getCurrentLocation() != LOCATION_DESCENDING_STAIRCASE &&
+	    database->getCurrentLocation() != LOCATION_ENTRANCE)
+	  continue;
+	/* FIXME: need map to descend */
+	database->setCurrentFloor(database->getCurrentFloor()+1);
+	database->setCurrentLocation(LOCATION_ASCENDING_STAIRCASE);
+	screen.stairMovement(false);
 	setRoomFixtureShape(FIXTURE_ASCENDING_STAIRS);
-	/* ... */
+	return DIVERSION_STAIRCASE;
       }
     }
     return DIVERSION_CONTINUE_GAME;

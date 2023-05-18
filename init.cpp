@@ -91,10 +91,18 @@ EventType GameEngine::run()
     default:
       // internal error...
       return EVENT_NULL;
+    case DIVERSION_STAIRCASE:
+      if ((diversion = staircase()))
+	continue;
+    case DIVERSION_ENTRANCE:
+      if ((diversion = entrance()))
+	continue;
     case DIVERSION_CONTINUE_GAME:
       if ((diversion = core()))
 	continue;
-      return EVENT_NULL;
+    case DIVERSION_ROOM:
+      if ((diversion = room()))
+	continue;
     case DIVERSION_CORRIDOR:
       // -> G@>66F7
       /* FIXME: If no direction set previous direction */

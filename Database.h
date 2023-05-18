@@ -67,6 +67,7 @@ public:
   virtual void setNumPlayers(byte num) = 0;
   virtual void setDifficulty(byte dif) = 0;
   virtual byte getCurrentFloor() const = 0;
+  virtual void setCurrentFloor(byte floor) = 0;
   virtual int getCurrentPlayer() const = 0;
   virtual void setCurrentPlayer(int n) = 0;
   virtual bool nextPlayerInOrder() = 0;
@@ -97,6 +98,8 @@ public:
   virtual byte getMappedFloors() const = 0;
   virtual Utils::StringSpan getFloorMap() const = 0;
   virtual void setMapVisited(MapPosition pos, bool visited) = 0;
+  virtual void prepareFloorMap(unsigned floor) = 0;
+  virtual void restoreFloorVisitedMarkers() = 0;
   virtual bool inCombat() const = 0;
   virtual Location mapLocation(MapPosition pos) const = 0;
   virtual bool canMove(MapPosition pos, Direction dir, Location &dest) const = 0;

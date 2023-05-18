@@ -223,4 +223,10 @@ void ScreenEngine::drawPlayer(unsigned n)
   putQuad(database->getPlayerRow(n), database->getPlayerColumn(n), n<<3);
 }
 
+void ScreenEngine::stairMovement(bool ascending)
+{
+  clearRoom();
+  drawPrompt(ascending? 0x2f : 0x30);
+}
+
 }}

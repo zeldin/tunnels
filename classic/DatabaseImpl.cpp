@@ -306,6 +306,244 @@ void DatabaseImpl::setMapVisited(MapPosition pos, bool visited)
       data.floorMap[p] |= 0x10;
 }
 
+void DatabaseImpl::clearMap(unsigned mode)
+{
+  for (unsigned pos = 0; pos < sizeof(data.floorMap)/sizeof(data.floorMap[0]);
+       pos++)
+    if (data.floorMap[pos] >= 0x60) {
+      data.floorMap[pos] &= ~0x10;
+      if (mode != 2) {
+	if (data.floorMap[pos] == 0x69 && mode == 0) { // Descending stairs
+	  data.floorMap[pos] = 0x68; // Change to ascending
+	  continue;
+	} else if (data.floorMap[pos] == 0x68 && mode == 1) // Ascending stairs
+	  continue;
+      }
+      data.floorMap[pos] = 0x6b; // Clear to blank
+    }
+}
+
+unsigned DatabaseImpl::findDescriptor(uint16 pos, unsigned offs, unsigned cnt,
+				      unsigned delta)
+{
+  offs += (data.currentFloor-1) * data.descriptorBytesPerFloor;
+  while (cnt--) {
+    if (offs >= sizeof(data.floorDescriptors)/sizeof(data.floorDescriptors[0])-1)
+      break;
+    if (pos == *reinterpret_cast<const msb16*>(data.floorDescriptors + offs))
+      return offs;
+    offs += delta;
+  }
+  return 0;
+}
+
+void DatabaseImpl::addMapFeatures(unsigned offs, unsigned cnt, byte code,
+				  unsigned delta)
+{
+  while (cnt--) {
+    if (offs >= sizeof(data.floorDescriptors)/sizeof(data.floorDescriptors[0])-1)
+      break;
+    uint16 pos = *reinterpret_cast<const msb16*>(data.floorDescriptors + offs);
+    if (pos && pos < sizeof(data.floorMap)/sizeof(data.floorMap[0]))
+      data.floorMap[pos] = code;
+    offs += delta;
+  }
+}
+
+unsigned DatabaseImpl::countBlankNeighbors(unsigned offs)
+{
+  unsigned n = 0;
+  if (offs >= 32 && data.floorMap[offs-32] == 0x6b)
+    n++;
+  if (offs < sizeof(data.floorMap)/sizeof(data.floorMap[0])-32 &&
+      data.floorMap[offs+32] == 0x6b)
+    n++;
+  if (offs >= 1 && data.floorMap[offs-1] == 0x6b)
+    n++;
+  if (offs < sizeof(data.floorMap)/sizeof(data.floorMap[0])-1 &&
+      data.floorMap[offs+1] == 0x6b)
+    n++;
+  return n;
+}
+
+void DatabaseImpl::addMapVerticalCorridors()
+{
+  int x, y, last_y;
+  bool candidate_room_seen;
+  for (x=0; x<26; x++) {
+    y = 0;
+    last_y = -1;
+    candidate_room_seen = false;
+    while (y < 17) {
+      unsigned offs = (y<<5)+x;
+      byte code = data.floorMap[offs];
+      if (code == 0x60)
+	; /* Horizontal segment, allowed start/end of vertical segment */
+      else if (code < 0x67 || code == 0x6b) {
+	/* Other segment, or blank.  Not allowed start/end */
+	y++;
+	continue;
+      } else {
+	/* Room or fountain.  Allowed start/end, maybe candidate */
+	if (countBlankNeighbors(offs) >= 3)
+	  candidate_room_seen = true;
+      }
+      if (!candidate_room_seen || last_y < 0) {
+	/* Don't complete the segment here, but keep it as a possible start */
+	last_y = y++;
+	continue;
+      }
+      /* New segment decided */
+      for (int y2 = last_y; y2 <= y; y2++) {
+	offs = (y2<<5)+x;
+	code = data.floorMap[offs];
+	if (code == 0x6b)
+	  code = 0x61;
+	else if (code == 0x63 && y2 != y)
+	  code = 0x62;
+	else if (code == 0x61)
+	  break;
+	else if (code == 0x60) {
+	  if (y2 == last_y)
+	    code = 0x64;
+	  else if (y2 == y)
+	    code = 0x63;
+	  else
+	    code = 0x62;
+	}
+	data.floorMap[offs] = code;
+      }
+      /* Reset state */
+      last_y = -1;
+      candidate_room_seen = false;
+    }
+  }
+}
+
+void DatabaseImpl::addMapHorizontalCorridors()
+{
+  int x, y, last_x;
+  bool candidate_room_seen;
+  for (y=0; y<17; y++) {
+    x = 0;
+    last_x = -1;
+    candidate_room_seen = false;
+    while (x < 26) {
+      unsigned offs = (y<<5)+x;
+      byte code = data.floorMap[offs];
+      if (code == 0x61)
+	; /* Vertical segment, allowed start/end of horizontal segment */
+      else if (code < 0x67 || code == 0x6b) {
+	/* Other segment, or blank.  Not allowed start/end */
+	x++;
+	continue;
+      } else {
+	/* Room or fountain.  Allowed start/end, maybe candidate */
+	if (countBlankNeighbors(offs) >= 3)
+	  candidate_room_seen = true;
+      }
+      if (!candidate_room_seen || last_x < 0) {
+	/* Don't complete the segment here, but keep it as a possible start */
+	last_x = x++;
+	continue;
+      }
+      /* New segment decided */
+      for (int x2 = last_x; x2 <= x; x2++) {
+	offs = (y<<5)+x2;
+	code = data.floorMap[offs];
+	if (code == 0x6b)
+	  code = 0x60;
+	else if (code == 0x65 && x2 != x)
+	  code = 0x62;
+	else if (code == 0x60)
+	  break;
+	else if (code == 0x66 || code == 0x61) {
+	  if (x2 == last_x)
+	    code = 0x66;
+	  else if (x2 == x)
+	    code = 0x65;
+	  else
+	    code = 0x62;
+	}
+	data.floorMap[offs] = code;
+      }
+      /* Reset state */
+      last_x = -1;
+      candidate_room_seen = false;
+    }
+  }
+}
+
+void DatabaseImpl::fixupConnections()
+{
+  for (unsigned y=0; y<17; y++)
+    for (unsigned x=0; x<26; x++) {
+      unsigned offs = (y<<5)+x;
+      byte code = data.floorMap[offs];
+      if (code >= 0x68 && code <= 0x6a) {
+	if (offs >= 32) {
+	  code = data.floorMap[offs-32];
+	  if (code == 0x60)
+	    data.floorMap[offs-32] = 0x64;
+	  else if (code == 0x63)
+	    data.floorMap[offs-32] = 0x62;
+	}
+	if (offs < sizeof(data.floorMap)/sizeof(data.floorMap[0])-32) {
+	  code = data.floorMap[offs+32];
+	  if (code == 0x60)
+	    data.floorMap[offs+32] = 0x63;
+	  else if (code == 0x64)
+	    data.floorMap[offs+32] = 0x62;
+	}
+	if (offs >= 1) {
+	  code = data.floorMap[offs-1];
+	  if (code == 0x61)
+	    data.floorMap[offs-1] = 0x66;
+	  else if (code == 0x65)
+	    data.floorMap[offs-1] = 0x62;
+	}
+	if (offs < sizeof(data.floorMap)/sizeof(data.floorMap[0])-1) {
+	  code = data.floorMap[offs+1];
+	  if (code == 0x61)
+	    data.floorMap[offs+1] = 0x64;
+	  else if (code == 0x66)
+	    data.floorMap[offs+1] = 0x62;
+	}
+      }
+    }
+}
+
+void DatabaseImpl::prepareFloorMap(unsigned floor)
+{
+  clearMap(2);
+  if (floor < 1 || floor > data.numFloors)
+    return;
+  uint16 floorBase = (floor-1) * data.descriptorBytesPerFloor;
+  addMapFeatures(floorBase + 0, data.numRoomsPerFloor, 0x67, 10);
+  addMapFeatures(floorBase + data.ascendingStairsDescriptorOffset,
+		 data.numStairsPerFloor, 0x68, 2);
+  addMapFeatures(floorBase + data.descendingStairsDescriptorOffset,
+		 data.numStairsPerFloor, 0x69, 2);
+  addMapFeatures(floorBase + data.fountainDescriptorOffset,
+		 data.numFountainsPerFloor, 0x6a, 3);
+  for (unsigned round = 0; round < 2; round++) {
+    addMapVerticalCorridors();
+    addMapHorizontalCorridors();
+  }
+  fixupConnections();
+}
+
+void DatabaseImpl::restoreFloorVisitedMarkers()
+{
+  for (uint16 p = 0; p < sizeof(data.floorMap)/sizeof(data.floorMap[0]); p++) {
+    if (data.floorMap[p] >= 0x60)
+      data.floorMap[p] |= 0x10;
+    if (data.floorMap[p] == 0x77 &&
+	(data.floorDescriptors[findDescriptor(p)+4]&8))
+      data.floorMap[p] &= ~0x10;
+  }
+}
+
 Location DatabaseImpl::mapLocation(MapPosition pos) const
 {
   uint16 p = PosWord(pos);

@@ -92,12 +92,14 @@ private:
     byte unknown_1ce0;    // V@>1CE0
     byte numClasses;      // V@>1CE1
     byte maxFloors;       // V@>1CE2
-    byte unknown_1ce3[5]; // V@>1CE3
+    byte unknown_1ce3[3]; // V@>1CE3
+    byte numFountainsPerFloor; // V@>1CE6
+    byte numStairsPerFloor;    // V@>1CE7
     byte unknown_1ce8;    // V@>1CE8
     byte unknown_1ce9;    // V@>1CE9
     byte numConfPlayers;  // V@>1CEA
     byte unknown_1ceb;    // V@>1CEB
-    byte unknown_1cec;    // V@>1CEC
+    byte numRoomsPerFloor;// V@>1CEC
     byte minFloors;       // V@>1CED
     byte unknown_1cee[6]; // V@>1CEE
     byte unknown_1cf4;    // V@>1CF4
@@ -112,7 +114,12 @@ private:
     byte activeHighPatternTable; // V@>1D01
     byte unknown_1d02;    // V@>1D02
     byte unknown_1d03;    // V@>1D03
-    byte unknown_1d04[0x8ec];
+    msb16 descriptorBytesPerFloor; // V@>1D04
+    msb16 ascendingStairsDescriptorOffset; // V@>1D06
+    msb16 descendingStairsDescriptorOffset; // V@>1D08
+    msb16 fountainDescriptorOffset; // V@>1D0A
+    byte floorDescriptors[0x85c]; // V@>1D0C
+    byte unknown_2568[0x88];
     byte savedDirection;  // V@>25F0
     byte unknown_25f1[0xb];
     byte savedActionKey;   // V@>25FC
@@ -229,6 +236,7 @@ public:
   virtual void setNumPlayers(byte num) override { data.numPlayers = num; }
   virtual void setDifficulty(byte dif) override { data.difficulty = dif; }
   virtual byte getCurrentFloor() const override { return data.currentFloor; }
+  virtual void setCurrentFloor(byte floor) override { data.currentFloor = floor; }
   virtual int getCurrentPlayer() const override { return data.currentPlayer-1; }
   virtual void setCurrentPlayer(int n) override { data.currentPlayer = n+1; }
   virtual bool nextPlayerInOrder() override;
@@ -260,6 +268,8 @@ public:
   virtual byte getMappedFloors() const override { return data.numMappedFloors; }
   virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;
+  virtual void prepareFloorMap(unsigned floor) override;
+  virtual void restoreFloorVisitedMarkers() override;
   virtual bool inCombat() const override { return data.unknown_1d03 != 0; }
   virtual Location mapLocation(MapPosition pos) const override;
   virtual bool canMove(MapPosition pos, Direction dir, Location &dest) const override;
@@ -267,6 +277,16 @@ public:
   virtual bool getSecretDoorsRevealed() const override { return data.unknown_111c & 0x8; }
   virtual void setSecretDoorsRevealed(bool value) override
   { if(value) data.unknown_111c |= 0x8; else data.unknown_111c &= ~0x8; }
+
+private:
+  void clearMap(unsigned mode);
+  unsigned findDescriptor(uint16 pos, unsigned offs, unsigned cnt, unsigned delta);
+  unsigned findDescriptor(uint16 pos) { return findDescriptor(pos, 0, data.numRoomsPerFloor, 10); }
+  void addMapFeatures(unsigned offs, unsigned cnt, byte code, unsigned delta);
+  unsigned countBlankNeighbors(unsigned offs);
+  void addMapVerticalCorridors();
+  void addMapHorizontalCorridors();
+  void fixupConnections();
 };
   
 }
