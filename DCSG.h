@@ -5,6 +5,10 @@
 
 namespace Tunnels { namespace DCSG {
 
+namespace MusicBuilder {
+template <typename T, typename U> struct music_meta_sequence;
+}
+
 constexpr unsigned CLOCK_HZ = 3579545;
 
 class Synthesizer {
@@ -55,6 +59,8 @@ class Backend {
 };
 
 class Music : Timer::Timer {
+  template <typename T, typename U>
+  friend class MusicBuilder::music_meta_sequence;
 private:
   const byte *data;
   unsigned pos, length, timing;
