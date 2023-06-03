@@ -32,7 +32,7 @@ private:
     { return MapPosition{byte(v&0x1f), byte(v>>5)}; }
   };
   struct RoomDescriptor {
-    uint16 pos;
+    msb16 mapPosition;
     byte fixtureId;
     byte monsterInfo;
     byte unknown[6];
@@ -181,7 +181,12 @@ private:
     byte savedProgression; // V@>25FD
     byte unknown_25fe[0x78];
     byte playerOrder[4];  // V@>2676
-    byte unknown_267a[0x7e];
+    byte unknown_267a[0xa];
+    struct {
+      byte row;
+      byte column;
+    } fixturePosition[6]; // V@>2684
+    byte unknown_2690[0x68];
     struct {
       byte name[15];
       byte unknown[3];
@@ -319,6 +324,11 @@ public:
   virtual void setSavedActionKey(byte actionKey) override { data.savedActionKey = actionKey; }
   virtual byte getSavedProgression() const override { return data.savedProgression; }
   virtual void setSavedProgression(byte progression) override { data.savedProgression = progression; }
+  virtual void clearFixturePositions() override;
+  virtual byte getFixtureRow(unsigned n) const override { return data.fixturePosition[n].row; }
+  virtual byte getFixtureColumn(unsigned n) const override { return data.fixturePosition[n].column; }
+  virtual bool isFixturePlaced(unsigned n) const override { return data.fixturePosition[n].row != 0 || data.fixturePosition[n].column != 0; }
+  virtual void setStaircaseFixturePosition() override;
   virtual Utils::StringSpan getItemName(ItemCategory cat, byte id) const override;
   virtual int8 getRangedWeaponAmmoType(unsigned id) const override;
   virtual Utils::StringSpan getRangedWeaponAmmoName(unsigned id) const override;

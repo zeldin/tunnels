@@ -97,11 +97,12 @@ EventType GameEngine::run()
     case DIVERSION_ENTRANCE:
       if ((diversion = entrance()))
 	continue;
+    case DIVERSION_ENTER_LOCATION:
     case DIVERSION_CONTINUE_GAME:
-      if ((diversion = core()))
+      if ((diversion = core(diversion == DIVERSION_ENTER_LOCATION)))
 	continue;
-    case DIVERSION_ROOM:
-      if ((diversion = room()))
+    case DIVERSION_ENTER_ROOM:
+      if ((diversion = room(true)))
 	continue;
     case DIVERSION_CORRIDOR:
       // -> G@>66F7

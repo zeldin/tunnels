@@ -71,7 +71,7 @@ public:
   virtual void mapScreen() override;
   virtual void clearMessages() override;
   virtual void drawGeneralStore() override;
-  virtual void drawStaircase() override; 
+  virtual void drawDynamicFixture(unsigned index) override;
   virtual void stairMovement(bool ascending) override;
   virtual void drawCorridorSegment(unsigned n, Location loc) override;
   virtual void drawCorridorLeftJunction(unsigned n, Location loc) override;

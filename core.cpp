@@ -60,7 +60,7 @@ bool GameEngine::tryMove(bool checkOnly)
   database->setMapPosition(pos);
   loc = database->mapLocation(pos);
   database->setCurrentLocation(loc);
-  /* FIXME: clear V@>2684 */
+  database->clearFixturePositions();
   database->setSecretDoorsRevealed(false);
   return true;
 }
@@ -195,14 +195,14 @@ GameEngine::Diversion GameEngine::staircase()
 {
   // G@>64F1
   if (database->getCurrentLocation() == LOCATION_ENTRANCE)
-    return DIVERSION_ROOM;
+    return DIVERSION_ENTER_ROOM;
   lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
   sound.playStairMusic();
   if (Diversion d = delay(2000))
     return d;
   database->prepareFloorMap(database->getCurrentFloor());
   database->restoreFloorVisitedMarkers();
-  return DIVERSION_CONTINUE_GAME;
+  return DIVERSION_ENTER_LOCATION;
 }
 
 GameEngine::Diversion GameEngine::entrance()
@@ -211,52 +211,73 @@ GameEngine::Diversion GameEngine::entrance()
   database->setCurrentLocation(LOCATION_ENTRANCE);
   lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
   setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
-  return DIVERSION_ROOM;
+  return DIVERSION_ENTER_ROOM;
 }
 
-GameEngine::Diversion GameEngine::room()
+GameEngine::Diversion GameEngine::room(bool newLocation)
 {
   // G@>657E
   sound.stopMusic();
   screen.roomScreen();
-  if (database->getCurrentLocation() == LOCATION_ENTRANCE)
-    lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
-  else  {
-    // FIXME G@>658F
-  }
-  StartPosition pos = STARTPOS_NORMAL;
-  if (database->getCurrentLocation() == LOCATION_ROOM ||
-      database->getCurrentLocation() > LOCATION_FOUNTAIN) {
-    if (lastActionKey != database->getKeymapEntry(KEYMAP_BREAK_DOOR))
-      pos = STARTPOS_IN_DOORWAY;
-  } else {
-    Location nextLocation;
-    if (!database->canMove(database->getMapPosition(), reverse(direction),
-			   nextLocation) ||
-	(nextLocation != LOCATION_CORRIDOR &&
-	 nextLocation != LOCATION_FOUNTAIN))
-      pos = STARTPOS_BACK_AGAINST_WALL;
-  }
-  database->setCurrentPlayer(-1);
-  while (database->nextPlayerInOrder()) {
-    unsigned p = database->getCurrentPlayer();
-    database->setPlayerStartPosition(p, pos, direction);
-    screen.drawPlayer(p);
-  }
-  switch (database->getCurrentLocation()) {
-  case LOCATION_ENTRANCE:
-    screen.drawGeneralStore();
-    setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
-  case LOCATION_DESCENDING_STAIRCASE:
-  case LOCATION_ASCENDING_STAIRCASE:
-    screen.drawStaircase();
-    break;
-  }
-  if (lastActionKey == 'C') // Not using keymap! G@>65A2
-    database->setSecretDoorsRevealed(false);
-  lastActionKey = 0;
-  database->setCurrentPlayer(-1);
 
+  if (!newLocation && database->getCurrentLocation() != LOCATION_ENTRANCE) {
+    if (database->getCurrentLocation() == LOCATION_ROOM &&
+	database->getFixtureId(currentRoom) == 0) {
+      // FIXME G@>AF0B
+    } else {
+      if (database->isFixturePlaced(0))
+	screen.drawDynamicFixture(0);
+    }
+    for (unsigned p=0; p<database->getNumConfiguredPlayers(); p++) {
+      // FIXME G@>ADC6
+      if (database->getPlayerHP(p) > database->getPlayerWD(p))
+	screen.drawPlayer(p);
+    }
+    // FIXME G@>AF62
+  } else {
+    // Initial party placement
+    if (database->getCurrentLocation() == LOCATION_ENTRANCE)
+      lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
+    else {
+      // FIXME G@>659A
+    }
+    // G@>659F
+    StartPosition pos = STARTPOS_NORMAL;
+    if (database->getCurrentLocation() == LOCATION_ROOM ||
+	database->getCurrentLocation() > LOCATION_FOUNTAIN) {
+      if (lastActionKey != database->getKeymapEntry(KEYMAP_BREAK_DOOR))
+	pos = STARTPOS_IN_DOORWAY;
+    } else {
+      Location nextLocation;
+      if (!database->canMove(database->getMapPosition(), reverse(direction),
+			     nextLocation) ||
+	  (nextLocation != LOCATION_CORRIDOR &&
+	   nextLocation != LOCATION_FOUNTAIN))
+	pos = STARTPOS_BACK_AGAINST_WALL;
+    }
+    database->setCurrentPlayer(-1);
+    while (database->nextPlayerInOrder()) {
+      unsigned p = database->getCurrentPlayer();
+      database->setPlayerStartPosition(p, pos, direction);
+      if (database->getPlayerHP(p) > database->getPlayerWD(p))
+	screen.drawPlayer(p);
+    }
+    switch (database->getCurrentLocation()) {
+    case LOCATION_ENTRANCE:
+      screen.drawGeneralStore();
+      setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
+    case LOCATION_DESCENDING_STAIRCASE:
+    case LOCATION_ASCENDING_STAIRCASE:
+      database->setStaircaseFixturePosition();
+      screen.drawDynamicFixture(0);
+      break;
+    }
+    if (lastActionKey == 'C') // Not using keymap! G@>65A2
+      database->setSecretDoorsRevealed(false);
+    lastActionKey = 0;
+    database->setCurrentPlayer(-1);
+  }
+  // G@>65B2
   if (database->getCurrentLocation() == LOCATION_ENTRANCE &&
       database->getPartyGold() != 0) {
     sound.playGeneralStoreMusic();
@@ -278,6 +299,7 @@ GameEngine::Diversion GameEngine::room()
       if (database->getCurrentLocation() == LOCATION_ENTRANCE ||
 	  !tryMove())
 	continue;
+      return DIVERSION_ENTER_LOCATION;
     } else {
       if (keyCode == database->getKeymapEntry(KEYMAP_USE_ITEM)) {
 	/* ... */
@@ -310,8 +332,8 @@ GameEngine::Diversion GameEngine::room()
 	setRoomFixtureShape(FIXTURE_ASCENDING_STAIRS);
 	return DIVERSION_STAIRCASE;
       }
+      return DIVERSION_CONTINUE_GAME;
     }
-    return DIVERSION_CONTINUE_GAME;
   }
 }
 
@@ -321,7 +343,7 @@ GameEngine::Diversion GameEngine::corridor()
   Location loc = database->mapLocation(pos);
   database->setCurrentLocation(loc);
   if (loc == LOCATION_ROOM || loc > LOCATION_FOUNTAIN)
-    return DIVERSION_CONTINUE_GAME;
+    return DIVERSION_ENTER_LOCATION;
   for (;;) {
     screen.clearMessages();
     /* FIXME: V@>111D */
@@ -417,7 +439,7 @@ GameEngine::Diversion GameEngine::corridor()
 	}
 	if (Diversion d = delay(500))
 	  return d;
-	return DIVERSION_CONTINUE_GAME;
+	return DIVERSION_ENTER_LOCATION;
       } else if (keyCode == database->getKeymapEntry(KEYMAP_USE_ITEM)) {
 	/* FIXME G@>67DF */
       } else if (keyCode == database->getKeymapEntry(KEYMAP_CHANGE_ORDER)) {
@@ -431,11 +453,11 @@ GameEngine::Diversion GameEngine::corridor()
   }
 }
 
-GameEngine::Diversion GameEngine::core()
+GameEngine::Diversion GameEngine::core(bool newLocation)
 {
   database->setMapVisited(database->getMapPosition(), true);
   if (database->inCombat())
-    return room();
+    return room(newLocation);
   else switch(database->getCurrentLocation()) {
     case LOCATION_CORRIDOR:
     case LOCATION_FOUNTAIN:
@@ -445,7 +467,7 @@ GameEngine::Diversion GameEngine::core()
     case LOCATION_DESCENDING_STAIRCASE:
     case LOCATION_ASCENDING_STAIRCASE:
     case LOCATION_ENTRANCE:
-      return room();
+      return room(newLocation);
     default:
       return DIVERSION_QUIT;
     }

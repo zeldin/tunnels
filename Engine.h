@@ -42,7 +42,7 @@ public:
   virtual void mapScreen() = 0;
   virtual void clearMessages() = 0;
   virtual void drawGeneralStore() = 0;
-  virtual void drawStaircase() = 0;
+  virtual void drawDynamicFixture(unsigned index) = 0;
   virtual void stairMovement(bool ascending) = 0;
   virtual void drawCorridorSegment(unsigned n, Location loc) = 0;
   virtual void drawCorridorLeftJunction(unsigned n, Location loc) = 0;
@@ -89,8 +89,9 @@ private:
     DIVERSION_BUILD_DUNGEON,  // G@>62F4
     DIVERSION_STAIRCASE,      // G@>64F1
     DIVERSION_ENTRANCE,       // G@>6538
+    DIVERSION_ENTER_ROOM,     // G@>654C
+    DIVERSION_ENTER_LOCATION, // G@>6551
     DIVERSION_CONTINUE_GAME,  // G@>6556
-    DIVERSION_ROOM,           // G@>657E
     DIVERSION_CORRIDOR,       // G@>66F7
     DIVERSION_CORRIDOR_MAIN,  // G@>670B
     DIVERSION_AID,
@@ -133,10 +134,10 @@ private:
   Diversion delay(unsigned ms);
   Diversion waitForMusic();
   void setRoomFixtureShape(RoomFixture f);
-  Diversion core();
+  Diversion core(bool newLocation);
   Diversion staircase();
   Diversion entrance();
-  Diversion room();
+  Diversion room(bool newLocation);
   Diversion corridor();
   bool tryMove(bool checkOnly = false);
   Diversion getMovementKey(byte &kc, Direction &dir);

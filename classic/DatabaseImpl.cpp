@@ -194,6 +194,18 @@ void DatabaseImpl::setSavedRoomAddress(DescriptorHandle room)
     0x1D0C + (data.currentFloor-1) * data.descriptorBytesPerFloor;
 }
 
+void DatabaseImpl::clearFixturePositions()
+{
+  for (unsigned i = 0; i < sizeof(data.fixturePosition)/sizeof(data.fixturePosition[0]); i++)
+    data.fixturePosition[i].row = data.fixturePosition[i].column = 0;
+}
+
+void DatabaseImpl::setStaircaseFixturePosition()
+{
+  data.fixturePosition[0].row = 13;
+  data.fixturePosition[0].column = 15;
+}
+
 Utils::StringSpan DatabaseImpl::getItemName(ItemCategory cat, byte id) const
 {
   if (id--)

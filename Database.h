@@ -95,6 +95,11 @@ public:
   virtual void setSavedActionKey(byte actionKey) = 0;
   virtual byte getSavedProgression() const = 0;
   virtual void setSavedProgression(byte progression) = 0;
+  virtual void clearFixturePositions() = 0;
+  virtual byte getFixtureRow(unsigned n) const = 0;
+  virtual byte getFixtureColumn(unsigned n) const = 0;
+  virtual bool isFixturePlaced(unsigned n) const = 0;
+  virtual void setStaircaseFixturePosition() = 0;
   virtual Utils::StringSpan getItemName(ItemCategory cat, byte id) const = 0;
   virtual int8 getRangedWeaponAmmoType(unsigned id) const = 0;
   virtual Utils::StringSpan getRangedWeaponAmmoName(unsigned id) const = 0;

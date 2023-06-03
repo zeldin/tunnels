@@ -213,9 +213,9 @@ void ScreenEngine::drawGeneralStore()
   putQuad(13, 5, 0x90);
 }
 
-void ScreenEngine::drawStaircase()
+void ScreenEngine::drawDynamicFixture(unsigned index)
 {
-  putQuad(13, 15, 0xf4);
+  putQuad(database->getFixtureRow(index), database->getFixtureColumn(index), 0xf4);
 }
 
 void ScreenEngine::drawPlayer(unsigned n)
