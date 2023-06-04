@@ -60,6 +60,25 @@ enum RoomFixture {
   FIXTURE_VAULT = 5
 };
 
+enum RoomItem {
+  ROOM_ITEM_FIXTURE = 0, // If special room (general store / vault)
+  ROOM_ITEM_CHEST = 0, // If normal room
+  ROOM_ITEM_MONEY = 1,
+  ROOM_ITEM_CENTERPIECE = 2, // Fountain / living statue
+  ROOM_ITEM_LOOT1 = 3,
+  ROOM_ITEM_LOOT2 = 4,
+  ROOM_ITEM_LOOT3 = 5,
+
+  ROOM_ITEM_FIRST = ROOM_ITEM_CHEST,
+  ROOM_ITEM_LAST = ROOM_ITEM_LOOT3
+};
+
+constexpr RoomItem next(RoomItem i)
+{
+  return RoomItem(i + 1);
+}
+
+
 constexpr Direction operator+(Direction a, Direction b)
 {
   return static_cast<Direction>((unsigned(a)+unsigned(b))&3);

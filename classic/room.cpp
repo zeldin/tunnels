@@ -229,38 +229,44 @@ void ScreenEngine::drawGeneralStore()
   putQuad(13, 5, 0x90);
 }
 
-void ScreenEngine::drawDynamicFixture(unsigned index)
+void ScreenEngine::drawDynamicFixture()
 {
-  putQuad(database->getFixtureRow(index), database->getFixtureColumn(index), 0xf4);
+  putQuad(database->getRoomItemRow(ROOM_ITEM_FIXTURE),
+	  database->getRoomItemColumn(ROOM_ITEM_FIXTURE), 0xf4);
 }
 
 void ScreenEngine::drawLootItem(unsigned index, ItemCategory cat, byte id)
 {
-  putQuad(database->getFixtureRow(index+3), database->getFixtureColumn(index+3),
+  putQuad(database->getRoomItemRow(RoomItem(ROOM_ITEM_LOOT1+index)),
+	  database->getRoomItemColumn(RoomItem(ROOM_ITEM_LOOT1+index)),
 	  database->getItemTiles(cat, id));
 }
 
 void ScreenEngine::drawLivingStatue()
 {
-  putQuad(database->getFixtureRow(2), database->getFixtureColumn(2),
+  putQuad(database->getRoomItemRow(ROOM_ITEM_CENTERPIECE),
+	  database->getRoomItemColumn(ROOM_ITEM_CENTERPIECE),
 	  database->getLivingStatueTiles());
 }
 
 void ScreenEngine::drawFountain()
 {
-  putQuad(database->getFixtureRow(2), database->getFixtureColumn(2),
+  putQuad(database->getRoomItemRow(ROOM_ITEM_CENTERPIECE),
+	  database->getRoomItemColumn(ROOM_ITEM_CENTERPIECE),
 	  database->getFountainTiles());
 }
 
 void ScreenEngine::drawChestItem()
 {
-  putQuad(database->getFixtureRow(0), database->getFixtureColumn(0),
+  putQuad(database->getRoomItemRow(ROOM_ITEM_CHEST),
+	  database->getRoomItemColumn(ROOM_ITEM_CHEST),
 	  database->getChestTiles());
 }
 
 void ScreenEngine::drawMoneyItem()
 {
-  putQuad(database->getFixtureRow(1), database->getFixtureColumn(1),
+  putQuad(database->getRoomItemRow(ROOM_ITEM_MONEY),
+	  database->getRoomItemColumn(ROOM_ITEM_MONEY),
 	  database->getMoneyTiles());
 }
 

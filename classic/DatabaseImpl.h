@@ -33,9 +33,9 @@ private:
   };
   struct RoomDescriptor {
     msb16 mapPosition;
-    byte fixtureId;
+    byte specialRoomType;
     byte monsterInfo;
-    byte chestInfo;
+    byte specialItemInfo;
     byte goldAmount;
     byte lootInfo;
     byte lootId[3];
@@ -188,7 +188,7 @@ private:
     struct {
       byte row;
       byte column;
-    } fixturePosition[6]; // V@>2684
+    } roomItemPosition[6]; // V@>2684
     byte unknown_2690[0x68];
     struct {
       byte name[15];
@@ -331,13 +331,13 @@ public:
   virtual void setSavedActionKey(byte actionKey) override { data.savedActionKey = actionKey; }
   virtual byte getSavedProgression() const override { return data.savedProgression; }
   virtual void setSavedProgression(byte progression) override { data.savedProgression = progression; }
-  virtual void clearFixturePosition(unsigned n) override;
-  virtual void placeFixture(unsigned n, byte y, byte x) override;
-  virtual void placeFixtureCenter(unsigned n) override;
-  virtual void copyFixturePosition(unsigned n, unsigned m) override;
-  virtual byte getFixtureRow(unsigned n) const override { return data.fixturePosition[n].row; }
-  virtual byte getFixtureColumn(unsigned n) const override { return data.fixturePosition[n].column; }
-  virtual bool isFixturePlaced(unsigned n) const override { return data.fixturePosition[n].row != 0 || data.fixturePosition[n].column != 0; }
+  virtual void clearRoomItemPosition(RoomItem n) override;
+  virtual void placeRoomItem(RoomItem n, byte y, byte x) override;
+  virtual void placeRoomItemCenter(RoomItem n) override;
+  virtual void copyRoomItemPosition(RoomItem n, RoomItem m) override;
+  virtual byte getRoomItemRow(RoomItem n) const override { return data.roomItemPosition[n].row; }
+  virtual byte getRoomItemColumn(RoomItem n) const override { return data.roomItemPosition[n].column; }
+  virtual bool isRoomItemPlaced(RoomItem n) const override { return data.roomItemPosition[n].row != 0 || data.roomItemPosition[n].column != 0; }
   virtual Utils::StringSpan getItemName(ItemCategory cat, byte id) const override;
   virtual Utils::StringSpan getItemTiles(ItemCategory cat, byte id) const override;
   virtual int8 getRangedWeaponAmmoType(unsigned id) const override;
@@ -362,13 +362,13 @@ public:
   virtual uint16 getPartyGold() const override { return data.partyGold; }
   virtual byte getMappedFloors() const override { return data.numMappedFloors; }
   virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const override { return findDescriptor(PosWord(pos)); }
-  virtual byte getFixtureId(DescriptorHandle room) const override { return roomDescriptor(room)->fixtureId; }
+  virtual byte getRoomSpecialType(DescriptorHandle room) const override { return roomDescriptor(room)->specialRoomType; }
   virtual bool roomHasEnemies(DescriptorHandle room) const override { return (roomDescriptor(room)->monsterInfo & 0xe0) != 0; }
   virtual void clearRoomEnemies() override;
   virtual void prepareRoomEnemies(DescriptorHandle room) override;
-  virtual bool roomHasUnopenedChest(DescriptorHandle room) const override { return (roomDescriptor(room)->chestInfo & 0x01) != 0; }
-  virtual bool roomHasLivingStatue(DescriptorHandle room) const override { return (roomDescriptor(room)->chestInfo & 0x10) != 0; }
-  virtual bool roomHasFountain(DescriptorHandle room)  const override { return (roomDescriptor(room)->chestInfo & 0x20) != 0; }
+  virtual bool roomHasUnopenedChest(DescriptorHandle room) const override { return (roomDescriptor(room)->specialItemInfo & 0x01) != 0; }
+  virtual bool roomHasLivingStatue(DescriptorHandle room) const override { return (roomDescriptor(room)->specialItemInfo & 0x10) != 0; }
+  virtual bool roomHasFountain(DescriptorHandle room)  const override { return (roomDescriptor(room)->specialItemInfo & 0x20) != 0; }
   virtual byte getRoomMoneyAmount(DescriptorHandle room) const override { return roomDescriptor(room)->goldAmount; }
   virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const override;
   virtual Utils::StringSpan getFloorMap() const override;

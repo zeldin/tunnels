@@ -42,7 +42,7 @@ public:
   virtual void mapScreen() = 0;
   virtual void clearMessages() = 0;
   virtual void drawGeneralStore() = 0;
-  virtual void drawDynamicFixture(unsigned index) = 0;
+  virtual void drawDynamicFixture() = 0;
   virtual void drawLivingStatue() = 0;
   virtual void drawFountain() = 0;
   virtual void drawChestItem() = 0;

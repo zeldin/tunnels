@@ -194,36 +194,28 @@ void DatabaseImpl::setSavedRoomAddress(DescriptorHandle room)
     0x1D0C + (data.currentFloor-1) * data.descriptorBytesPerFloor;
 }
 
-void DatabaseImpl::clearFixturePosition(unsigned n)
+void DatabaseImpl::clearRoomItemPosition(RoomItem n)
 {
-  if (n < 6) {
-    data.fixturePosition[n].row = 0;
-    data.fixturePosition[n].column = 0;
-  }
+  data.roomItemPosition[n].row = 0;
+  data.roomItemPosition[n].column = 0;
 }
 
-void DatabaseImpl::placeFixture(unsigned n, byte y, byte x)
+void DatabaseImpl::placeRoomItem(RoomItem n, byte y, byte x)
 {
-  if (n < 6) {
-    data.fixturePosition[n].row = 2*y + 1;
-    data.fixturePosition[n].column = 2*x + 3;
-  }
+  data.roomItemPosition[n].row = 2*y + 1;
+  data.roomItemPosition[n].column = 2*x + 3;
 }
 
-void DatabaseImpl::placeFixtureCenter(unsigned n)
+void DatabaseImpl::placeRoomItemCenter(RoomItem n)
 {
-  if (n < 6) {
-    data.fixturePosition[n].row = 8;
-    data.fixturePosition[n].column = 10;
-  }
+  data.roomItemPosition[n].row = 8;
+  data.roomItemPosition[n].column = 10;
 }
 
-void DatabaseImpl::copyFixturePosition(unsigned n, unsigned m)
+void DatabaseImpl::copyRoomItemPosition(RoomItem n, RoomItem m)
 {
-  if (n < 6 && m < 6 && n != m) {
-    data.fixturePosition[m].row = data.fixturePosition[n].row;
-    data.fixturePosition[m].column = data.fixturePosition[n].column;
-  }
+  data.roomItemPosition[m].row = data.roomItemPosition[n].row;
+  data.roomItemPosition[m].column = data.roomItemPosition[n].column;
 }
 
 Utils::StringSpan DatabaseImpl::getItemName(ItemCategory cat, byte id) const

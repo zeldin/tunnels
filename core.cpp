@@ -58,7 +58,7 @@ bool GameEngine::tryMove(bool checkOnly)
     currentRoom = database->getRoomDescriptor(pos);
     pos.backward(direction);
     {
-      byte f = database->getFixtureId(currentRoom);
+      byte f = database->getRoomSpecialType(currentRoom);
       if (f & 0x80)
 	f = -f;
       if (f) {
@@ -88,8 +88,8 @@ bool GameEngine::tryMove(bool checkOnly)
   database->setMapPosition(pos);
   loc = database->mapLocation(pos);
   database->setCurrentLocation(loc);
-  for (unsigned n=0; n<6; n++)
-    database->clearFixturePosition(n);
+  for (RoomItem n = ROOM_ITEM_FIRST; n<=ROOM_ITEM_LAST; n=next(n))
+    database->clearRoomItemPosition(n);
   database->setSecretDoorsRevealed(false);
   return true;
 }
@@ -268,10 +268,10 @@ void GameEngine::placeRoomItems()
   }
   switch (database->getCurrentLocation()) {
   case LOCATION_ROOM:
-    switch(database->getFixtureId(currentRoom)) {
+    switch(database->getRoomSpecialType(currentRoom)) {
     case 0:
       byte prevy[5], prevx[5];
-      for (unsigned i = 0; i < 6; i++) {
+      for (RoomItem i = ROOM_ITEM_FIRST; i <= ROOM_ITEM_LAST; i=next(i)) {
 	byte y, x;
 	bool collission;
 	do {
@@ -285,28 +285,28 @@ void GameEngine::placeRoomItems()
 	} while(collission);
 	prevy[i] = y;
 	prevx[i] = x;
-	database->placeFixture(i, y, x);
+	database->placeRoomItem(i, y, x);
       }
       if (database->roomHasLivingStatue(currentRoom)) {
-	database->placeFixtureCenter(2);
+	database->placeRoomItemCenter(ROOM_ITEM_CENTERPIECE);
 	screen.drawLivingStatue();
       }
       if (database->roomHasFountain(currentRoom)) {
-	database->placeFixtureCenter(2);
+	database->placeRoomItemCenter(ROOM_ITEM_CENTERPIECE);
 	screen.drawFountain();
       }
       drawLoot();
       break;
     case 1:
       // General store
-      database->placeFixture(0, 6, 6);
-      screen.drawDynamicFixture(0);
+      database->placeRoomItem(ROOM_ITEM_FIXTURE, 6, 6);
+      screen.drawDynamicFixture();
       break;
     case 2:
       // Vault
-      database->clearFixturePosition(0);
-      for (unsigned n=1; n<6; n++)
-	database->placeFixture(n, 6, 1);
+      database->clearRoomItemPosition(ROOM_ITEM_FIXTURE);
+      for (RoomItem n=ROOM_ITEM_MONEY; n<=ROOM_ITEM_LAST; n=next(n))
+	database->placeRoomItem(n, 6, 1);
       return;
     default:
       return;
@@ -319,8 +319,8 @@ void GameEngine::placeRoomItems()
     setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
   case LOCATION_DESCENDING_STAIRCASE:
   case LOCATION_ASCENDING_STAIRCASE:
-    database->placeFixture(0, 6, 6);
-    screen.drawDynamicFixture(0);
+    database->placeRoomItem(ROOM_ITEM_FIXTURE, 6, 6);
+    screen.drawDynamicFixture();
     break;
   }
 }
@@ -329,13 +329,13 @@ void GameEngine::drawLoot()
 {
   // G@>ACE5
   if (database->roomHasUnopenedChest(currentRoom)) {
-    for(unsigned n=1; n<6; n++)
-      if (n != 2) // Preserve fountain / living status position
-	database->copyFixturePosition(0, n);
+    for(RoomItem n=ROOM_ITEM_MONEY; n<=ROOM_ITEM_LAST; n=next(n))
+      if (n != ROOM_ITEM_CENTERPIECE)
+	database->copyRoomItemPosition(ROOM_ITEM_CHEST, n);
     screen.drawChestItem();
     return;
   }
-  database->clearFixturePosition(0);
+  database->clearRoomItemPosition(ROOM_ITEM_CHEST);
   if (database->getRoomMoneyAmount(currentRoom) != 0)
     screen.drawMoneyItem();
   for (unsigned n = 0; n < 3; n++) {
@@ -354,17 +354,17 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
 
   if (!newLocation && database->getCurrentLocation() != LOCATION_ENTRANCE) {
     if (database->getCurrentLocation() == LOCATION_ROOM &&
-	database->getFixtureId(currentRoom) == 0) {
+	database->getRoomSpecialType(currentRoom) == 0) {
       drawLoot();
-      if (database->isFixturePlaced(2)) {
+      if (database->isRoomItemPlaced(ROOM_ITEM_CENTERPIECE)) {
 	if (database->roomHasLivingStatue(currentRoom))
 	  screen.drawLivingStatue();
 	if (database->roomHasFountain(currentRoom))
 	  screen.drawFountain();
       }
     } else {
-      if (database->isFixturePlaced(0))
-	screen.drawDynamicFixture(0);
+      if (database->isRoomItemPlaced(ROOM_ITEM_FIXTURE))
+	screen.drawDynamicFixture();
     }
     for (unsigned p=0; p<database->getNumConfiguredPlayers(); p++) {
       // FIXME G@>ADC6

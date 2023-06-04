@@ -73,7 +73,7 @@ public:
   virtual void mapScreen() override;
   virtual void clearMessages() override;
   virtual void drawGeneralStore() override;
-  virtual void drawDynamicFixture(unsigned index) override;
+  virtual void drawDynamicFixture() override;
   virtual void drawLivingStatue() override;
   virtual void drawFountain() override;
   virtual void drawChestItem() override;
