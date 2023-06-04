@@ -88,6 +88,7 @@ public:
   virtual void drawDoorReveal(unsigned n) override;
   virtual void showCompass(Direction dir) override;
   virtual void drawPlayer(unsigned n) override;
+  virtual bool isPlayerBlocked(unsigned n) override;
   virtual void drawPlayerStatusHeader(unsigned n) override;
   virtual void drawMagicEffectDescription(byte id) override;
   virtual void drawMagicItemDescription(unsigned id) override;

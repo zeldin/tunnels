@@ -270,6 +270,14 @@ void ScreenEngine::drawMoneyItem()
 	  database->getMoneyTiles());
 }
 
+bool ScreenEngine::isPlayerBlocked(unsigned n)
+{
+  unsigned y = database->getPlayerRow(n);
+  unsigned x = database->getPlayerColumn(n);
+  return screen.gchar(y, x) != 'k' || screen.gchar(y+1, x) != 'k' ||
+    screen.gchar(y+1, x+1) != 'k' || screen.gchar(y, x+1) != 'k';
+}
+
 void ScreenEngine::drawPlayer(unsigned n)
 {
   putQuad(database->getPlayerRow(n), database->getPlayerColumn(n), n<<3);

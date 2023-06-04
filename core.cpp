@@ -367,11 +367,24 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
 	screen.drawDynamicFixture();
     }
     for (unsigned p=0; p<database->getNumConfiguredPlayers(); p++) {
-      // FIXME G@>ADC6
+      if (screen.isPlayerBlocked(p)) {
+	byte y;
+	byte x;
+	pickUnoccupiedRoomSquare(y, x);
+	database->placePlayer(p, y, x);
+      }
       if (database->getPlayerHP(p) > database->getPlayerWD(p))
 	screen.drawPlayer(p);
     }
-    // FIXME G@>AF62
+    if (database->inCombat() || database->getCurrentLocation() == LOCATION_ROOM ||
+	database->getCurrentLocation() >= LOCATION_DESCENDING_STAIRCASE) {
+      if ((database->getCurrentLocation() == LOCATION_ROOM &&
+	   database->getRoomSpecialType(currentRoom) == 0 &&
+	   database->roomHasEnemies(currentRoom)) ||
+	  database->inCombat()) {
+	// FIXME G@>AF7A
+      }
+    }
   } else {
     if (database->getCurrentLocation() == LOCATION_ENTRANCE)
       lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);

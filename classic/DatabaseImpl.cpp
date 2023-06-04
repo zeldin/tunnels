@@ -66,6 +66,12 @@ void DatabaseImpl::setPlayerClass(unsigned n, unsigned c)
     data.patternTable[(n << 6) | i] = data.classPatternTable[c][i];
 }
 
+void DatabaseImpl::placePlayer(unsigned n, unsigned y, unsigned x)
+{
+  data.player[n].row = 2*y+1;
+  data.player[n].column = 2*x+3;
+}
+
 void DatabaseImpl::setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir)
 {
   static const byte partyPositions[3][4][4][2] =

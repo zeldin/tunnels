@@ -38,9 +38,8 @@ public:
   virtual bool isPlayerWeaponSwapped(unsigned n) const = 0;
   virtual void swapPlayerWeapon(unsigned n) = 0;
   virtual byte getPlayerRow(unsigned n) const = 0;
-  virtual void setPlayerRow(unsigned n, byte row) = 0;
   virtual byte getPlayerColumn(unsigned n) const = 0;
-  virtual void setPlayerColumn(unsigned n, byte column) = 0;
+  virtual void placePlayer(unsigned n, unsigned y, unsigned x) = 0;
   virtual void setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir) = 0;
   virtual byte getPlayerMagicItemId(unsigned n, unsigned m) const = 0;
   virtual byte getPlayerMagicItemRemainingUses(unsigned n, unsigned m) const = 0;

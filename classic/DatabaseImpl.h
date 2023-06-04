@@ -274,9 +274,8 @@ public:
   virtual bool isPlayerWeaponSwapped(unsigned n) const override { return (data.player[n].flags >> 5) & 1; }
   virtual void swapPlayerWeapon(unsigned n) override { data.player[n].flags ^= 0x20; }
   virtual byte getPlayerRow(unsigned n) const override { return data.player[n].row; }
-  virtual void setPlayerRow(unsigned n, byte row) override { data.player[n].row = row; }
   virtual byte getPlayerColumn(unsigned n) const override { return data.player[n].column; }
-  virtual void setPlayerColumn(unsigned n, byte column) override { data.player[n].column = column; }
+  virtual void placePlayer(unsigned n, unsigned y, unsigned x) override;
   virtual void setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir) override;
   virtual byte getPlayerMagicItemId(unsigned n, unsigned m) const override { return data.player[n].magicItems[m].id; }
   virtual byte getPlayerMagicItemRemainingUses(unsigned n, unsigned m) const override { return data.player[n].magicItems[m].remainingUses; }

@@ -57,6 +57,7 @@ public:
   virtual void drawDoorReveal(unsigned n) = 0;
   virtual void showCompass(Direction dir) = 0;
   virtual void drawPlayer(unsigned n) = 0;
+  virtual bool isPlayerBlocked(unsigned n) = 0;
   virtual void drawPlayerStatusHeader(unsigned n) = 0;
   virtual void drawMagicEffectDescription(byte id) = 0;
   virtual void drawMagicItemDescription(unsigned id) = 0;
