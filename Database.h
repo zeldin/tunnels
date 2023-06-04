@@ -95,8 +95,9 @@ public:
   virtual void setSavedActionKey(byte actionKey) = 0;
   virtual byte getSavedProgression() const = 0;
   virtual void setSavedProgression(byte progression) = 0;
-  virtual void clearFixturePositions() = 0;
+  virtual void clearFixturePosition(unsigned n) = 0;
   virtual void placeFixture(unsigned n, byte y, byte x) = 0;
+  virtual void copyFixturePosition(unsigned n, unsigned m) = 0;
   virtual byte getFixtureRow(unsigned n) const = 0;
   virtual byte getFixtureColumn(unsigned n) const = 0;
   virtual bool isFixturePlaced(unsigned n) const = 0;
@@ -125,7 +126,9 @@ public:
   virtual bool roomHasEnemies(DescriptorHandle room) const = 0;
   virtual void clearRoomEnemies() = 0;
   virtual void prepareRoomEnemies(DescriptorHandle room) = 0;
+  virtual bool roomHasUnopenedChest(DescriptorHandle room) const = 0;
   virtual bool shouldKeepRoomCenterClear(DescriptorHandle room) const = 0;
+  virtual byte getRoomMoneyAmount(DescriptorHandle room) const = 0;
   virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const = 0;
   virtual Utils::StringSpan getFloorMap() const = 0;
   virtual void setMapVisited(MapPosition pos, bool visited) = 0;

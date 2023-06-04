@@ -87,7 +87,8 @@ bool GameEngine::tryMove(bool checkOnly)
   database->setMapPosition(pos);
   loc = database->mapLocation(pos);
   database->setCurrentLocation(loc);
-  database->clearFixturePositions();
+  for (unsigned n=0; n<6; n++)
+    database->clearFixturePosition(n);
   database->setSecretDoorsRevealed(false);
   return true;
 }
@@ -295,7 +296,7 @@ void GameEngine::placeRoomItems()
       break;
     case 2:
       // Vault
-      database->clearFixturePositions();
+      database->clearFixturePosition(0);
       for (unsigned n=1; n<6; n++)
 	database->placeFixture(n, 6, 1);
       return;
@@ -319,7 +320,16 @@ void GameEngine::placeRoomItems()
 void GameEngine::drawLoot()
 {
   // G@>ACE5
-  // FIXME: chest, money
+  if (database->roomHasUnopenedChest(currentRoom)) {
+    for(unsigned n=1; n<6; n++)
+      if (n != 2)
+	database->copyFixturePosition(0, n);
+    screen.drawChestItem();
+    return;
+  }
+  database->clearFixturePosition(0);
+  if (database->getRoomMoneyAmount(currentRoom) != 0)
+    screen.drawMoneyItem();
   for (unsigned n = 0; n < 3; n++) {
     ItemCategory cat;
     byte id;

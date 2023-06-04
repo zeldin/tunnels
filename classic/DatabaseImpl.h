@@ -332,8 +332,9 @@ public:
   virtual void setSavedActionKey(byte actionKey) override { data.savedActionKey = actionKey; }
   virtual byte getSavedProgression() const override { return data.savedProgression; }
   virtual void setSavedProgression(byte progression) override { data.savedProgression = progression; }
-  virtual void clearFixturePositions() override;
+  virtual void clearFixturePosition(unsigned n) override;
   virtual void placeFixture(unsigned n, byte y, byte x) override;
+  virtual void copyFixturePosition(unsigned n, unsigned m) override;
   virtual byte getFixtureRow(unsigned n) const override { return data.fixturePosition[n].row; }
   virtual byte getFixtureColumn(unsigned n) const override { return data.fixturePosition[n].column; }
   virtual bool isFixturePlaced(unsigned n) const override { return data.fixturePosition[n].row != 0 || data.fixturePosition[n].column != 0; }
@@ -363,7 +364,9 @@ public:
   virtual bool roomHasEnemies(DescriptorHandle room) const override { return (roomDescriptor(room)->monsterInfo & 0xe0) != 0; }
   virtual void clearRoomEnemies() override;
   virtual void prepareRoomEnemies(DescriptorHandle room) override;
+  virtual bool roomHasUnopenedChest(DescriptorHandle room) const override { return (roomDescriptor(room)->chestInfo & 0x01) != 0; }
   virtual bool shouldKeepRoomCenterClear(DescriptorHandle room) const override { return (roomDescriptor(room)->chestInfo & 0x30) != 0; }
+  virtual byte getRoomMoneyAmount(DescriptorHandle room) const override { return roomDescriptor(room)->goldAmount; }
   virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const override;
   virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;

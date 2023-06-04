@@ -74,6 +74,8 @@ public:
   virtual void clearMessages() override;
   virtual void drawGeneralStore() override;
   virtual void drawDynamicFixture(unsigned index) override;
+  virtual void drawChestItem() override;
+  virtual void drawMoneyItem() override;
   virtual void drawLootItem(unsigned index, ItemCategory cat, byte id) override;
   virtual void stairMovement(bool ascending) override;
   virtual void drawCorridorSegment(unsigned n, Location loc) override;

@@ -194,10 +194,12 @@ void DatabaseImpl::setSavedRoomAddress(DescriptorHandle room)
     0x1D0C + (data.currentFloor-1) * data.descriptorBytesPerFloor;
 }
 
-void DatabaseImpl::clearFixturePositions()
+void DatabaseImpl::clearFixturePosition(unsigned n)
 {
-  for (unsigned i = 0; i < sizeof(data.fixturePosition)/sizeof(data.fixturePosition[0]); i++)
-    data.fixturePosition[i].row = data.fixturePosition[i].column = 0;
+  if (n < 6) {
+    data.fixturePosition[n].row = 0;
+    data.fixturePosition[n].column = 0;
+  }
 }
 
 void DatabaseImpl::placeFixture(unsigned n, byte y, byte x)
@@ -205,6 +207,14 @@ void DatabaseImpl::placeFixture(unsigned n, byte y, byte x)
   if (n < 6) {
     data.fixturePosition[n].row = 2*y + 1;
     data.fixturePosition[n].column = 2*x + 3;
+  }
+}
+
+void DatabaseImpl::copyFixturePosition(unsigned n, unsigned m)
+{
+  if (n < 6 && m < 6 && n != m) {
+    data.fixturePosition[m].row = data.fixturePosition[n].row;
+    data.fixturePosition[m].column = data.fixturePosition[n].column;
   }
 }
 

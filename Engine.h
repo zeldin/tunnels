@@ -43,6 +43,8 @@ public:
   virtual void clearMessages() = 0;
   virtual void drawGeneralStore() = 0;
   virtual void drawDynamicFixture(unsigned index) = 0;
+  virtual void drawChestItem() = 0;
+  virtual void drawMoneyItem() = 0;
   virtual void drawLootItem(unsigned index, ItemCategory cat, byte id) = 0;
   virtual void stairMovement(bool ascending) = 0;
   virtual void drawCorridorSegment(unsigned n, Location loc) = 0;
