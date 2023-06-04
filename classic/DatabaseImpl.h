@@ -230,8 +230,7 @@ private:
     byte corridorColors[5][10]; // V@>2E3E
     byte patternColors[32];  // V@>2E70
     byte patternTable2[0x380]; // V@2E90
-    byte unknown_3210[0x8];
-    byte objectTiles[7][4]; // V@3218
+    byte objectTiles[9][4]; // V@3210
     byte unknown_3234[0x9];
     byte keymap[11];         // V@323D
     byte unknown_3248[0x8];
@@ -334,6 +333,7 @@ public:
   virtual void setSavedProgression(byte progression) override { data.savedProgression = progression; }
   virtual void clearFixturePosition(unsigned n) override;
   virtual void placeFixture(unsigned n, byte y, byte x) override;
+  virtual void placeFixtureCenter(unsigned n) override;
   virtual void copyFixturePosition(unsigned n, unsigned m) override;
   virtual byte getFixtureRow(unsigned n) const override { return data.fixturePosition[n].row; }
   virtual byte getFixtureColumn(unsigned n) const override { return data.fixturePosition[n].column; }
@@ -347,6 +347,8 @@ public:
   virtual void setPlayerColor(unsigned n, unsigned c) override;
   virtual Utils::StringSpan getFloorColorTable(unsigned floor) const override;
   virtual Utils::StringSpan getColorTable() const override;
+  virtual Utils::StringSpan getLivingStatueTiles() const override;
+  virtual Utils::StringSpan getFountainTiles() const override;
   virtual Utils::StringSpan getChestTiles() const override;
   virtual Utils::StringSpan getMoneyTiles() const override;
   virtual byte getKeymapEntry(KeyMapping k) const override { return data.keymap[k]; }
@@ -365,7 +367,8 @@ public:
   virtual void clearRoomEnemies() override;
   virtual void prepareRoomEnemies(DescriptorHandle room) override;
   virtual bool roomHasUnopenedChest(DescriptorHandle room) const override { return (roomDescriptor(room)->chestInfo & 0x01) != 0; }
-  virtual bool shouldKeepRoomCenterClear(DescriptorHandle room) const override { return (roomDescriptor(room)->chestInfo & 0x30) != 0; }
+  virtual bool roomHasLivingStatue(DescriptorHandle room) const override { return (roomDescriptor(room)->chestInfo & 0x10) != 0; }
+  virtual bool roomHasFountain(DescriptorHandle room)  const override { return (roomDescriptor(room)->chestInfo & 0x20) != 0; }
   virtual byte getRoomMoneyAmount(DescriptorHandle room) const override { return roomDescriptor(room)->goldAmount; }
   virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const override;
   virtual Utils::StringSpan getFloorMap() const override;

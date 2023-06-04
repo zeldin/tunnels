@@ -210,6 +210,14 @@ void DatabaseImpl::placeFixture(unsigned n, byte y, byte x)
   }
 }
 
+void DatabaseImpl::placeFixtureCenter(unsigned n)
+{
+  if (n < 6) {
+    data.fixturePosition[n].row = 8;
+    data.fixturePosition[n].column = 10;
+  }
+}
+
 void DatabaseImpl::copyFixturePosition(unsigned n, unsigned m)
 {
   if (n < 6 && m < 6 && n != m) {
@@ -262,21 +270,21 @@ Utils::StringSpan DatabaseImpl::getItemTiles(ItemCategory cat, byte id) const
     switch(cat) {
     case ITEM_ARMORS:
       if (id < 8)
-	return data.objectTiles[3];
+	return data.objectTiles[5];
       id -= 8;
       /* FALLTHROUGH */
     case ITEM_SHIELDS:
       if (id < 6)
-	return data.objectTiles[2];
+	return data.objectTiles[4];
       break;
     case ITEM_WEAPONS:
       if (id < 8)
-	return data.objectTiles[0];
+	return data.objectTiles[2];
       id -= 8;
       /* FALLTHROUGH */
     case ITEM_RANGED_WEAPONS:
       if (id < 8)
-	return data.objectTiles[1];
+	return data.objectTiles[3];
       break;
     case ITEM_MAGIC_ITEMS:
       if (id & 0x80)
@@ -290,7 +298,7 @@ Utils::StringSpan DatabaseImpl::getItemTiles(ItemCategory cat, byte id) const
 	return data.questObjects[id].tiles;
       break;
     case ITEM_FLOOR_MAP:
-      return data.objectTiles[6];
+      return data.objectTiles[8];
     }
   }
   return Utils::StringSpan();
@@ -337,8 +345,10 @@ Utils::StringSpan DatabaseImpl::getColorTable() const
   return data.patternColors;
 }
 
-Utils::StringSpan DatabaseImpl::getChestTiles() const { return data.objectTiles[4]; }
-Utils::StringSpan DatabaseImpl::getMoneyTiles() const { return data.objectTiles[5]; }
+Utils::StringSpan DatabaseImpl::getLivingStatueTiles() const { return data.objectTiles[1]; }
+Utils::StringSpan DatabaseImpl::getFountainTiles() const { return data.objectTiles[0]; }
+Utils::StringSpan DatabaseImpl::getChestTiles() const { return data.objectTiles[6]; }
+Utils::StringSpan DatabaseImpl::getMoneyTiles() const { return data.objectTiles[7]; }
 
 Utils::StringSpan DatabaseImpl::getExtDictionaryWord(byte n) const
 {

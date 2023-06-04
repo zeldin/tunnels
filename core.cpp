@@ -30,7 +30,8 @@ void GameEngine::pickItemRoomSquare(byte &y, byte &x)
     // 3 4 5 5 4 3
     // 2 3 4 4 3 2
   } while(weight >= 4 &&
-	  ((database->shouldKeepRoomCenterClear(currentRoom)) || weight < 6));
+	  (weight < 6 || database->roomHasLivingStatue(currentRoom) ||
+	   database->roomHasFountain(currentRoom)));
 }
 
 void GameEngine::setRoomFixtureShape(RoomFixture f)
@@ -286,7 +287,14 @@ void GameEngine::placeRoomItems()
 	prevx[i] = x;
 	database->placeFixture(i, y, x);
       }
-      // FIXME: G@AC2D
+      if (database->roomHasLivingStatue(currentRoom)) {
+	database->placeFixtureCenter(2);
+	screen.drawLivingStatue();
+      }
+      if (database->roomHasFountain(currentRoom)) {
+	database->placeFixtureCenter(2);
+	screen.drawFountain();
+      }
       drawLoot();
       break;
     case 1:
@@ -322,7 +330,7 @@ void GameEngine::drawLoot()
   // G@>ACE5
   if (database->roomHasUnopenedChest(currentRoom)) {
     for(unsigned n=1; n<6; n++)
-      if (n != 2)
+      if (n != 2) // Preserve fountain / living status position
 	database->copyFixturePosition(0, n);
     screen.drawChestItem();
     return;
@@ -348,7 +356,12 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
     if (database->getCurrentLocation() == LOCATION_ROOM &&
 	database->getFixtureId(currentRoom) == 0) {
       drawLoot();
-      // FIXME G@>AF0E
+      if (database->isFixturePlaced(2)) {
+	if (database->roomHasLivingStatue(currentRoom))
+	  screen.drawLivingStatue();
+	if (database->roomHasFountain(currentRoom))
+	  screen.drawFountain();
+      }
     } else {
       if (database->isFixturePlaced(0))
 	screen.drawDynamicFixture(0);

@@ -240,6 +240,18 @@ void ScreenEngine::drawLootItem(unsigned index, ItemCategory cat, byte id)
 	  database->getItemTiles(cat, id));
 }
 
+void ScreenEngine::drawLivingStatue()
+{
+  putQuad(database->getFixtureRow(2), database->getFixtureColumn(2),
+	  database->getLivingStatueTiles());
+}
+
+void ScreenEngine::drawFountain()
+{
+  putQuad(database->getFixtureRow(2), database->getFixtureColumn(2),
+	  database->getFountainTiles());
+}
+
 void ScreenEngine::drawChestItem()
 {
   putQuad(database->getFixtureRow(0), database->getFixtureColumn(0),

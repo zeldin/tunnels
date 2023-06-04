@@ -97,6 +97,7 @@ public:
   virtual void setSavedProgression(byte progression) = 0;
   virtual void clearFixturePosition(unsigned n) = 0;
   virtual void placeFixture(unsigned n, byte y, byte x) = 0;
+  virtual void placeFixtureCenter(unsigned n) = 0;
   virtual void copyFixturePosition(unsigned n, unsigned m) = 0;
   virtual byte getFixtureRow(unsigned n) const = 0;
   virtual byte getFixtureColumn(unsigned n) const = 0;
@@ -110,6 +111,8 @@ public:
   virtual void setPlayerColor(unsigned n, unsigned c) = 0;
   virtual Utils::StringSpan getFloorColorTable(unsigned floor) const = 0;
   virtual Utils::StringSpan getColorTable() const = 0;
+  virtual Utils::StringSpan getLivingStatueTiles() const = 0;
+  virtual Utils::StringSpan getFountainTiles() const = 0;
   virtual Utils::StringSpan getChestTiles() const = 0;
   virtual Utils::StringSpan getMoneyTiles() const = 0;
   virtual byte getKeymapEntry(KeyMapping k) const = 0;
@@ -127,7 +130,8 @@ public:
   virtual void clearRoomEnemies() = 0;
   virtual void prepareRoomEnemies(DescriptorHandle room) = 0;
   virtual bool roomHasUnopenedChest(DescriptorHandle room) const = 0;
-  virtual bool shouldKeepRoomCenterClear(DescriptorHandle room) const = 0;
+  virtual bool roomHasLivingStatue(DescriptorHandle room) const = 0;
+  virtual bool roomHasFountain(DescriptorHandle room) const = 0;
   virtual byte getRoomMoneyAmount(DescriptorHandle room) const = 0;
   virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const = 0;
   virtual Utils::StringSpan getFloorMap() const = 0;
