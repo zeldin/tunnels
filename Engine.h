@@ -41,6 +41,7 @@ public:
   virtual void corridorScreen() = 0;
   virtual void mapScreen() = 0;
   virtual void clearMessages() = 0;
+  virtual void drawVault() = 0;
   virtual void drawGeneralStore() = 0;
   virtual void drawDynamicFixture() = 0;
   virtual void drawLivingStatue() = 0;

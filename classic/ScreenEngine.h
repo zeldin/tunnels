@@ -72,6 +72,7 @@ public:
   virtual void corridorScreen() override;
   virtual void mapScreen() override;
   virtual void clearMessages() override;
+  virtual void drawVault() override;
   virtual void drawGeneralStore() override;
   virtual void drawDynamicFixture() override;
   virtual void drawLivingStatue() override;

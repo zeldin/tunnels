@@ -117,15 +117,6 @@ void ScreenEngine::roomScreen()
 	fmt(COL(4), ROW(7), VCHA(4, 0xda));
       fmt5(screen);
     }
-    if (location != LOCATION_ROOM)
-      return;
-    if (false /* FIXME */) {
-      // Add vault
-      static constexpr const auto fmt6 =
-	fmt(COL(4), ROW(11), HSTR("\xdc\xd9\xdb\xd9"), VSTR("\xdc"),
-	    VCHA(3, 0xd8), HSTR("\xdc"));
-      fmt6(screen);
-    }
     break;
   case LOCATION_BLANK:
   case LOCATION_CORRIDOR:
@@ -206,6 +197,16 @@ void ScreenEngine::roomScreen()
     
     break;
   }
+}
+
+void ScreenEngine::drawVault()
+{
+  using namespace VDP::FMTBuilder;
+
+  static constexpr const auto fmt1 =
+    fmt(COL(4), ROW(11), HSTR("\xdc\xd9\xdb\xd9"), VSTR("\xdc"),
+	VCHA(3, 0xd8), HSTR("\xdc"));
+  fmt1(screen);
 }
 
 void ScreenEngine::putQuad(unsigned y, unsigned x, byte base)
