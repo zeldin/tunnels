@@ -208,6 +208,22 @@ void ScreenEngine::roomScreen()
   }
 }
 
+void ScreenEngine::putQuad(unsigned y, unsigned x, byte base)
+{
+  screen.hchar(y, x, base);
+  screen.hchar(y+1, x, base+1);
+  screen.hchar(y+1, x+1, base+3);
+  screen.hchar(y, x+1, base+2);
+}
+
+void ScreenEngine::putQuad(unsigned y, unsigned x, Utils::StringSpan tiles)
+{
+  screen.hchar(y, x, tiles[0]);
+  screen.hchar(y+1, x, tiles[1]);
+  screen.hchar(y+1, x+1, tiles[3]);
+  screen.hchar(y, x+1, tiles[2]);
+}
+
 void ScreenEngine::drawGeneralStore()
 {
   putQuad(13, 5, 0x90);
@@ -216,6 +232,12 @@ void ScreenEngine::drawGeneralStore()
 void ScreenEngine::drawDynamicFixture(unsigned index)
 {
   putQuad(database->getFixtureRow(index), database->getFixtureColumn(index), 0xf4);
+}
+
+void ScreenEngine::drawLootItem(unsigned index, ItemCategory cat, byte id)
+{
+  putQuad(database->getFixtureRow(index+3), database->getFixtureColumn(index+3),
+	  database->getItemTiles(cat, id));
 }
 
 void ScreenEngine::drawPlayer(unsigned n)
@@ -227,6 +249,14 @@ void ScreenEngine::stairMovement(bool ascending)
 {
   clearRoom();
   drawPrompt(ascending? 0x2f : 0x30);
+}
+
+bool ScreenEngine::checkIfRoomSquareOccupied(unsigned y, unsigned x)
+{
+  y = 2*y+1;
+  x = 2*x+3;
+  return screen.gchar(y, x) != 'k' || screen.gchar(y+1, x) != 'k' ||
+    screen.gchar(y+1, x+1) != 'k' || screen.gchar(y, x+1) != 'k';
 }
 
 }}

@@ -96,11 +96,12 @@ public:
   virtual byte getSavedProgression() const = 0;
   virtual void setSavedProgression(byte progression) = 0;
   virtual void clearFixturePositions() = 0;
+  virtual void placeFixture(unsigned n, byte y, byte x) = 0;
   virtual byte getFixtureRow(unsigned n) const = 0;
   virtual byte getFixtureColumn(unsigned n) const = 0;
   virtual bool isFixturePlaced(unsigned n) const = 0;
-  virtual void setStaircaseFixturePosition() = 0;
   virtual Utils::StringSpan getItemName(ItemCategory cat, byte id) const = 0;
+  virtual Utils::StringSpan getItemTiles(ItemCategory cat, byte id) const = 0;
   virtual int8 getRangedWeaponAmmoType(unsigned id) const = 0;
   virtual Utils::StringSpan getRangedWeaponAmmoName(unsigned id) const = 0;
   virtual byte getMagicItemEffect(byte n) const = 0;
@@ -108,6 +109,8 @@ public:
   virtual void setPlayerColor(unsigned n, unsigned c) = 0;
   virtual Utils::StringSpan getFloorColorTable(unsigned floor) const = 0;
   virtual Utils::StringSpan getColorTable() const = 0;
+  virtual Utils::StringSpan getChestTiles() const = 0;
+  virtual Utils::StringSpan getMoneyTiles() const = 0;
   virtual byte getKeymapEntry(KeyMapping k) const = 0;
   virtual Utils::StringSpan getExtDictionaryWord(byte n) const = 0;
   virtual Utils::StringSpan getDictionaryWord(byte n) const = 0;
@@ -122,6 +125,8 @@ public:
   virtual bool roomHasEnemies(DescriptorHandle room) const = 0;
   virtual void clearRoomEnemies() = 0;
   virtual void prepareRoomEnemies(DescriptorHandle room) = 0;
+  virtual bool shouldKeepRoomCenterClear(DescriptorHandle room) const = 0;
+  virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const = 0;
   virtual Utils::StringSpan getFloorMap() const = 0;
   virtual void setMapVisited(MapPosition pos, bool visited) = 0;
   virtual void prepareFloorMap(unsigned floor) = 0;

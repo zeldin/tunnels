@@ -7,6 +7,8 @@
 
 namespace Tunnels {
 
+namespace Utils { class StringSpan; }
+
 namespace Classic {
 
 class ScreenEngine : public Tunnels::ScreenEngine {
@@ -72,6 +74,7 @@ public:
   virtual void clearMessages() override;
   virtual void drawGeneralStore() override;
   virtual void drawDynamicFixture(unsigned index) override;
+  virtual void drawLootItem(unsigned index, ItemCategory cat, byte id) override;
   virtual void stairMovement(bool ascending) override;
   virtual void drawCorridorSegment(unsigned n, Location loc) override;
   virtual void drawCorridorLeftJunction(unsigned n, Location loc) override;
@@ -84,6 +87,7 @@ public:
   virtual void drawPlayerStatusHeader(unsigned n) override;
   virtual void drawMagicEffectDescription(byte id) override;
   virtual void drawMagicItemDescription(unsigned id) override;
+  virtual bool checkIfRoomSquareOccupied(unsigned y, unsigned x) override;
 
 private:
   void menuScreen();
@@ -101,6 +105,7 @@ private:
   unsigned putNumberEol(unsigned y, uint16 n);
   unsigned putPlural();
   void putQuad(unsigned y, unsigned x, byte base);
+  void putQuad(unsigned y, unsigned x, Utils::StringSpan tiles);
   void putWeaponDescription(unsigned y, unsigned x,
 			    bool secondWeapon, bool showDamage);
   void putArmorDescription(unsigned y, unsigned x, bool shield);

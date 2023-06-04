@@ -35,7 +35,10 @@ private:
     msb16 mapPosition;
     byte fixtureId;
     byte monsterInfo;
-    byte unknown[6];
+    byte chestInfo;
+    byte goldAmount;
+    byte lootInfo;
+    byte lootId[3];
   };
 
   struct {
@@ -208,7 +211,8 @@ private:
     } shields[6]; // V@>2928
     struct {
       byte name[11];
-      byte unknown[5];
+      byte tiles[4];
+      byte unknown;
     } magicItemCategories[8]; // V@>2994
     struct {
       byte name[15];
@@ -218,13 +222,17 @@ private:
     byte unknown_2ce4[0x32];
     struct {
       byte name[11];
-      byte unknown[8];
+      byte unknown1[2];
+      byte tiles[4];
+      byte unknown2[2];
     } questObjects[8];     // V@>2D16
     byte unknown_2dae[0x90];
     byte corridorColors[5][10]; // V@>2E3E
     byte patternColors[32];  // V@>2E70
     byte patternTable2[0x380]; // V@2E90
-    byte unknown_3210[0x2d];
+    byte unknown_3210[0x8];
+    byte objectTiles[7][4]; // V@3218
+    byte unknown_3234[0x9];
     byte keymap[11];         // V@323D
     byte unknown_3248[0x8];
     byte extDictionary[4][16]; // V@3250
@@ -325,11 +333,12 @@ public:
   virtual byte getSavedProgression() const override { return data.savedProgression; }
   virtual void setSavedProgression(byte progression) override { data.savedProgression = progression; }
   virtual void clearFixturePositions() override;
+  virtual void placeFixture(unsigned n, byte y, byte x) override;
   virtual byte getFixtureRow(unsigned n) const override { return data.fixturePosition[n].row; }
   virtual byte getFixtureColumn(unsigned n) const override { return data.fixturePosition[n].column; }
   virtual bool isFixturePlaced(unsigned n) const override { return data.fixturePosition[n].row != 0 || data.fixturePosition[n].column != 0; }
-  virtual void setStaircaseFixturePosition() override;
   virtual Utils::StringSpan getItemName(ItemCategory cat, byte id) const override;
+  virtual Utils::StringSpan getItemTiles(ItemCategory cat, byte id) const override;
   virtual int8 getRangedWeaponAmmoType(unsigned id) const override;
   virtual Utils::StringSpan getRangedWeaponAmmoName(unsigned id) const override;
   virtual byte getMagicItemEffect(byte n) const override { return data.magicItems[n-1].effect; }
@@ -337,6 +346,8 @@ public:
   virtual void setPlayerColor(unsigned n, unsigned c) override;
   virtual Utils::StringSpan getFloorColorTable(unsigned floor) const override;
   virtual Utils::StringSpan getColorTable() const override;
+  virtual Utils::StringSpan getChestTiles() const override;
+  virtual Utils::StringSpan getMoneyTiles() const override;
   virtual byte getKeymapEntry(KeyMapping k) const override { return data.keymap[k]; }
   virtual Utils::StringSpan getExtDictionaryWord(byte n) const override;
   virtual Utils::StringSpan getDictionaryWord(byte n) const override;
@@ -352,6 +363,8 @@ public:
   virtual bool roomHasEnemies(DescriptorHandle room) const override { return (roomDescriptor(room)->monsterInfo & 0xe0) != 0; }
   virtual void clearRoomEnemies() override;
   virtual void prepareRoomEnemies(DescriptorHandle room) override;
+  virtual bool shouldKeepRoomCenterClear(DescriptorHandle room) const override { return (roomDescriptor(room)->chestInfo & 0x30) != 0; }
+  virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const override;
   virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;
   virtual void prepareFloorMap(unsigned floor) override;

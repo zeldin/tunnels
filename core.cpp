@@ -6,6 +6,33 @@
 
 namespace Tunnels {
 
+void GameEngine::pickUnoccupiedRoomSquare(byte &y, byte &x)
+{
+  // G@>ADB5
+  do {
+    y = random(1, 6);
+    x = random(1, 6);
+  } while(screen.checkIfRoomSquareOccupied(y, x));
+}
+
+void GameEngine::pickItemRoomSquare(byte &y, byte &x)
+{
+  // G@>ADD5
+  byte weight;
+  do {
+    pickUnoccupiedRoomSquare(y, x);
+    // Make sure square is either in a corner or the center
+    weight = (y > 3? 7 - y : y) + (x > 3? 7 - x : x);
+    // 2 3 4 4 3 2
+    // 3 4 5 5 4 3
+    // 4 5 6 6 5 4
+    // 4 5 6 6 5 4
+    // 3 4 5 5 4 3
+    // 2 3 4 4 3 2
+  } while(weight >= 4 &&
+	  ((database->shouldKeepRoomCenterClear(currentRoom)) || weight < 6));
+}
+
 void GameEngine::setRoomFixtureShape(RoomFixture f)
 {
   database->setRoomFixture(f);
@@ -214,6 +241,93 @@ GameEngine::Diversion GameEngine::entrance()
   return DIVERSION_ENTER_ROOM;
 }
 
+void GameEngine::placeRoomItems()
+{
+  // G@>AB2B
+  StartPosition pos = STARTPOS_NORMAL;
+  if (database->getCurrentLocation() == LOCATION_ROOM ||
+      database->getCurrentLocation() > LOCATION_FOUNTAIN) {
+    if (lastActionKey != database->getKeymapEntry(KEYMAP_BREAK_DOOR))
+      pos = STARTPOS_IN_DOORWAY;
+  } else {
+    Location nextLocation;
+    if (!database->canMove(database->getMapPosition(), reverse(direction),
+			   nextLocation) ||
+	(nextLocation != LOCATION_CORRIDOR &&
+	 nextLocation != LOCATION_FOUNTAIN))
+      pos = STARTPOS_BACK_AGAINST_WALL;
+  }
+  database->setCurrentPlayer(-1);
+  while (database->nextPlayerInOrder()) {
+    unsigned p = database->getCurrentPlayer();
+    database->setPlayerStartPosition(p, pos, direction);
+    if (database->getPlayerHP(p) > database->getPlayerWD(p))
+      screen.drawPlayer(p);
+  }
+  switch (database->getCurrentLocation()) {
+  case LOCATION_ROOM:
+    switch(database->getFixtureId(currentRoom)) {
+    case 0:
+      byte prevy[5], prevx[5];
+      for (unsigned i = 0; i < 6; i++) {
+	byte y, x;
+	bool collission;
+	do {
+	  pickItemRoomSquare(y, x);
+	  collission = false;
+	  for (unsigned j = 0; j < i; j++)
+	    if (y == prevy[j] && x == prevx[j]) {
+	      collission = true;
+	      break;
+	    }
+	} while(collission);
+	prevy[i] = y;
+	prevx[i] = x;
+	database->placeFixture(i, y, x);
+      }
+      // FIXME: G@AC2D
+      drawLoot();
+      break;
+    case 1:
+      // General store
+      database->placeFixture(0, 6, 6);
+      screen.drawDynamicFixture(0);
+      break;
+    case 2:
+      // Vault
+      database->clearFixturePositions();
+      for (unsigned n=1; n<6; n++)
+	database->placeFixture(n, 6, 1);
+      return;
+    default:
+      return;
+    }
+  case LOCATION_CORRIDOR:
+    // FIXME: G@>AC5A
+    break;
+  case LOCATION_ENTRANCE:
+    screen.drawGeneralStore();
+    setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
+  case LOCATION_DESCENDING_STAIRCASE:
+  case LOCATION_ASCENDING_STAIRCASE:
+    database->placeFixture(0, 6, 6);
+    screen.drawDynamicFixture(0);
+    break;
+  }
+}
+
+void GameEngine::drawLoot()
+{
+  // G@>ACE5
+  // FIXME: chest, money
+  for (unsigned n = 0; n < 3; n++) {
+    ItemCategory cat;
+    byte id;
+    if ((id = database->getRoomLootItem(currentRoom, n, cat)) != 0)
+      screen.drawLootItem(n, cat, id);
+  }
+}
+
 GameEngine::Diversion GameEngine::room(bool newLocation)
 {
   // G@>657E
@@ -223,7 +337,8 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
   if (!newLocation && database->getCurrentLocation() != LOCATION_ENTRANCE) {
     if (database->getCurrentLocation() == LOCATION_ROOM &&
 	database->getFixtureId(currentRoom) == 0) {
-      // FIXME G@>AF0B
+      drawLoot();
+      // FIXME G@>AF0E
     } else {
       if (database->isFixturePlaced(0))
 	screen.drawDynamicFixture(0);
@@ -235,43 +350,13 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
     }
     // FIXME G@>AF62
   } else {
-    // Initial party placement
     if (database->getCurrentLocation() == LOCATION_ENTRANCE)
       lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
     else {
       // FIXME G@>659A
     }
     // G@>659F
-    StartPosition pos = STARTPOS_NORMAL;
-    if (database->getCurrentLocation() == LOCATION_ROOM ||
-	database->getCurrentLocation() > LOCATION_FOUNTAIN) {
-      if (lastActionKey != database->getKeymapEntry(KEYMAP_BREAK_DOOR))
-	pos = STARTPOS_IN_DOORWAY;
-    } else {
-      Location nextLocation;
-      if (!database->canMove(database->getMapPosition(), reverse(direction),
-			     nextLocation) ||
-	  (nextLocation != LOCATION_CORRIDOR &&
-	   nextLocation != LOCATION_FOUNTAIN))
-	pos = STARTPOS_BACK_AGAINST_WALL;
-    }
-    database->setCurrentPlayer(-1);
-    while (database->nextPlayerInOrder()) {
-      unsigned p = database->getCurrentPlayer();
-      database->setPlayerStartPosition(p, pos, direction);
-      if (database->getPlayerHP(p) > database->getPlayerWD(p))
-	screen.drawPlayer(p);
-    }
-    switch (database->getCurrentLocation()) {
-    case LOCATION_ENTRANCE:
-      screen.drawGeneralStore();
-      setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
-    case LOCATION_DESCENDING_STAIRCASE:
-    case LOCATION_ASCENDING_STAIRCASE:
-      database->setStaircaseFixturePosition();
-      screen.drawDynamicFixture(0);
-      break;
-    }
+    placeRoomItems();
     if (lastActionKey == 'C') // Not using keymap! G@>65A2
       database->setSecretDoorsRevealed(false);
     lastActionKey = 0;

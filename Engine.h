@@ -43,6 +43,7 @@ public:
   virtual void clearMessages() = 0;
   virtual void drawGeneralStore() = 0;
   virtual void drawDynamicFixture(unsigned index) = 0;
+  virtual void drawLootItem(unsigned index, ItemCategory cat, byte id) = 0;
   virtual void stairMovement(bool ascending) = 0;
   virtual void drawCorridorSegment(unsigned n, Location loc) = 0;
   virtual void drawCorridorLeftJunction(unsigned n, Location loc) = 0;
@@ -55,6 +56,7 @@ public:
   virtual void drawPlayerStatusHeader(unsigned n) = 0;
   virtual void drawMagicEffectDescription(byte id) = 0;
   virtual void drawMagicItemDescription(unsigned id) = 0;
+  virtual bool checkIfRoomSquareOccupied(unsigned y, unsigned x) = 0;
 };
 
 class SoundEngine {
@@ -121,6 +123,7 @@ private:
   DescriptorHandle currentRoom;
   byte lastActionKey;
   byte progression;
+  uint16 randState;
 
 public:
   GameEngine(EventLoop &eventLoop_, Timer::TimerManager &timerManager_,
@@ -129,14 +132,20 @@ public:
   EventType run();
 
 private:
+  byte random(byte upper);
+  byte random(byte lower, byte upper);
   Event nextEvent();
   EventType waitForEvent();
   Diversion delay(unsigned ms);
   Diversion waitForMusic();
+  void pickUnoccupiedRoomSquare(byte &y, byte &x);
+  void pickItemRoomSquare(byte &y, byte &x);
   void setRoomFixtureShape(RoomFixture f);
   Diversion core(bool newLocation);
   Diversion staircase();
   Diversion entrance();
+  void placeRoomItems();
+  void drawLoot();
   Diversion room(bool newLocation);
   Diversion corridor();
   bool tryMove(bool checkOnly = false);

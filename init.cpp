@@ -12,8 +12,32 @@ GameEngine::GameEngine(EventLoop &eventLoop_,
 		       File::Backend &file_, DatabaseFactory &databaseFactory_)
   : eventLoop(eventLoop_), timerManager(timerManager_),
     screen(screen_), sound(sound_), file(file_),
-    databaseFactory(databaseFactory_), database(nullptr)
+    databaseFactory(databaseFactory_), database(nullptr), randState(0x3567)
 {
+}
+
+byte GameEngine::random(byte upper)
+{
+  // G@>027A
+  uint16 n = 0x6fe5 * randState + 0x7ab9;
+  randState = n;
+  n = (n >> 8) | (n << 8);
+  return n % (upper + 1);
+}
+
+byte GameEngine::random(byte lower, byte upper)
+{
+  // G@>A3E6
+  if (upper <= lower)
+    return upper;
+  byte n;
+  do {
+    n = random(upper > 60? 125 :
+	       (upper > 30? 60 :
+		(upper > 15? 30 :
+		 upper > 5? 15 : 5)));
+  } while(n < lower || n > upper);
+  return n;
 }
 
 Event GameEngine::nextEvent()

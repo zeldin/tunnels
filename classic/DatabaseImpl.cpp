@@ -200,10 +200,12 @@ void DatabaseImpl::clearFixturePositions()
     data.fixturePosition[i].row = data.fixturePosition[i].column = 0;
 }
 
-void DatabaseImpl::setStaircaseFixturePosition()
+void DatabaseImpl::placeFixture(unsigned n, byte y, byte x)
 {
-  data.fixturePosition[0].row = 13;
-  data.fixturePosition[0].column = 15;
+  if (n < 6) {
+    data.fixturePosition[n].row = 2*y + 1;
+    data.fixturePosition[n].column = 2*x + 3;
+  }
 }
 
 Utils::StringSpan DatabaseImpl::getItemName(ItemCategory cat, byte id) const
@@ -241,6 +243,46 @@ Utils::StringSpan DatabaseImpl::getItemName(ItemCategory cat, byte id) const
 	return data.questObjects[id].name;
       break;
     }
+  return Utils::StringSpan();
+}
+
+Utils::StringSpan DatabaseImpl::getItemTiles(ItemCategory cat, byte id) const
+{
+  if (id--) {
+    switch(cat) {
+    case ITEM_ARMORS:
+      if (id < 8)
+	return data.objectTiles[3];
+      id -= 8;
+      /* FALLTHROUGH */
+    case ITEM_SHIELDS:
+      if (id < 6)
+	return data.objectTiles[2];
+      break;
+    case ITEM_WEAPONS:
+      if (id < 8)
+	return data.objectTiles[0];
+      id -= 8;
+      /* FALLTHROUGH */
+    case ITEM_RANGED_WEAPONS:
+      if (id < 8)
+	return data.objectTiles[1];
+      break;
+    case ITEM_MAGIC_ITEMS:
+      if (id & 0x80)
+	id = byte(~id)-1;
+      id /= 5;
+      if (id < 8)
+	return data.magicItemCategories[id].tiles;
+      break;
+    case ITEM_QUEST_OBJECTS:
+      if (id < 8)
+	return data.questObjects[id].tiles;
+      break;
+    case ITEM_FLOOR_MAP:
+      return data.objectTiles[6];
+    }
+  }
   return Utils::StringSpan();
 }
 
@@ -284,6 +326,9 @@ Utils::StringSpan DatabaseImpl::getColorTable() const
 {
   return data.patternColors;
 }
+
+Utils::StringSpan DatabaseImpl::getChestTiles() const { return data.objectTiles[4]; }
+Utils::StringSpan DatabaseImpl::getMoneyTiles() const { return data.objectTiles[5]; }
 
 Utils::StringSpan DatabaseImpl::getExtDictionaryWord(byte n) const
 {
@@ -405,6 +450,26 @@ void DatabaseImpl::prepareRoomEnemies(DescriptorHandle room)
   patterns.store(data.patternTable, 244*8);
   Utils::clearArray(data.unknown_1140);
   /* FIXME: G@>AB02 */
+}
+
+byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const
+{
+  if (n >= 3)
+    return 0;
+  byte id = roomDescriptor(room)->lootId[n];
+  if (id & 0x80) {
+    switch (id >> 5) {
+    case 4: cat = ITEM_ARMORS; break;
+    case 5: cat = ITEM_WEAPONS; break;
+    case 6: cat = ITEM_FLOOR_MAP; id=1; break;
+    case 7: cat = ITEM_QUEST_OBJECTS; break;
+    }
+    id &= 0x1f;
+  } else {
+    cat = ITEM_MAGIC_ITEMS;
+    id &= 0x3f;
+  }
+  return id;
 }
 
 void DatabaseImpl::setMapVisited(MapPosition pos, bool visited)

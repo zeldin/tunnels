@@ -47,7 +47,8 @@ enum ItemCategory {
   ITEM_WEAPONS = 2,
   ITEM_RANGED_WEAPONS = 3,
   ITEM_MAGIC_ITEMS = 4,
-  ITEM_QUEST_OBJECTS = 5
+  ITEM_QUEST_OBJECTS = 5,
+  ITEM_FLOOR_MAP = 6 // Not part of original enum...
 };
 
 enum RoomFixture {

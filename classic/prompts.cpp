@@ -516,14 +516,6 @@ unsigned ScreenEngine::putPlural()
   return x;
 }
 
-void ScreenEngine::putQuad(unsigned y, unsigned x, byte base)
-{
-  screen.hchar(y, x, base);
-  screen.hchar(y+1, x, base+1);
-  screen.hchar(y+1, x+1, base+3);
-  screen.hchar(y, x+1, base+2);
-}
-
 unsigned ScreenEngine::findEndOfLine()
 {
   unsigned y = screen.getYpt();
