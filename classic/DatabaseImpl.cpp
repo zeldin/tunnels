@@ -132,6 +132,12 @@ int DatabaseImpl::getMonsterSound()
   return snd;
 }
 
+void DatabaseImpl::placeMonster(unsigned n, unsigned y, unsigned x)
+{
+  data.monsterPosition[n].row = 2*y+1;
+  data.monsterPosition[n].column = 2*x+3;
+}
+
 Utils::StringSpan DatabaseImpl::getClassName(unsigned n) const
 {
   return data.classes[n].name;
@@ -421,7 +427,7 @@ Utils::StringSpan DatabaseImpl::getFloorMap() const
 void DatabaseImpl::clearRoomEnemies()
 {
   Utils::clearArray(data.monsterName);
-  data.monsterBaseHP = 0;
+  data.monsterHPNumD6 = 0;
   data.monsterDefense = 0;
   data.monsterAttack = 0;
   data.monsterMaxDamage = 0;
@@ -435,7 +441,7 @@ void DatabaseImpl::clearRoomEnemies()
   data.monsterResistance = 0;
   data.unknown_113e = 0;
   data.monsterSpeed = 0;
-  Utils::clearArray(data.unknown_1140);
+  Utils::clearArray(data.monsterHP);
   Utils::clearArray(data.monsterPosition, {0, 0});
   data.unknown_1156 = 0;
   data.unknown_1157 = 0;
@@ -449,7 +455,7 @@ void DatabaseImpl::prepareRoomEnemies(DescriptorHandle room)
   data.unknown_115e = 0;
   unsigned n = data.unknown_1cfb * (data.currentFloor - 1) * 4 + (info & 0x1f);
   Utils::StringSpan{data.monsters[n].name}.store(data.monsterName);
-  data.monsterBaseHP = data.monsters[n].baseHP;
+  data.monsterHPNumD6 = data.monsters[n].hpNumD6;
   data.monsterDefense = data.monsters[n].defense;
   data.monsterAttack = data.monsters[n].attack;
   data.monsterMaxDamage = data.monsters[n].maxDamage;
@@ -466,8 +472,7 @@ void DatabaseImpl::prepareRoomEnemies(DescriptorHandle room)
   Utils::StringSpan patterns{data.monsterPatternTable[data.monsterPatternNumber]};
   patterns.store(data.patternTable, 240*8);
   patterns.store(data.patternTable, 244*8);
-  Utils::clearArray(data.unknown_1140);
-  /* FIXME: G@>AB02 */
+  Utils::clearArray(data.monsterHP);
 }
 
 byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const

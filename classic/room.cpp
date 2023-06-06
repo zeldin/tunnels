@@ -209,6 +209,12 @@ void ScreenEngine::drawVault()
   fmt1(screen);
 }
 
+bool ScreenEngine::isQuadBlocked(unsigned y, unsigned x)
+{
+  return screen.gchar(y, x) != 'k' || screen.gchar(y+1, x) != 'k' ||
+    screen.gchar(y+1, x+1) != 'k' || screen.gchar(y, x+1) != 'k';
+}
+
 void ScreenEngine::putQuad(unsigned y, unsigned x, byte base)
 {
   screen.hchar(y, x, base);
@@ -273,15 +279,24 @@ void ScreenEngine::drawMoneyItem()
 
 bool ScreenEngine::isPlayerBlocked(unsigned n)
 {
-  unsigned y = database->getPlayerRow(n);
-  unsigned x = database->getPlayerColumn(n);
-  return screen.gchar(y, x) != 'k' || screen.gchar(y+1, x) != 'k' ||
-    screen.gchar(y+1, x+1) != 'k' || screen.gchar(y, x+1) != 'k';
+  return isQuadBlocked(database->getPlayerRow(n),
+		       database->getPlayerColumn(n));
 }
 
 void ScreenEngine::drawPlayer(unsigned n)
 {
   putQuad(database->getPlayerRow(n), database->getPlayerColumn(n), n<<3);
+}
+
+bool ScreenEngine::isMonsterBlocked(unsigned n)
+{
+  return isQuadBlocked(database->getMonsterRow(n),
+		       database->getMonsterColumn(n));
+}
+
+void ScreenEngine::drawMonster(unsigned n)
+{
+  putQuad(database->getMonsterRow(n), database->getMonsterColumn(n), 0xf0);
 }
 
 void ScreenEngine::stairMovement(bool ascending)
@@ -292,10 +307,7 @@ void ScreenEngine::stairMovement(bool ascending)
 
 bool ScreenEngine::checkIfRoomSquareOccupied(unsigned y, unsigned x)
 {
-  y = 2*y+1;
-  x = 2*x+3;
-  return screen.gchar(y, x) != 'k' || screen.gchar(y+1, x) != 'k' ||
-    screen.gchar(y+1, x+1) != 'k' || screen.gchar(y, x+1) != 'k';
+  return isQuadBlocked(2*y+1, 2*x+3);
 }
 
 }}

@@ -98,7 +98,7 @@ private:
     byte unknown_111c;    // V@>111C
     byte unknown_111d[9];
     byte monsterName[12]; // V@>1126
-    byte monsterBaseHP;   // V@>1132
+    byte monsterHPNumD6;  // V@>1132
     byte monsterDefense;  // V@>1133
     byte monsterAttack;   // V@>1134
     byte monsterMaxDamage; // V@>1135
@@ -112,7 +112,7 @@ private:
     byte monsterResistance; // V@>113D
     byte unknown_113e;      // V@>113E
     byte monsterSpeed;      // V@>113F
-    byte unknown_1140[8];
+    byte monsterHP[8];
     struct {
       byte row;
       byte column;
@@ -129,7 +129,7 @@ private:
     byte classPatternTable[4][0x40]; // V@>11CA
     struct {
       byte name[12];
-      byte baseHP;
+      byte hpNumD6;
       byte defense;
       byte attack;
       byte maxDamage;
@@ -292,7 +292,7 @@ public:
   virtual uint16 getTurnsLeft(unsigned n) const override { return data.turnsLeft[n]; }
   virtual byte getRations() const override { return data.rations; }
   virtual Utils::StringSpan getMonsterName() const override;
-  virtual byte getMonsterMaxHP() const override { return data.monsterBaseHP*6; }
+  virtual byte getMonsterHPNumD6() const override { return data.monsterHPNumD6; }
   virtual byte getMonsterDefense() const override { return data.monsterDefense; }
   virtual byte getMonsterAttack() const override { return data.monsterAttack; }
   virtual byte getMonsterMaxDamage() const override { return data.monsterMaxDamage; }
@@ -303,6 +303,12 @@ public:
   virtual byte getMonsterMobility() const override { return data.monsterMobility * 25; }
   virtual byte getMonsterResistance() const override { return data.monsterResistance * 10; }
   virtual byte getMonsterSpeed() const override { return data.monsterSpeed; }
+  virtual byte getMonsterHP(unsigned n) const override { return data.monsterHP[n]; }
+  virtual void setMonsterHP(unsigned n, byte hp) override { data.monsterHP[n] = hp; }
+  virtual void placeMonster(unsigned n, unsigned y, unsigned x) override;
+  virtual byte getMonsterRow(unsigned n) const override { return data.monsterPosition[n].row; }
+  virtual byte getMonsterColumn(unsigned n) const override { return data.monsterPosition[n].column; }
+  virtual bool isMonsterPlaced(unsigned n) const override { return data.monsterPosition[n].row != 0 || data.monsterPosition[n].column != 0; }
   virtual Utils::StringSpan getClassName(unsigned n) const override;
   virtual Utils::StringSpan getClassPatternTable(unsigned n) const override;
   virtual Utils::StringSpan getSpecialAttackName(unsigned n) const override;
@@ -383,6 +389,7 @@ public:
   virtual void prepareFloorMap(unsigned floor) override;
   virtual void restoreFloorVisitedMarkers() override;
   virtual bool inCombat() const override { return data.monsterInfo != 0; }
+  virtual byte getNumEnemies() const override { return data.monsterInfo >> 5; }
   virtual Location mapLocation(MapPosition pos) const override;
   virtual bool canMove(MapPosition pos, Direction dir, Location &dest) const override;
   virtual bool blockedForward(MapPosition pos, Direction dir) const override;

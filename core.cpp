@@ -6,6 +6,17 @@
 
 namespace Tunnels {
 
+void GameEngine::initEnemyHealth()
+{
+  for (unsigned i = 0; i < database->getNumEnemies(); i++)
+    for (unsigned n = database->getMonsterHPNumD6(); n>0; --n) {
+      byte roll = random(1, 6);
+      byte hp = database->getMonsterHP(i);
+      if (hp < 245)
+	database->setMonsterHP(i, hp + roll);
+    }
+}
+
 void GameEngine::pickUnoccupiedRoomSquare(byte &y, byte &x)
 {
   // G@>ADB5
@@ -68,6 +79,7 @@ bool GameEngine::tryMove(bool checkOnly)
     }
     if (database->roomHasEnemies(currentRoom)) {
       database->prepareRoomEnemies(currentRoom);
+      initEnemyHealth();
       screen.setRoomFixtureShapes();
     }
     break;
@@ -301,7 +313,7 @@ void GameEngine::placeRoomItems()
       // General store
       database->placeRoomItem(ROOM_ITEM_FIXTURE, 6, 6);
       screen.drawDynamicFixture();
-      break;
+      return;
     case 2:
       // Vault
       database->clearRoomItemPosition(ROOM_ITEM_FIXTURE);
@@ -312,7 +324,14 @@ void GameEngine::placeRoomItems()
       return;
     }
   case LOCATION_CORRIDOR:
-    // FIXME: G@>AC5A
+    if (database->getNumEnemies() > 0)
+      for (unsigned n=0; n<7; n++)
+	if (database->getMonsterHP(n) != 0) {
+	  byte y, x;
+	  pickUnoccupiedRoomSquare(y, x);
+	  database->placeMonster(n, y, x);
+	  screen.drawMonster(n);
+	}
     break;
   case LOCATION_ENTRANCE:
     screen.drawGeneralStore();
@@ -387,7 +406,20 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
 	   database->getRoomSpecialType(currentRoom) == 0 &&
 	   database->roomHasEnemies(currentRoom)) ||
 	  database->inCombat()) {
-	// FIXME G@>AF7A
+	for (unsigned n=0; n<8; n++)
+	  if (database->getMonsterHP(n) != 0) {
+	    if (!database->isMonsterPlaced(n))
+	      database->setMonsterHP(n, 0);
+	    else {
+	      if (screen.isMonsterBlocked(n)) {
+		byte y;
+		byte x;
+		pickUnoccupiedRoomSquare(y, x);
+		database->placeMonster(n, y, x);
+	      }
+	      screen.drawMonster(n);
+	    }
+	  }
       }
     }
   } else {

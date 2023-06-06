@@ -49,7 +49,7 @@ public:
   virtual uint16 getTurnsLeft(unsigned n) const = 0;
   virtual byte getRations() const = 0;
   virtual Utils::StringSpan getMonsterName() const = 0;
-  virtual byte getMonsterMaxHP() const = 0;
+  virtual byte getMonsterHPNumD6() const = 0;
   virtual byte getMonsterDefense() const = 0;
   virtual byte getMonsterAttack() const = 0;
   virtual byte getMonsterMaxDamage() const = 0;
@@ -60,6 +60,12 @@ public:
   virtual byte getMonsterMobility() const = 0;
   virtual byte getMonsterResistance() const = 0;
   virtual byte getMonsterSpeed() const = 0;
+  virtual byte getMonsterHP(unsigned n) const = 0;
+  virtual void setMonsterHP(unsigned n, byte hp) = 0;
+  virtual void placeMonster(unsigned n, unsigned y, unsigned x) = 0;
+  virtual byte getMonsterRow(unsigned n) const = 0;
+  virtual byte getMonsterColumn(unsigned n) const = 0;
+  virtual bool isMonsterPlaced(unsigned n) const = 0;
   virtual Utils::StringSpan getClassName(unsigned n) const = 0;
   virtual Utils::StringSpan getClassPatternTable(unsigned n) const = 0;
   virtual Utils::StringSpan getSpecialAttackName(unsigned n) const = 0;
@@ -139,6 +145,7 @@ public:
   virtual void prepareFloorMap(unsigned floor) = 0;
   virtual void restoreFloorVisitedMarkers() = 0;
   virtual bool inCombat() const = 0;
+  virtual byte getNumEnemies() const = 0;
   virtual Location mapLocation(MapPosition pos) const = 0;
   virtual bool canMove(MapPosition pos, Direction dir, Location &dest) const = 0;
   bool canMove(MapPosition pos, Direction dir) const

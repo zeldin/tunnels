@@ -704,7 +704,7 @@ void ScreenEngine::promptExtension(byte n)
       Utils::StringSpan name = database->getMonsterName();
       unsigned offs = name.center();
       screen.hstr(3, 11+offs, name);
-      putNumberEol(5, database->getMonsterMaxHP());
+      putNumberEol(5, byte(6*database->getMonsterHPNumD6()));
       screen.hchar(6, putNumberEol(6, uint16(12345 /* FIXME */)), '0');
       byte n = database->getMonsterAttack();
       putNumberEol(9, byte((n&0x80)? 256-n : n));

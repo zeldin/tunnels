@@ -90,6 +90,8 @@ public:
   virtual void showCompass(Direction dir) override;
   virtual void drawPlayer(unsigned n) override;
   virtual bool isPlayerBlocked(unsigned n) override;
+  virtual void drawMonster(unsigned n) override;
+  virtual bool isMonsterBlocked(unsigned n) override;
   virtual void drawPlayerStatusHeader(unsigned n) override;
   virtual void drawMagicEffectDescription(byte id) override;
   virtual void drawMagicItemDescription(unsigned id) override;
@@ -110,6 +112,7 @@ private:
   unsigned putNumberEol(unsigned y, byte n);
   unsigned putNumberEol(unsigned y, uint16 n);
   unsigned putPlural();
+  bool isQuadBlocked(unsigned y, unsigned x);
   void putQuad(unsigned y, unsigned x, byte base);
   void putQuad(unsigned y, unsigned x, Utils::StringSpan tiles);
   void putWeaponDescription(unsigned y, unsigned x,

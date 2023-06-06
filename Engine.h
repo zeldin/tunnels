@@ -59,6 +59,8 @@ public:
   virtual void showCompass(Direction dir) = 0;
   virtual void drawPlayer(unsigned n) = 0;
   virtual bool isPlayerBlocked(unsigned n) = 0;
+  virtual void drawMonster(unsigned n) = 0;
+  virtual bool isMonsterBlocked(unsigned n) = 0;
   virtual void drawPlayerStatusHeader(unsigned n) = 0;
   virtual void drawMagicEffectDescription(byte id) = 0;
   virtual void drawMagicItemDescription(unsigned id) = 0;
@@ -144,6 +146,7 @@ private:
   EventType waitForEvent();
   Diversion delay(unsigned ms);
   Diversion waitForMusic();
+  void initEnemyHealth();
   void pickUnoccupiedRoomSquare(byte &y, byte &x);
   void pickItemRoomSquare(byte &y, byte &x);
   void setRoomFixtureShape(RoomFixture f);
