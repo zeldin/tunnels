@@ -795,7 +795,7 @@ void ScreenEngine::promptExtension(byte n)
 	x += 2;
 	if (database->isQuestObjectFound(i))
 	  screen.hstr(y, x, "FOUND");
-	else if (!database->isQuestObjectIntact(i))
+	else if (!database->isQuestObjectRemaining(i))
 	  screen.hstr(y, x, "DESTROYED");
 	else {
 	  uint16 left = database->getTurnsLeft(i);

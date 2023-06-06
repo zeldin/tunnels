@@ -132,6 +132,7 @@ private:
   byte lastActionKey;
   byte progression;
   uint16 randState;
+  int8 roomDone;
 
 public:
   GameEngine(EventLoop &eventLoop_, Timer::TimerManager &timerManager_,

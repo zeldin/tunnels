@@ -251,6 +251,7 @@ GameEngine::Diversion GameEngine::entrance()
   // G@>6538
   database->setCurrentLocation(LOCATION_ENTRANCE);
   lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
+  roomDone = 0;
   setRoomFixtureShape(FIXTURE_DESCENDING_STAIRS);
   return DIVERSION_ENTER_ROOM;
 }
@@ -425,9 +426,8 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
   } else {
     if (database->getCurrentLocation() == LOCATION_ENTRANCE)
       lastActionKey = database->getKeymapEntry(KEYMAP_BREAK_DOOR);
-    else {
-      // FIXME G@>659A
-    }
+    else
+      roomDone = database->getUnknown10FB();
     // G@>659F
     placeRoomItems();
     if (lastActionKey == 'C') // Not using keymap! G@>65A2
@@ -436,17 +436,34 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
     database->setCurrentPlayer(-1);
   }
   // G@>65B2
-  if (database->getCurrentLocation() == LOCATION_ENTRANCE &&
-      database->getPartyGold() != 0) {
-    sound.playGeneralStoreMusic();
-    if (Diversion d = waitForMusic())
-      return d;
-    // ...
+  if (roomDone != -1 && database->getCurrentLocation() == LOCATION_ROOM) {
+    // FIXME: G@>65BE
   }
-
+  if (database->getNumEnemies() > 0)
+    ; // FIXME: Go to G@>682E
+  if (database->getCurrentLocation() == LOCATION_ENTRANCE) {
+    if (!database->isAnyQuestObjectRemaining()) {
+      // FIXME: G@>65FE
+    }
+    if (!(database->getUnknown25EF() & 0x80) &&
+	database->getPartyGold() != 0 &&
+	roomDone >= 0) {
+      sound.playGeneralStoreMusic();
+      if (Diversion d = waitForMusic())
+	return d;
+      // FIXME: Go to G@>6CC8
+      roomDone = -1; // at G@>6CD7...
+    }
+  }
+  // G@>663F
   for (;;) {
     backTarget = DIVERSION_CONTINUE_GAME;
-    // ...
+    // FIXME: Clear V@>111D, current player character sheet addr, @>833C
+    database->clearCombat();
+    // FIXME: Clear @>8330, selected item number, selected magical item id
+    // FIXME: Clear character sheet address (VDP), V@>3248
+    lastActionKey = 0;
+    screen.clearMessages();
     screen.drawPrompt(0x2e);
     byte keyCode;
     Direction dir;
@@ -454,13 +471,16 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
       return d;
     if (dir != DIR_NONE) {
       direction = dir;
-      if (database->getCurrentLocation() == LOCATION_ENTRANCE ||
-	  !tryMove())
+      if (database->getCurrentLocation() == LOCATION_ENTRANCE)
+	continue;
+      roomDone = 0;
+      if (!tryMove())
 	continue;
       return DIVERSION_ENTER_LOCATION;
     } else {
       if (keyCode == database->getKeymapEntry(KEYMAP_USE_ITEM)) {
-	/* ... */
+	roomDone = 0;
+	// FIXME: Go to G@>771C
       }
       if (keyCode == database->getKeymapEntry(KEYMAP_CHANGE_ORDER)) {
 	/* ... */
@@ -502,9 +522,10 @@ GameEngine::Diversion GameEngine::corridor()
   database->setCurrentLocation(loc);
   if (loc == LOCATION_ROOM || loc > LOCATION_FOUNTAIN)
     return DIVERSION_ENTER_LOCATION;
+  roomDone = 0;
   for (;;) {
     screen.clearMessages();
-    /* FIXME: V@>111D */
+    /* FIXME: Clear V@>111D */
     pos = database->getMapPosition();
     loc = database->getCurrentLocation();
     database->setMapVisited(pos, true);

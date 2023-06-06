@@ -90,7 +90,7 @@ private:
     byte numMappedFloors; // V@>10FE
     byte unknown_10ff;    // V@>10FF
     byte foundQuestObjects; // V@>1100
-    byte intactQuestObjects; // V@>1101
+    byte remainingQuestObjects; // V@>1101
     msb16 turnsLeft[8];   // V@>1102
     byte unknown_1112;    // V@>1112
     byte rations;         // V@>1113
@@ -181,7 +181,8 @@ private:
     byte unknown_2568[0x3c];
     byte monsterSoundTable[16]; // V@>25A4
     msb16 monsterSoundAddress;  // V@>25B4
-    byte unknown_25b6[0x3a];
+    byte unknown_25b6[0x39];
+    byte unknown_25ef;    // V@>25EF
     byte savedDirection;  // V@>25F0
     byte unknown_25f1[0x3];
     msb16 savedFloorDescriptorAddr; // V@>25F4
@@ -288,7 +289,8 @@ public:
   virtual byte getPlayerMagicItemRemainingUses(unsigned n, unsigned m) const override { return data.player[n].magicItems[m].remainingUses; }
   virtual void compactPlayerMagicItems(unsigned n) override;
   virtual bool isQuestObjectFound(unsigned n) const override { return (data.foundQuestObjects >> n)&1; }
-  virtual bool isQuestObjectIntact(unsigned n) const override { return (data.intactQuestObjects >> n)&1; }
+  virtual bool isQuestObjectRemaining(unsigned n) const override { return (data.remainingQuestObjects >> n)&1; }
+  virtual bool isAnyQuestObjectRemaining() const override { return data.remainingQuestObjects != 0; }
   virtual uint16 getTurnsLeft(unsigned n) const override { return data.turnsLeft[n]; }
   virtual byte getRations() const override { return data.rations; }
   virtual Utils::StringSpan getMonsterName() const override;
@@ -335,6 +337,7 @@ public:
   virtual bool nextPlayerInOrder() override;
   virtual Location getCurrentLocation() const override { return static_cast<Location>(data.currentLocation); }
   virtual void setCurrentLocation(Location loc) override { data.currentLocation = loc; }
+  virtual byte getUnknown25EF() const override { return data.unknown_25ef; }
   virtual Direction getSavedDirection() const override { return static_cast<Direction>(data.savedDirection & 3); }
   virtual void setSavedDirection(Direction direction) override { data.savedDirection = direction; }
   virtual DescriptorHandle getSavedRoomAddress() const override;
@@ -371,6 +374,7 @@ public:
     override;
   virtual MapPosition getMapPosition() const override { return PosWord(data.mapPosition); }
   virtual void setMapPosition(MapPosition pos) { data.mapPosition = PosWord(pos); }
+  virtual byte getUnknown10FB() const override { return data.unknown_10fb; }
   virtual uint16 getPartyGold() const override { return data.partyGold; }
   virtual byte getMappedFloors() const override { return data.numMappedFloors; }
   virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const override { return findDescriptor(PosWord(pos)); }
@@ -390,6 +394,7 @@ public:
   virtual void restoreFloorVisitedMarkers() override;
   virtual bool inCombat() const override { return data.monsterInfo != 0; }
   virtual byte getNumEnemies() const override { return data.monsterInfo >> 5; }
+  virtual void clearCombat() override { data.monsterInfo = 0; }
   virtual Location mapLocation(MapPosition pos) const override;
   virtual bool canMove(MapPosition pos, Direction dir, Location &dest) const override;
   virtual bool blockedForward(MapPosition pos, Direction dir) const override;

@@ -45,7 +45,8 @@ public:
   virtual byte getPlayerMagicItemRemainingUses(unsigned n, unsigned m) const = 0;
   virtual void compactPlayerMagicItems(unsigned n) = 0;
   virtual bool isQuestObjectFound(unsigned n) const = 0;
-  virtual bool isQuestObjectIntact(unsigned n) const = 0;
+  virtual bool isQuestObjectRemaining(unsigned n) const = 0;
+  virtual bool isAnyQuestObjectRemaining() const = 0;
   virtual uint16 getTurnsLeft(unsigned n) const = 0;
   virtual byte getRations() const = 0;
   virtual Utils::StringSpan getMonsterName() const = 0;
@@ -92,6 +93,7 @@ public:
   virtual bool nextPlayerInOrder() = 0;
   virtual Location getCurrentLocation() const = 0;
   virtual void setCurrentLocation(Location loc) = 0;
+  virtual byte getUnknown25EF() const = 0;
   virtual Direction getSavedDirection() const = 0;
   virtual void setSavedDirection(Direction direction) = 0;
   virtual DescriptorHandle getSavedRoomAddress() const = 0;
@@ -127,6 +129,7 @@ public:
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name) = 0;
   virtual MapPosition getMapPosition() const = 0;
   virtual void setMapPosition(MapPosition pos) = 0;
+  virtual byte getUnknown10FB() const = 0;
   virtual uint16 getPartyGold() const = 0;
   virtual byte getMappedFloors() const = 0;
   virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const = 0;
@@ -146,6 +149,7 @@ public:
   virtual void restoreFloorVisitedMarkers() = 0;
   virtual bool inCombat() const = 0;
   virtual byte getNumEnemies() const = 0;
+  virtual void clearCombat() = 0;
   virtual Location mapLocation(MapPosition pos) const = 0;
   virtual bool canMove(MapPosition pos, Direction dir, Location &dest) const = 0;
   bool canMove(MapPosition pos, Direction dir) const
