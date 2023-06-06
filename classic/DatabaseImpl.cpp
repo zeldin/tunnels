@@ -735,7 +735,8 @@ void DatabaseImpl::restoreFloorVisitedMarkers()
     if (data.floorMap[p] == 0x77) {
       unsigned offs = findDescriptor(p);
       if (offs != ~0u &&
-	  (data.floorDescriptors[offs+4] & 8))
+	  (reinterpret_cast<const RoomDescriptor*>
+	   (&data.floorDescriptors[offs])->roomFlags & ROOM_FLAG_VISITED))
 	data.floorMap[p] &= ~0x10;
     }
   }

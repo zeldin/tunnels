@@ -131,6 +131,7 @@ public:
   virtual bool roomHasUnopenedChest(DescriptorHandle room) const = 0;
   virtual bool roomHasLivingStatue(DescriptorHandle room) const = 0;
   virtual bool roomHasFountain(DescriptorHandle room) const = 0;
+  virtual void setRoomVisited(DescriptorHandle room) = 0;
   virtual byte getRoomMoneyAmount(DescriptorHandle room) const = 0;
   virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const = 0;
   virtual Utils::StringSpan getFloorMap() const = 0;

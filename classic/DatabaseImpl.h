@@ -35,10 +35,17 @@ private:
     msb16 mapPosition;
     byte specialRoomType;
     byte monsterInfo;
-    byte specialItemInfo;
+    byte roomFlags;
     byte goldAmount;
     byte lootInfo;
     byte lootId[3];
+  };
+  enum {
+    ROOM_FLAG_CHEST = 0x01,
+    ROOM_FLAG_TRAP = 0x02,
+    ROOM_FLAG_VISITED = 0x08,
+    ROOM_FLAG_LIVING_STATUE = 0x10,
+    ROOM_FLAG_FOUNTAIN = 0x20
   };
 
   struct {
@@ -365,9 +372,10 @@ public:
   virtual bool roomHasEnemies(DescriptorHandle room) const override { return (roomDescriptor(room)->monsterInfo & 0xe0) != 0; }
   virtual void clearRoomEnemies() override;
   virtual void prepareRoomEnemies(DescriptorHandle room) override;
-  virtual bool roomHasUnopenedChest(DescriptorHandle room) const override { return (roomDescriptor(room)->specialItemInfo & 0x01) != 0; }
-  virtual bool roomHasLivingStatue(DescriptorHandle room) const override { return (roomDescriptor(room)->specialItemInfo & 0x10) != 0; }
-  virtual bool roomHasFountain(DescriptorHandle room)  const override { return (roomDescriptor(room)->specialItemInfo & 0x20) != 0; }
+  virtual bool roomHasUnopenedChest(DescriptorHandle room) const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_CHEST) != 0; }
+  virtual bool roomHasLivingStatue(DescriptorHandle room) const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_LIVING_STATUE) != 0; }
+  virtual bool roomHasFountain(DescriptorHandle room)  const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_FOUNTAIN) != 0; }
+  virtual void setRoomVisited(DescriptorHandle room) override { roomDescriptor(room)->roomFlags |= ROOM_FLAG_VISITED; }
   virtual byte getRoomMoneyAmount(DescriptorHandle room) const override { return roomDescriptor(room)->goldAmount; }
   virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const override;
   virtual Utils::StringSpan getFloorMap() const override;

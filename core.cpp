@@ -352,7 +352,7 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
   sound.stopMusic();
   screen.roomScreen();
   if (database->getCurrentLocation() == LOCATION_ROOM) {
-    /* FIXME: Should or 0x08 into specialItemInfo here... */
+    database->setRoomVisited(currentRoom);
     if (database->getRoomSpecialType(currentRoom) == 2)
       screen.drawVault();
   }
