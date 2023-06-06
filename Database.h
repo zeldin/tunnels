@@ -135,6 +135,7 @@ public:
   virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const = 0;
   virtual byte getRoomSpecialType(DescriptorHandle room) const = 0;
   virtual bool roomHasEnemies(DescriptorHandle room) const = 0;
+  virtual void startCombat(DescriptorHandle room) = 0;
   virtual void clearRoomEnemies() = 0;
   virtual void prepareRoomEnemies(DescriptorHandle room) = 0;
   virtual bool roomHasUnopenedChest(DescriptorHandle room) const = 0;

@@ -380,6 +380,7 @@ public:
   virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const override { return findDescriptor(PosWord(pos)); }
   virtual byte getRoomSpecialType(DescriptorHandle room) const override { return roomDescriptor(room)->specialRoomType; }
   virtual bool roomHasEnemies(DescriptorHandle room) const override { return (roomDescriptor(room)->monsterInfo & 0xe0) != 0; }
+  virtual void startCombat(DescriptorHandle room) override { data.monsterInfo = roomDescriptor(room)->monsterInfo; }
   virtual void clearRoomEnemies() override;
   virtual void prepareRoomEnemies(DescriptorHandle room) override;
   virtual bool roomHasUnopenedChest(DescriptorHandle room) const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_CHEST) != 0; }

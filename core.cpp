@@ -366,7 +366,7 @@ void GameEngine::drawLoot()
   }
 }
 
-GameEngine::Diversion GameEngine::room(bool newLocation)
+void GameEngine::roomSetup(bool newLocation)
 {
   // G@>657E
   sound.stopMusic();
@@ -435,9 +435,38 @@ GameEngine::Diversion GameEngine::room(bool newLocation)
     lastActionKey = 0;
     database->setCurrentPlayer(-1);
   }
+}
+
+GameEngine::Diversion GameEngine::room()
+{
   // G@>65B2
   if (roomDone != -1 && database->getCurrentLocation() == LOCATION_ROOM) {
-    // FIXME: G@>65BE
+    switch (database->getRoomSpecialType(currentRoom)) {
+    case 2:
+      // Vault
+      // FIXME: Go to G@>C016
+      break;
+    case 1:
+      // General store
+      if (database->getPartyGold() != 0 &&
+	  roomDone >= 0) {
+	sound.playGeneralStoreMusic();
+	if (Diversion d = waitForMusic())
+	  return d;
+	// FIXME: Go to G@>6CC8
+	roomDone = -1; // at G@>6CD7...
+      }
+      break;
+    case 0:
+      // Normal room
+      if (database->roomHasEnemies(currentRoom))
+	database->startCombat(currentRoom);
+      else {
+	database->clearCombat();
+	// FIXME: Go to G@>C018
+      }
+      break;
+    }
   }
   if (database->getNumEnemies() > 0)
     ; // FIXME: Go to G@>682E
@@ -635,9 +664,8 @@ GameEngine::Diversion GameEngine::corridor()
 GameEngine::Diversion GameEngine::core(bool newLocation)
 {
   database->setMapVisited(database->getMapPosition(), true);
-  if (database->inCombat())
-    return room(newLocation);
-  else switch(database->getCurrentLocation()) {
+  if (!database->inCombat())
+    switch(database->getCurrentLocation()) {
     case LOCATION_CORRIDOR:
     case LOCATION_FOUNTAIN:
       return DIVERSION_CORRIDOR;
@@ -646,10 +674,12 @@ GameEngine::Diversion GameEngine::core(bool newLocation)
     case LOCATION_DESCENDING_STAIRCASE:
     case LOCATION_ASCENDING_STAIRCASE:
     case LOCATION_ENTRANCE:
-      return room(newLocation);
+      break;
     default:
       return DIVERSION_QUIT;
     }
+  roomSetup(newLocation);
+  return room();
 }
 
 }

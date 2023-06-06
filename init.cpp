@@ -116,26 +116,27 @@ EventType GameEngine::run()
       // internal error...
       return EVENT_NULL;
     case DIVERSION_STAIRCASE:
-      if ((diversion = staircase()))
-	continue;
+      diversion = staircase();
+      continue;
     case DIVERSION_ENTRANCE:
-      if ((diversion = entrance()))
-	continue;
+      diversion = entrance();
+      continue;
     case DIVERSION_ENTER_LOCATION:
     case DIVERSION_CONTINUE_GAME:
-      if ((diversion = core(diversion == DIVERSION_ENTER_LOCATION)))
-	continue;
+      diversion = core(diversion == DIVERSION_ENTER_LOCATION);
+      continue;
     case DIVERSION_ENTER_ROOM:
-      if ((diversion = room(true)))
-	continue;
+      roomSetup(true);
+    case DIVERSION_ROOM_MAIN:
+      diversion = room();
+      continue;
     case DIVERSION_CORRIDOR:
       // -> G@>66F7
       /* FIXME: If no direction set previous direction */
       screen.corridorScreen();
     case DIVERSION_CORRIDOR_MAIN:
-      if ((diversion = corridor()))
-	continue;
-      return EVENT_NULL;
+      diversion = corridor();
+      continue;
     case DIVERSION_QUIT:
       return EVENT_QUIT;
     }

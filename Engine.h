@@ -102,6 +102,7 @@ private:
     DIVERSION_ENTER_ROOM,     // G@>654C
     DIVERSION_ENTER_LOCATION, // G@>6551
     DIVERSION_CONTINUE_GAME,  // G@>6556
+    DIVERSION_ROOM_MAIN,      // G@>65B2
     DIVERSION_CORRIDOR,       // G@>66F7
     DIVERSION_CORRIDOR_MAIN,  // G@>670B
     DIVERSION_AID,
@@ -156,7 +157,8 @@ private:
   Diversion entrance();
   void placeRoomItems();
   void drawLoot();
-  Diversion room(bool newLocation);
+  void roomSetup(bool newLocation);
+  Diversion room();
   Diversion corridor();
   bool tryMove(bool checkOnly = false);
   Diversion getMovementKey(byte &kc, Direction &dir);
