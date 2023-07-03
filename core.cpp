@@ -532,7 +532,13 @@ GameEngine::Diversion GameEngine::room()
 	if (database->getCurrentLocation() != LOCATION_DESCENDING_STAIRCASE &&
 	    database->getCurrentLocation() != LOCATION_ENTRANCE)
 	  continue;
-	/* FIXME: need map to descend */
+	if (database->hasHiddenMap() &&
+	    !(database->getMappedFloors() >= database->getCurrentFloor())) {
+	  screen.drawPrompt(0x2d);
+	  if (Diversion d = flashBorder())
+	    return d;
+	  continue;
+	}
 	database->setCurrentFloor(database->getCurrentFloor()+1);
 	database->setCurrentLocation(LOCATION_ASCENDING_STAIRCASE);
 	screen.stairMovement(false);
