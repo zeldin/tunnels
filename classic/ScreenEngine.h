@@ -51,7 +51,7 @@ public:
   virtual void setDatabase(const Database *db) override;
   virtual void drawTitleScreen() override;
   virtual void initMenu() override;
-  virtual void drawPrompt(unsigned n) override;
+  virtual void drawPrompt(unsigned n, unsigned param) override;
   virtual void setCursorEnabled(bool enabled) override;
   virtual void setBorderFlashEnabled(bool enabled) override;
   virtual void markSelection(byte ch) override;
@@ -96,6 +96,7 @@ public:
   virtual void drawMagicEffectDescription(byte id) override;
   virtual void drawMagicItemDescription(unsigned id) override;
   virtual bool checkIfRoomSquareOccupied(unsigned y, unsigned x) override;
+  void drawPrompt(unsigned n) { drawPrompt(n, 0); }
 
 private:
   void menuScreen();
@@ -119,7 +120,7 @@ private:
 			    bool secondWeapon, bool showDamage);
   void putArmorDescription(unsigned y, unsigned x, bool shield);
   unsigned findEndOfLine();
-  void promptExtension(byte n);
+  void promptExtension(byte n, unsigned param = 0);
   void cursorCallback(uint32 expiry);
   void borderCallback(uint32 expiry);
 };

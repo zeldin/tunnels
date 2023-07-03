@@ -20,7 +20,7 @@ public:
   virtual void setDatabase(const Database *database) {}
   virtual void drawTitleScreen() = 0;
   virtual void initMenu() = 0;
-  virtual void drawPrompt(unsigned n) = 0;
+  virtual void drawPrompt(unsigned n, unsigned param) = 0;
   virtual void setCursorEnabled(bool enabled) = 0;
   virtual void setBorderFlashEnabled(bool enabled) = 0;
   virtual void markSelection(byte ch) = 0;
@@ -65,6 +65,7 @@ public:
   virtual void drawMagicEffectDescription(byte id) = 0;
   virtual void drawMagicItemDescription(unsigned id) = 0;
   virtual bool checkIfRoomSquareOccupied(unsigned y, unsigned x) = 0;
+  void drawPrompt(unsigned n) { drawPrompt(n, 0); }
 };
 
 class SoundEngine {

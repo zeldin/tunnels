@@ -525,7 +525,7 @@ unsigned ScreenEngine::findEndOfLine()
   return x;
 }
 
-void ScreenEngine::promptExtension(byte n)
+void ScreenEngine::promptExtension(byte n, unsigned param)
 {
   unsigned x = screen.getXpt();
   unsigned y = screen.getYpt();
@@ -936,7 +936,7 @@ void ScreenEngine::drawMagicItemDescription(unsigned n)
   drawMagicEffectDescription(database->getMagicItemEffect(n));
 }
 
-void ScreenEngine::drawPrompt(unsigned n)
+void ScreenEngine::drawPrompt(unsigned n, unsigned param)
 {
   const byte *ptr = Vocab::prompts.entry(n);
   byte c;
@@ -967,7 +967,7 @@ void ScreenEngine::drawPrompt(unsigned n)
 	  ptr = Vocab::prompts.entry(*ptr);
 	  break;
 	case Vocab::cEXT:
-	  promptExtension(ptr[0]);
+	  promptExtension(ptr[0], param);
 	  return;
       }
     } else switch(c) {
