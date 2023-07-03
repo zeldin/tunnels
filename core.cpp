@@ -366,6 +366,35 @@ void GameEngine::drawLoot()
   }
 }
 
+GameEngine::Diversion GameEngine::lootRoom()
+{
+  // G@>C41F
+  if (database->getCurrentLocation() == LOCATION_ROOM &&
+      database->getRoomSpecialType(currentRoom) == 0) {
+    screen.clearMessages();
+    if (database->roomHasUnopenedChest(currentRoom)) {
+      // FIXME: G@>C436
+    }
+    if (byte gold = database->getRoomMoneyAmount(currentRoom)) {
+      database->setPartyGold(database->getPartyGold() + gold);
+      screen.drawMoneyItem();
+      screen.clearMessages();
+      screen.drawPrompt(0x59, gold);
+      database->setRoomMoneyAmount(currentRoom, 0);
+      database->clearRoomItemPosition(ROOM_ITEM_MONEY);
+      if (Diversion d = flashBorder())
+	return d;
+    }
+    for (unsigned i=0; i<6; i++) {
+      byte mask = byte(1) << i;
+      // FIXME: G@>C4D2
+    }
+  }
+  // G@>C424
+  roomDone = -1;
+  return DIVERSION_ROOM_MAIN;
+}
+
 void GameEngine::roomSetup(bool newLocation)
 {
   // G@>657E
@@ -463,7 +492,7 @@ GameEngine::Diversion GameEngine::room()
 	database->startCombat(currentRoom);
       else {
 	database->clearCombat();
-	// FIXME: Go to G@>C018
+	return DIVERSION_LOOT_ROOM;
       }
       break;
     }

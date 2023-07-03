@@ -131,6 +131,7 @@ public:
   virtual void setMapPosition(MapPosition pos) = 0;
   virtual byte getUnknown10FB() const = 0;
   virtual uint16 getPartyGold() const = 0;
+  virtual void setPartyGold(uint16 n) = 0;
   virtual byte getMappedFloors() const = 0;
   virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const = 0;
   virtual byte getRoomSpecialType(DescriptorHandle room) const = 0;
@@ -143,6 +144,7 @@ public:
   virtual bool roomHasFountain(DescriptorHandle room) const = 0;
   virtual void setRoomVisited(DescriptorHandle room) = 0;
   virtual byte getRoomMoneyAmount(DescriptorHandle room) const = 0;
+  virtual void setRoomMoneyAmount(DescriptorHandle room, byte n) = 0;
   virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const = 0;
   virtual Utils::StringSpan getFloorMap() const = 0;
   virtual void setMapVisited(MapPosition pos, bool visited) = 0;

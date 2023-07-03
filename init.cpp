@@ -137,6 +137,9 @@ EventType GameEngine::run()
     case DIVERSION_CORRIDOR_MAIN:
       diversion = corridor();
       continue;
+    case DIVERSION_LOOT_ROOM:
+      diversion = lootRoom();
+      continue;
     case DIVERSION_QUIT:
       return EVENT_QUIT;
     }

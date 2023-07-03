@@ -376,6 +376,7 @@ public:
   virtual void setMapPosition(MapPosition pos) { data.mapPosition = PosWord(pos); }
   virtual byte getUnknown10FB() const override { return data.unknown_10fb; }
   virtual uint16 getPartyGold() const override { return data.partyGold; }
+  virtual void setPartyGold(uint16 n) override { data.partyGold = n; }
   virtual byte getMappedFloors() const override { return data.numMappedFloors; }
   virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const override { return findDescriptor(PosWord(pos)); }
   virtual byte getRoomSpecialType(DescriptorHandle room) const override { return roomDescriptor(room)->specialRoomType; }
@@ -388,6 +389,7 @@ public:
   virtual bool roomHasFountain(DescriptorHandle room)  const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_FOUNTAIN) != 0; }
   virtual void setRoomVisited(DescriptorHandle room) override { roomDescriptor(room)->roomFlags |= ROOM_FLAG_VISITED; }
   virtual byte getRoomMoneyAmount(DescriptorHandle room) const override { return roomDescriptor(room)->goldAmount; }
+  virtual void setRoomMoneyAmount(DescriptorHandle room, byte n) override { roomDescriptor(room)->goldAmount = n; }
   virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const override;
   virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;

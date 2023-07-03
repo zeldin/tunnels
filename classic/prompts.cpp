@@ -671,10 +671,10 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
     }
   case Vocab::extGOLDFOUND: /* G@>F44A */
     {
-      uint16 n = 123; /* FIXME */
+      uint16 n = param;
       x = putNumber(y, x, n);
       screen.hstr(y, x-1, "0 ");
-      screen.hstr(y, x+1, "################"); /* FIXME */
+      screen.hstr(y, x+1, database->getExtDictionaryWord(2));
       screen.setXpt(x+1);
       return;
     }

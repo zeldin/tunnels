@@ -106,6 +106,7 @@ private:
     DIVERSION_ROOM_MAIN,      // G@>65B2
     DIVERSION_CORRIDOR,       // G@>66F7
     DIVERSION_CORRIDOR_MAIN,  // G@>670B
+    DIVERSION_LOOT_ROOM,      // G@>C41F
     DIVERSION_AID,
     DIVERSION_UP,
     DIVERSION_DOWN,
@@ -158,6 +159,7 @@ private:
   Diversion entrance();
   void placeRoomItems();
   void drawLoot();
+  Diversion lootRoom();
   void roomSetup(bool newLocation);
   Diversion room();
   Diversion corridor();
