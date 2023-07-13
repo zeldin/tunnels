@@ -237,18 +237,18 @@ Utils::StringSpan DatabaseImpl::getItemName(ItemCategory cat, byte id) const
     case ITEM_ARMORS:
       if (id < 8)
 	return data.armors[id].name;
-      id -= 8;
       /* FALLTHROUGH */
     case ITEM_SHIELDS:
+      if (id >= 8) id -= 8;
       if (id < 6)
 	return data.shields[id].name;
       break;
     case ITEM_WEAPONS:
       if (id < 8)
 	return data.weapons[id].name;
-      id -= 8;
       /* FALLTHROUGH */
     case ITEM_RANGED_WEAPONS:
+      if (id >= 8) id -= 8;
       if (id < 8)
 	return data.rangedWeapons[id].name;
       break;
@@ -275,18 +275,18 @@ Utils::StringSpan DatabaseImpl::getItemTiles(ItemCategory cat, byte id) const
     case ITEM_ARMORS:
       if (id < 8)
 	return data.objectTiles[5];
-      id -= 8;
       /* FALLTHROUGH */
     case ITEM_SHIELDS:
+      if (id >= 8) id -= 8;
       if (id < 6)
 	return data.objectTiles[4];
       break;
     case ITEM_WEAPONS:
       if (id < 8)
 	return data.objectTiles[2];
-      id -= 8;
       /* FALLTHROUGH */
     case ITEM_RANGED_WEAPONS:
+      if (id >= 8) id -= 8;
       if (id < 8)
 	return data.objectTiles[3];
       break;
