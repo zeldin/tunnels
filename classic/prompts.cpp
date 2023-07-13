@@ -532,7 +532,7 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
   switch (n) {
   case Vocab::extQUESTOBJ: /* G@>F193 */
     {
-      screen.hstr(y, x, "FOO" /* FIXME */);
+      screen.hstr(y, x, database->getItemName(ITEM_QUEST_OBJECTS, param));
       x = findEndOfLine();
       screen.hchar(y, ++x, '.');
       screen.setXpt(x);
@@ -680,7 +680,7 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
     }
   case Vocab::extQUESTCOMPLETE: /* G@>F463 */
     {
-      screen.hstr(y, x, "%%%%%%%%%%%"); /* FIXME */
+      screen.hstr(y, x, database->getItemName(ITEM_QUEST_OBJECTS, param));
       screen.setXpt(findEndOfLine()+2);
       drawPrompt(0x35);
       return;

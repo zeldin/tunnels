@@ -419,7 +419,13 @@ GameEngine::Diversion GameEngine::lootRoom()
 	    database->setMappedFloors(database->getCurrentFloor());
 	  break;
 	case ITEM_QUEST_OBJECTS:
-	  // FIXME: G@>C61C
+	  if (database->tryAchieveQuestObject(item)) {
+	    sound.playQuestObjectCompleteMusic();
+	    screen.drawPrompt(0x5c, item);
+	  } else {
+	    screen.drawPrompt(0x19, item);
+	    sound.playQuestObjectFailedMusic();
+	  }
 	  break;
 	}
 	for (unsigned i = 0; i < 3; i++) {
@@ -430,8 +436,13 @@ GameEngine::Diversion GameEngine::lootRoom()
 	  if ((diversion = delay(133)))
 	    break;
 	}
+	if (!diversion && cat >= ITEM_QUEST_OBJECTS) {
+	  database->clearRoomLootSlot(currentRoom, iterPos, slot);
+	  if (!(diversion = flashBorder()))
+	    diversion = DIVERSION_BACK;
+	}
 	if (!diversion) {
-	  // FIXME: G@>C5C1 ...
+	  // FIXME: G@>C5C6 ...
 	  database->clearRoomLootSlot(currentRoom, iterPos, slot);
 	}
 	if (diversion == DIVERSION_BACK) {

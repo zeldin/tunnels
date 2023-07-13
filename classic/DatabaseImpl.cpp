@@ -111,6 +111,19 @@ void DatabaseImpl::compactPlayerMagicItems(unsigned n)
   }
 }
 
+bool DatabaseImpl::tryAchieveQuestObject(unsigned n)
+{
+  if (n--) {
+    byte mask = byte(1) << n;
+    if ((data.remainingQuestObjects & mask)) {
+      data.foundQuestObjects |= mask;
+      data.remainingQuestObjects ^= mask;
+      return true;
+    }
+  }
+  return false;
+}
+
 Utils::StringSpan DatabaseImpl::getMonsterName() const
 {
   return data.monsterName;

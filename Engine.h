@@ -78,6 +78,8 @@ public:
   virtual void playStairMusic() = 0;
   virtual void playGeneralStoreMusic() = 0;
   virtual void playMonsterSound(unsigned n) = 0;
+  virtual void playQuestObjectFailedMusic() = 0;
+  virtual void playQuestObjectCompleteMusic() = 0;
   virtual void beep() = 0;
   virtual void honk() = 0;
 };

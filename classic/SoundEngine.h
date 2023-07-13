@@ -22,6 +22,8 @@ public:
   virtual void playStairMusic() override;
   virtual void playGeneralStoreMusic() override;
   virtual void playMonsterSound(unsigned n) override;
+  virtual void playQuestObjectFailedMusic() override;
+  virtual void playQuestObjectCompleteMusic() override;
   virtual void beep() override;
   virtual void honk() override;
 };

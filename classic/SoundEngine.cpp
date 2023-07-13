@@ -8,7 +8,25 @@ namespace Tunnels { namespace Classic {
 namespace {
 using namespace DCSG::MusicBuilder;
 static constexpr const auto soundData =
-  music(INDEX<0>(),
+  music(INDEX<0xc6b6>(),
+	BEAT(8, 0xe7, 0x9f, 0xbf, 0xc0, 0x06, 0xdf, 0xf0),
+	BEAT(24, 0xcb, 0x00, 0xf4),
+	BEAT(8, 0xc7, 0x00, 0xf2),
+	JUMP<-1>(),
+
+	INDEX<-3>(), // Quest object failed
+	BEAT(8, 0x9f, 0xbf, 0xc0, 0x30, 0xd2, 0xff),
+	BEAT(12, 0xc0, 0x2c, 0xd3),
+	BEAT(16, 0xc0, 0x34, 0xd4),
+	JUMP<-1>(),
+
+	INDEX<0xc6e1>(),
+	BEAT(4, 0xe7, 0x9f, 0xbf, 0xdf, 0xc0, 0x02, 0xf0),
+	BEAT(6, 0xc0, 0x03, 0xf1),
+	BEAT(8, 0xc0, 0x04, 0xf2),
+	JUMP<-1>(),
+
+	INDEX<0>(),
 	BEAT(1, 0xe3),
 	BEAT(8, 0xc6, 0x01, 0xd4, 0xff),
 	BEAT(6, 0xc5, 0x01, 0xd2),
@@ -120,7 +138,7 @@ static constexpr const auto soundData =
 	BEAT(12, 0xc4, 0x04, 0xd6),
 	JUMP<-1>(),
 
-	INDEX<-2>(),
+	INDEX<-2>(),  // General store
 	BEAT(8, 0xff, 0xdf, 0xbf, 0x8d, 0x38, 0x90),
 	BEAT(8, 0x86, 0x35),
 	BEAT(8, 0x8d, 0x38),
@@ -142,7 +160,7 @@ static constexpr const auto soundData =
 	BEAT(8, 0x8f, 0x05, 0xaf, 0x07, 0xc0, 0x05),
 	JUMP<-1>(),
 
-	INDEX<0xc955>(),
+	INDEX<-4>(),  // Quest object complete
 	BEAT(1, 0x9f, 0xbf, 0xdf, 0xff),
 	BEAT(12, 0x8e, 0x0f, 0xaf, 0x0b, 0x90, 0xb2),
 	BEAT(12, 0xbf),
@@ -183,7 +201,7 @@ static constexpr const auto soundData =
 	BEAT(30, 0x8a, 0x2f),
 	BEAT(0, 0x9f),
 
-	INDEX<-1>(),
+	INDEX<-1>(),  // Stop
 	BEAT(1, 0xff, 0xdf, 0xbf, 0x9f),
 	BEAT(0, 0xff),
 
@@ -317,6 +335,16 @@ void SoundEngine::playMonsterSound(unsigned n)
 {
   stopMusic();
   soundData.play(music, soundIndex, n);
+}
+
+void SoundEngine::playQuestObjectFailedMusic()
+{
+  soundData.play<-3>(music);
+}
+
+void SoundEngine::playQuestObjectCompleteMusic()
+{
+  soundData.play<-4>(music);
 }
 
 }}

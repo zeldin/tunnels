@@ -47,6 +47,7 @@ public:
   virtual bool isQuestObjectFound(unsigned n) const = 0;
   virtual bool isQuestObjectRemaining(unsigned n) const = 0;
   virtual bool isAnyQuestObjectRemaining() const = 0;
+  virtual bool tryAchieveQuestObject(unsigned n) = 0;
   virtual uint16 getTurnsLeft(unsigned n) const = 0;
   virtual byte getRations() const = 0;
   virtual Utils::StringSpan getMonsterName() const = 0;

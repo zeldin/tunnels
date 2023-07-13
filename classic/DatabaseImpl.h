@@ -291,6 +291,7 @@ public:
   virtual bool isQuestObjectFound(unsigned n) const override { return (data.foundQuestObjects >> n)&1; }
   virtual bool isQuestObjectRemaining(unsigned n) const override { return (data.remainingQuestObjects >> n)&1; }
   virtual bool isAnyQuestObjectRemaining() const override { return data.remainingQuestObjects != 0; }
+  virtual bool tryAchieveQuestObject(unsigned n) override;
   virtual uint16 getTurnsLeft(unsigned n) const override { return data.turnsLeft[n]; }
   virtual byte getRations() const override { return data.rations; }
   virtual Utils::StringSpan getMonsterName() const override;
