@@ -401,16 +401,19 @@ GameEngine::Diversion GameEngine::lootRoom()
 	byte item = database->getRoomLootItem(currentRoom, slot, cat);
 	switch(cat) {
 	case ITEM_MAGIC_ITEMS:
-	  // FIXME: G@>C545
+	  if (!(item & 0x80))
+	    item = byte(~item)+1;
+	  screen.drawLootItemName(cat, item);
 	  break;
 	case ITEM_ARMORS:
-	  // FIXME: G@>C56D
-	  break;
 	case ITEM_WEAPONS:
-	  // FIXME: G@>C5DB
+	  screen.drawLootItemName(cat, item);
+	  if (cat == ITEM_WEAPONS && item > 8) {
+	    // FIXME: G@>C5F2
+	  }
+	  // FIXME: G@>C592
 	  break;
 	case ITEM_FLOOR_MAP:
-	  // G@>C602
 	  screen.drawPrompt(0x5b);
 	  if (database->getCurrentFloor() > database->getMappedFloors())
 	    database->setMappedFloors(database->getCurrentFloor());

@@ -257,6 +257,11 @@ void ScreenEngine::clearLootItem(unsigned index)
   screen.hchar(y+1, x, 'k', 2);
 }
 
+void ScreenEngine::drawLootItemName(ItemCategory cat, byte id)
+{
+  screen.hstr(18, 2, database->getItemName(cat, id));
+}
+
 void ScreenEngine::drawLivingStatue()
 {
   putQuad(database->getRoomItemRow(ROOM_ITEM_CENTERPIECE),

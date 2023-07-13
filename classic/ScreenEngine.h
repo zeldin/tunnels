@@ -81,6 +81,7 @@ public:
   virtual void drawMoneyItem() override;
   virtual void drawLootItem(unsigned index, ItemCategory cat, byte id) override;
   virtual void clearLootItem(unsigned index) override;
+  virtual void drawLootItemName(ItemCategory cat, byte id) override;
   virtual void stairMovement(bool ascending) override;
   virtual void drawCorridorSegment(unsigned n, Location loc) override;
   virtual void drawCorridorLeftJunction(unsigned n, Location loc) override;
