@@ -378,6 +378,7 @@ public:
   virtual uint16 getPartyGold() const override { return data.partyGold; }
   virtual void setPartyGold(uint16 n) override { data.partyGold = n; }
   virtual byte getMappedFloors() const override { return data.numMappedFloors; }
+  virtual void setMappedFloors(byte n) override { data.numMappedFloors = n; }
   virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const override { return findDescriptor(PosWord(pos)); }
   virtual byte getRoomSpecialType(DescriptorHandle room) const override { return roomDescriptor(room)->specialRoomType; }
   virtual bool roomHasEnemies(DescriptorHandle room) const override { return (roomDescriptor(room)->monsterInfo & 0xe0) != 0; }
@@ -390,6 +391,8 @@ public:
   virtual void setRoomVisited(DescriptorHandle room) override { roomDescriptor(room)->roomFlags |= ROOM_FLAG_VISITED; }
   virtual byte getRoomMoneyAmount(DescriptorHandle room) const override { return roomDescriptor(room)->goldAmount; }
   virtual void setRoomMoneyAmount(DescriptorHandle room, byte n) override { roomDescriptor(room)->goldAmount = n; }
+  virtual int getRoomNextLootSlot(DescriptorHandle room, unsigned &iterPos) const override;
+  virtual void clearRoomLootSlot(DescriptorHandle room, unsigned iterPos, unsigned n) override;
   virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const override;
   virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;

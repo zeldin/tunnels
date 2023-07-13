@@ -49,6 +49,7 @@ public:
   virtual void drawChestItem() = 0;
   virtual void drawMoneyItem() = 0;
   virtual void drawLootItem(unsigned index, ItemCategory cat, byte id) = 0;
+  virtual void clearLootItem(unsigned index) = 0;
   virtual void stairMovement(bool ascending) = 0;
   virtual void drawCorridorSegment(unsigned n, Location loc) = 0;
   virtual void drawCorridorLeftJunction(unsigned n, Location loc) = 0;
@@ -112,6 +113,7 @@ private:
     DIVERSION_DOWN,
     DIVERSION_REDO,
     DIVERSION_PROCD,
+    DIVERSION_BACK,
     DIVERSION_QUIT
   };
   Diversion redoTarget;

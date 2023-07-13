@@ -475,6 +475,37 @@ void DatabaseImpl::prepareRoomEnemies(DescriptorHandle room)
   Utils::clearArray(data.monsterHP);
 }
 
+int DatabaseImpl::getRoomNextLootSlot(DescriptorHandle room, unsigned &iterPos) const
+{
+  const RoomDescriptor *r = roomDescriptor(room);
+  while (iterPos < 6) {
+    byte mask = byte(1) << iterPos;	
+    if ((r->lootInfo & mask)) {
+      switch (iterPos) {
+      case 0: mask = byte(0) << 5; break;
+      case 1: mask = byte(2) << 5; break;
+      default: mask = byte(iterPos+2) << 5; break;
+      }
+      for (int i = 0; i < 3; i++)
+	if (r->lootId[i] != 0 && (r->lootId[i] & mask) == mask) {
+	  ++iterPos;
+	  return i;
+	}
+    }
+    ++iterPos;
+  }
+  return -1;
+}
+
+void DatabaseImpl::clearRoomLootSlot(DescriptorHandle room, unsigned iterPos, unsigned n)
+{
+  RoomDescriptor *r = roomDescriptor(room);
+  byte mask = byte(1) << (iterPos-1);
+  r->lootInfo &= ~mask;
+  if (n < 3)
+    r->lootId[n] = 0;
+}
+
 byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const
 {
   if (n >= 3)

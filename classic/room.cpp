@@ -249,6 +249,14 @@ void ScreenEngine::drawLootItem(unsigned index, ItemCategory cat, byte id)
 	  database->getItemTiles(cat, id));
 }
 
+void ScreenEngine::clearLootItem(unsigned index)
+{
+  unsigned y = database->getRoomItemRow(RoomItem(ROOM_ITEM_LOOT1+index));
+  unsigned x = database->getRoomItemColumn(RoomItem(ROOM_ITEM_LOOT1+index));
+  screen.hchar(y, x, 'k', 2);
+  screen.hchar(y+1, x, 'k', 2);
+}
+
 void ScreenEngine::drawLivingStatue()
 {
   putQuad(database->getRoomItemRow(ROOM_ITEM_CENTERPIECE),

@@ -385,9 +385,65 @@ GameEngine::Diversion GameEngine::lootRoom()
       if (Diversion d = flashBorder())
 	return d;
     }
-    for (unsigned i=0; i<6; i++) {
-      byte mask = byte(1) << i;
-      // FIXME: G@>C4D2
+    Diversion diversion;
+    do {
+      unsigned iterPos = 0;
+      for (;;) {
+	diversion = DIVERSION_NULL;
+	redoTarget = DIVERSION_REDO;
+	procdTarget = DIVERSION_PROCD;
+	backTarget = DIVERSION_BACK;
+	screen.clearMessages();
+	int slot;
+	if ((slot = database->getRoomNextLootSlot(currentRoom, iterPos)) < 0)
+	  break;
+	ItemCategory cat;
+	byte item = database->getRoomLootItem(currentRoom, slot, cat);
+	switch(cat) {
+	case ITEM_MAGIC_ITEMS:
+	  // FIXME: G@>C545
+	  break;
+	case ITEM_ARMORS:
+	  // FIXME: G@>C56D
+	  break;
+	case ITEM_WEAPONS:
+	  // FIXME: G@>C5DB
+	  break;
+	case ITEM_FLOOR_MAP:
+	  // G@>C602
+	  screen.drawPrompt(0x5b);
+	  if (database->getCurrentFloor() > database->getMappedFloors())
+	    database->setMappedFloors(database->getCurrentFloor());
+	  break;
+	case ITEM_QUEST_OBJECTS:
+	  // FIXME: G@>C61C
+	  break;
+	}
+	for (unsigned i = 0; i < 3; i++) {
+	  screen.clearLootItem(slot);
+	  if ((diversion = delay(133)))
+	    break;
+	  screen.drawLootItem(slot, cat, item);
+	  if ((diversion = delay(133)))
+	    break;
+	}
+	if (!diversion) {
+	  // FIXME: G@>C5C1 ...
+	  database->clearRoomLootSlot(currentRoom, iterPos, slot);
+	}
+	if (diversion == DIVERSION_BACK) {
+	  // FIXME: G@>C674
+	} else if (diversion)
+	  break;
+      }
+    } while(diversion == DIVERSION_REDO);
+    if (diversion && diversion != DIVERSION_PROCD)
+      return diversion;
+    if /* while */ (database->roomHasFountain(currentRoom)) {
+      // FIXME: G@>C68B
+    }
+    if /* while */ (database->roomHasLivingStatue(currentRoom)) {
+      // FIXME: G@>C699
     }
   }
   // G@>C424
