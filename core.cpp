@@ -446,7 +446,7 @@ GameEngine::Diversion GameEngine::lootRoom()
 	  database->clearRoomLootSlot(currentRoom, iterPos, slot);
 	}
 	if (diversion == DIVERSION_BACK) {
-	  // FIXME: G@>C674
+	  roomSetup(false);
 	} else if (diversion)
 	  break;
       }
