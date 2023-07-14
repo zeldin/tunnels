@@ -571,7 +571,17 @@ GameEngine::Diversion GameEngine::room()
     ; // FIXME: Go to G@>682E
   if (database->getCurrentLocation() == LOCATION_ENTRANCE) {
     if (!database->isAnyQuestObjectRemaining()) {
-      // FIXME: G@>65FE
+      backTarget = DIVERSION_CONTINUE_GAME;
+      database->clearRemainingQuestObjects();
+      database->setUnknown1CEB(0);
+      screen.drawGameOver();
+      database->revealAllMagicItems();
+      sound.playTitleMusic();
+      byte keyCode;
+      Direction dir;
+      for (;;)
+	if (Diversion d = getMovementKey(keyCode, dir))
+	  return d;
     }
     if (!(database->getUnknown25EF() & 0x80) &&
 	database->getPartyGold() != 0 &&

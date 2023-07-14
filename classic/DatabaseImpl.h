@@ -288,10 +288,12 @@ public:
   virtual byte getPlayerMagicItemId(unsigned n, unsigned m) const override { return data.player[n].magicItems[m].id; }
   virtual byte getPlayerMagicItemRemainingUses(unsigned n, unsigned m) const override { return data.player[n].magicItems[m].remainingUses; }
   virtual void compactPlayerMagicItems(unsigned n) override;
+  virtual void revealAllMagicItems() override;
   virtual bool isQuestObjectFound(unsigned n) const override { return (data.foundQuestObjects >> n)&1; }
   virtual bool isQuestObjectRemaining(unsigned n) const override { return (data.remainingQuestObjects >> n)&1; }
   virtual bool isAnyQuestObjectRemaining() const override { return data.remainingQuestObjects != 0; }
   virtual bool tryAchieveQuestObject(unsigned n) override;
+  virtual void clearRemainingQuestObjects() override { data.remainingQuestObjects = 0; }
   virtual uint16 getTurnsLeft(unsigned n) const override { return data.turnsLeft[n]; }
   virtual byte getRations() const override { return data.rations; }
   virtual Utils::StringSpan getMonsterName() const override;
@@ -361,6 +363,7 @@ public:
   virtual byte getMagicItemEffect(byte n) const override { return data.magicItems[n-1].effect; }
   virtual byte getPlayerColor(unsigned n) const override { return data.patternColors[n]; }
   virtual void setPlayerColor(unsigned n, unsigned c) override;
+  virtual bool isQuestObjectValid(unsigned n) const override { return n<8 && data.questObjects[n].name[0] != ' '; }
   virtual Utils::StringSpan getFloorColorTable(unsigned floor) const override;
   virtual Utils::StringSpan getColorTable() const override;
   virtual Utils::StringSpan getLivingStatueTiles() const override;

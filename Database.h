@@ -44,10 +44,12 @@ public:
   virtual byte getPlayerMagicItemId(unsigned n, unsigned m) const = 0;
   virtual byte getPlayerMagicItemRemainingUses(unsigned n, unsigned m) const = 0;
   virtual void compactPlayerMagicItems(unsigned n) = 0;
+  virtual void revealAllMagicItems() = 0;
   virtual bool isQuestObjectFound(unsigned n) const = 0;
   virtual bool isQuestObjectRemaining(unsigned n) const = 0;
   virtual bool isAnyQuestObjectRemaining() const = 0;
   virtual bool tryAchieveQuestObject(unsigned n) = 0;
+  virtual void clearRemainingQuestObjects() = 0;
   virtual uint16 getTurnsLeft(unsigned n) const = 0;
   virtual byte getRations() const = 0;
   virtual Utils::StringSpan getMonsterName() const = 0;
@@ -117,6 +119,7 @@ public:
   virtual byte getMagicItemEffect(byte n) const = 0;
   virtual byte getPlayerColor(unsigned n) const = 0;
   virtual void setPlayerColor(unsigned n, unsigned c) = 0;
+  virtual bool isQuestObjectValid(unsigned n) const = 0;
   virtual Utils::StringSpan getFloorColorTable(unsigned floor) const = 0;
   virtual Utils::StringSpan getColorTable() const = 0;
   virtual Utils::StringSpan getLivingStatueTiles() const = 0;

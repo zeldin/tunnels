@@ -111,6 +111,14 @@ void DatabaseImpl::compactPlayerMagicItems(unsigned n)
   }
 }
 
+void DatabaseImpl::revealAllMagicItems()
+{
+  for (unsigned n=0; n<4; n++)
+    for (unsigned i=0; i<10; i++)
+      if ((data.player[n].magicItems[i].id & 0x80))
+	data.player[n].magicItems[i].id = -data.player[n].magicItems[i].id;
+}
+
 bool DatabaseImpl::tryAchieveQuestObject(unsigned n)
 {
   if (n--) {

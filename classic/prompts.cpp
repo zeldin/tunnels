@@ -604,9 +604,24 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
   case Vocab::extGAMEOVER: /* G@>F2AA */
     {
       screen.setBackground(VDP::DARK_BLUE);
-      /* FIXME ... */
+      if (database->getCurrentLocation() != LOCATION_ENTRANCE)
+	return;
       drawPrompt(0x2a);
-      drawPrompt(0x2b);
+      bool all_found = true;
+      for (unsigned n = 0, p = 0; n < 8; n++)
+	if (database->isQuestObjectValid(n)) {
+	  if (database->isQuestObjectFound(n)) {
+	    static constexpr const byte row[] = { 9, 9, 9, 12, 12, 12, 15, 15 };
+	    static constexpr const byte col[] = { 21, 24, 27, 21, 24, 27, 22, 26 };
+	    putQuad(row[p], col[p],
+		    database->getItemTiles(ITEM_QUEST_OBJECTS, n+1));
+	    p++;
+	  } else {
+	    all_found = false;
+	  }
+	}
+      if (all_found)
+	drawPrompt(0x2b);
       return;
     }
   case Vocab::extCURPLAYER: /* G@>F336 */
@@ -1011,7 +1026,10 @@ void ScreenEngine::drawPrompt(unsigned n, unsigned param)
 	    if (n == 16 && !(addr & 15) &&
 		addr >= 0x3250 && addr <= 0x3280)
 	      text = database->getExtDictionaryWord((addr-0x3250)>>4);
-	    else {
+	    else if (addr >= 0x600 && addr + n <= 0x780) {
+	      text = database->getDescription();
+	      text.subspan(addr-0x600, n);
+	    } else {
 	      /* FIXME */
 	      byte buf[n];
 	      for (unsigned i = 0; i<n; i++)

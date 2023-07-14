@@ -199,6 +199,16 @@ void ScreenEngine::roomScreen()
   }
 }
 
+void ScreenEngine::drawGameOver()
+{
+  using namespace VDP::FMTBuilder;
+
+  static constexpr const auto fmt1 =
+    fmt(COL(20), ROW(0), RPTB(19, HCHA(12, ' '), RIGHT(20)));
+  fmt1(screen);
+  drawPrompt(0x29);
+}
+
 void ScreenEngine::drawVault()
 {
   using namespace VDP::FMTBuilder;
