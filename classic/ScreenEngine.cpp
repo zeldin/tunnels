@@ -31,6 +31,12 @@ void ScreenEngine::endStringInputField(unsigned len, unsigned cnt)
   screen.setXpt(screen.getXpt()-cnt);
 }
 
+void ScreenEngine::replaceStringInputField(Utils::StringSpan str)
+{
+  screen.hstr(screen.getYpt(), screen.getXpt(), str);
+  screen.setXpt(screen.getXpt()+str.len());
+}
+
 void ScreenEngine::addStringInputField(byte ch)
 {
   screen.hchar(screen.getYpt(), screen.getXpt(), ch);
@@ -86,6 +92,12 @@ void ScreenEngine::preparePlayerColorInput()
 void ScreenEngine::prepareItemNumberInput()
 {
   screen.setYpt(17);
+  screen.setXpt(findEndOfLine() + 2);
+}
+
+void ScreenEngine::prepareGiveItemReceiverInput()
+{
+  screen.setYpt(19);
   screen.setXpt(findEndOfLine() + 2);
 }
 

@@ -57,6 +57,7 @@ public:
   virtual void markSelection(byte ch) override;
   virtual void prepareStringInputField(unsigned len) override;
   virtual void endStringInputField(unsigned len, unsigned cnt) override;
+  virtual void replaceStringInputField(Utils::StringSpan str) override;
   virtual void addStringInputField(byte ch) override;
   virtual void eraseStringInputField(unsigned cnt) override;
   virtual void drawIoError(bool casette, byte error) override;
@@ -64,6 +65,7 @@ public:
   virtual void preparePlayerClassInput() override;
   virtual void preparePlayerColorInput() override;
   virtual void prepareItemNumberInput() override;
+  virtual void prepareGiveItemReceiverInput() override;
   virtual void askCharacterAccept() override;
   virtual void setPlayerColors() override;
   virtual void setPlayerShapes(unsigned n) override;

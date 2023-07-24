@@ -8,6 +8,8 @@ namespace Tunnels {
 namespace Utils { class StringSpan; }
 namespace File { class ReadHandle; class WriteHandle; }
 
+class RandomSource;
+
 class Database {
 public:
   virtual Utils::StringSpan getSpritePatternTable() const = 0;
@@ -23,11 +25,17 @@ public:
   virtual byte getPlayerHP(unsigned n) const = 0;
   virtual byte getPlayerWD(unsigned n) const = 0;
   virtual byte getPlayerArmorId(unsigned n) const = 0;
+  virtual void setPlayerArmor(unsigned n, byte item) = 0;
   virtual int8 getPlayerArmorProtection(unsigned n) const = 0;
+  virtual void setPlayerArmorProtection(unsigned n, int8 prot) = 0;
   virtual byte getPlayerShieldId(unsigned n) const = 0;
+  virtual void setPlayerShield(unsigned n, byte item) = 0;
   virtual int8 getPlayerShieldProtection(unsigned n) const = 0;
+  virtual void setPlayerShieldProtection(unsigned n, int8 prot) = 0;
   virtual byte getPlayerWeaponId(unsigned n, bool secondary) const = 0;
+  virtual void setPlayerWeapon(unsigned n, bool secondary, ItemCategory cat, byte item) = 0;
   virtual byte getPlayerWeaponDamage(unsigned n, bool secondary) const = 0;
+  virtual void setPlayerWeaponDamage(unsigned n, bool secondary, byte dmg) = 0;
   virtual byte getPlayerWeaponAmmo(unsigned n, bool secondary) const = 0;
   virtual int8 getPlayerBaseProtection(unsigned n) const = 0;
   virtual byte getPlayerWeaponBonus(unsigned n) const = 0;
@@ -42,7 +50,9 @@ public:
   virtual void placePlayer(unsigned n, unsigned y, unsigned x) = 0;
   virtual void setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir) = 0;
   virtual byte getPlayerMagicItemId(unsigned n, unsigned m) const = 0;
+  virtual void setPlayerMagicItemId(unsigned n, unsigned m, byte id) = 0;
   virtual byte getPlayerMagicItemRemainingUses(unsigned n, unsigned m) const = 0;
+  virtual void setPlayerMagicItemRemainingUses(unsigned n, unsigned m, byte uses) = 0;
   virtual void compactPlayerMagicItems(unsigned n) = 0;
   virtual void revealAllMagicItems() = 0;
   virtual bool isQuestObjectFound(unsigned n) const = 0;
@@ -117,6 +127,7 @@ public:
   virtual int8 getRangedWeaponAmmoType(unsigned id) const = 0;
   virtual Utils::StringSpan getRangedWeaponAmmoName(unsigned id) const = 0;
   virtual byte getMagicItemEffect(byte n) const = 0;
+  virtual byte getMagicItemInitialUses(byte n) const = 0;
   virtual byte getPlayerColor(unsigned n) const = 0;
   virtual void setPlayerColor(unsigned n, unsigned c) = 0;
   virtual bool isQuestObjectValid(unsigned n) const = 0;
@@ -152,7 +163,8 @@ public:
   virtual void setRoomMoneyAmount(DescriptorHandle room, byte n) = 0;
   virtual int getRoomNextLootSlot(DescriptorHandle room, unsigned &iterPos) const = 0;
   virtual void clearRoomLootSlot(DescriptorHandle room, unsigned iterPos, unsigned n) = 0;
-  virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const = 0;
+  virtual bool dropItemInRoom(DescriptorHandle room, ItemCategory cat, byte id, byte itemStat, byte itemAmmo) = 0;
+  virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat, byte &itemStat, byte &itemAmmo) const = 0;
   virtual Utils::StringSpan getFloorMap() const = 0;
   virtual void setMapVisited(MapPosition pos, bool visited) = 0;
   virtual void prepareFloorMap(unsigned floor) = 0;
@@ -170,6 +182,10 @@ public:
   virtual bool getSecretDoorsRevealed() const = 0;
   virtual void setSecretDoorsRevealed(bool value) = 0;
   virtual ~Database() { }
+  void setRandomSource(RandomSource *randomSource_) { randomSource = randomSource_; }
+protected:
+  Database() : randomSource(nullptr) {}
+  RandomSource *randomSource;
 };
 
 class DatabaseFactory {

@@ -59,6 +59,8 @@ GameEngine::Diversion GameEngine::loadSave(bool isSave, unsigned len,
       failed = true;
     else
       database = db;
+    if (database != nullptr)
+      database->setRandomSource(this);
     screen.setDatabase(database);
   }
   File::Error error = file.getError();

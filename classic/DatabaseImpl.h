@@ -150,7 +150,8 @@ private:
     byte unknown_1ce0;    // V@>1CE0
     byte numClasses;      // V@>1CE1
     byte maxFloors;       // V@>1CE2
-    byte unknown_1ce3[3]; // V@>1CE3
+    byte unknown_1ce3[2]; // V@>1CE3
+    byte unknown_1ce5;    // V@>1CE5
     byte numFountainsPerFloor; // V@>1CE6
     byte numStairsPerFloor;    // V@>1CE7
     byte unknown_1ce8;    // V@>1CE8
@@ -200,22 +201,27 @@ private:
     byte unknown_2690[0x68];
     struct {
       byte name[15];
-      byte unknown[3];
+      byte damage;
+      byte unknown[2];
     } weapons[8]; // V@>26F8
     struct {
       byte name[15];
-      byte unknown1[4];
+      byte damage;
+      byte unknown1[2];
+      int8 defaultAmmo;
       int8 ammoType;
       byte unknown2;
       byte ammoName[13];
     } rangedWeapons[8]; // V@>2788
     struct {
       byte name[15];
-      byte unknown[3];
+      byte protection;
+      byte unknown[2];
     } armors[8]; // V@>2898
     struct {
       byte name[15];
-      byte unknown[3];
+      byte protection;
+      byte unknown[2];
     } shields[6]; // V@>2928
     struct {
       byte name[11];
@@ -225,7 +231,8 @@ private:
     struct {
       byte name[15];
       byte effect;
-      byte unknown[2];
+      byte usesLimit;
+      byte unknown;
     } magicItems[40]; // V@>2a14
     byte unknown_2ce4[0x32];
     struct {
@@ -267,11 +274,17 @@ public:
   virtual byte getPlayerHP(unsigned n) const override { return data.player[n].HP; }
   virtual byte getPlayerWD(unsigned n) const override { return data.player[n].WD; }
   virtual byte getPlayerArmorId(unsigned n) const override { return data.player[n].armorId; }
+  virtual void setPlayerArmor(unsigned n, byte item) override;
   virtual int8 getPlayerArmorProtection(unsigned n) const override { return data.player[n].armorProtection; }
+  virtual void setPlayerArmorProtection(unsigned n, int8 prot) override { data.player[n].armorProtection = prot; }
   virtual byte getPlayerShieldId(unsigned n) const override { return data.player[n].shieldId; }
+  virtual void setPlayerShield(unsigned n, byte item) override;
   virtual int8 getPlayerShieldProtection(unsigned n) const override { return data.player[n].shieldProtection; }
+  virtual void setPlayerShieldProtection(unsigned n, int8 prot) override { data.player[n].shieldProtection = prot; }
   virtual byte getPlayerWeaponId(unsigned n, bool secondary) const override { return (secondary? data.player[n].secondaryWeaponId : data.player[n].primaryWeaponId); }
+  virtual void setPlayerWeapon(unsigned n, bool secondary, ItemCategory cat, byte item) override;
   virtual byte getPlayerWeaponDamage(unsigned n, bool secondary) const override { return (secondary? data.player[n].secondaryWeaponDamage : data.player[n].primaryWeaponDamage); }
+  virtual void setPlayerWeaponDamage(unsigned n, bool secondary, byte dmg) override { if(secondary)  data.player[n].secondaryWeaponDamage = dmg; else data.player[n].primaryWeaponDamage = dmg; }
   virtual byte getPlayerWeaponAmmo(unsigned n, bool secondary) const override { return (secondary? data.player[n].secondaryWeaponAmmo : data.player[n].primaryWeaponAmmo); }
   virtual int8 getPlayerBaseProtection(unsigned n) const override { return data.player[n].baseProtection; }
   virtual byte getPlayerWeaponBonus(unsigned n) const override { return data.player[n].weaponBonus; }
@@ -286,7 +299,9 @@ public:
   virtual void placePlayer(unsigned n, unsigned y, unsigned x) override;
   virtual void setPlayerStartPosition(unsigned n, StartPosition pos, Direction dir) override;
   virtual byte getPlayerMagicItemId(unsigned n, unsigned m) const override { return data.player[n].magicItems[m].id; }
+  virtual void setPlayerMagicItemId(unsigned n, unsigned m, byte id) override { data.player[n].magicItems[m].id = id; }
   virtual byte getPlayerMagicItemRemainingUses(unsigned n, unsigned m) const override { return data.player[n].magicItems[m].remainingUses; }
+  virtual void setPlayerMagicItemRemainingUses(unsigned n, unsigned m, byte uses) override { data.player[n].magicItems[m].remainingUses = uses; }
   virtual void compactPlayerMagicItems(unsigned n) override;
   virtual void revealAllMagicItems() override;
   virtual bool isQuestObjectFound(unsigned n) const override { return (data.foundQuestObjects >> n)&1; }
@@ -360,7 +375,8 @@ public:
   virtual Utils::StringSpan getItemTiles(ItemCategory cat, byte id) const override;
   virtual int8 getRangedWeaponAmmoType(unsigned id) const override;
   virtual Utils::StringSpan getRangedWeaponAmmoName(unsigned id) const override;
-  virtual byte getMagicItemEffect(byte n) const override { return data.magicItems[n-1].effect; }
+  virtual byte getMagicItemEffect(byte n) const override { n = abs(n)-1; return (n < 40? data.magicItems[n].effect : 0); }
+  virtual byte getMagicItemInitialUses(byte n) const override;
   virtual byte getPlayerColor(unsigned n) const override { return data.patternColors[n]; }
   virtual void setPlayerColor(unsigned n, unsigned c) override;
   virtual bool isQuestObjectValid(unsigned n) const override { return n<8 && data.questObjects[n].name[0] != ' '; }
@@ -397,7 +413,8 @@ public:
   virtual void setRoomMoneyAmount(DescriptorHandle room, byte n) override { roomDescriptor(room)->goldAmount = n; }
   virtual int getRoomNextLootSlot(DescriptorHandle room, unsigned &iterPos) const override;
   virtual void clearRoomLootSlot(DescriptorHandle room, unsigned iterPos, unsigned n) override;
-  virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const override;
+  virtual bool dropItemInRoom(DescriptorHandle room, ItemCategory cat, byte id, byte itemStat, byte itemAmmo) override;
+  virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat, byte &itemStat, byte &itemAmmo) const override;
   virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;
   virtual void prepareFloorMap(unsigned floor) override;
@@ -413,6 +430,10 @@ public:
   { if(value) data.unknown_111c |= 0x8; else data.unknown_111c &= ~0x8; }
 
 private:
+  static inline constexpr byte abs(byte n) {
+    return ((n & 0x80)? byte(~n)+1 : n);
+  }
+
   void clearMap(unsigned mode);
   unsigned findDescriptor(uint16 pos, unsigned offs, unsigned cnt, unsigned delta) const;
   unsigned findDescriptor(uint16 pos) const { return findDescriptor(pos, 0, data.numRoomsPerFloor, 10); }

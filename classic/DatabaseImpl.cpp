@@ -1,6 +1,7 @@
 #include "system.h"
 
 #include "classic/DatabaseImpl.h"
+#include "RandomSource.h"
 #include "Utils.h"
 
 namespace Tunnels { namespace Classic {
@@ -57,6 +58,58 @@ Utils::StringSpan DatabaseImpl::getPlayerName(unsigned n) const
 void DatabaseImpl::setPlayerName(unsigned n, Utils::StringSpan name)
 {
   name.store(data.player[n].name);
+}
+
+void DatabaseImpl::setPlayerArmor(unsigned n, byte item)
+{
+  if (!item || item > 8)
+    return;
+  data.player[n].armorId = item;
+  data.player[n].armorProtection = data.armors[item-1].protection;
+}
+
+void DatabaseImpl::setPlayerShield(unsigned n, byte item)
+{
+  if (item > 8)
+    item -= 8;
+  if (!item || item > 6)
+    return;
+  data.player[n].shieldId = item + 8;
+  data.player[n].shieldProtection = data.shields[item-1].protection;
+}
+
+void DatabaseImpl::setPlayerWeapon(unsigned n, bool secondary, ItemCategory cat, byte item)
+{
+  if (!item || (cat != ITEM_WEAPONS && cat != ITEM_RANGED_WEAPONS))
+    return;
+  byte damage, ammo;
+  if (item > 8) {
+    item -= 8;
+    if (item > 8)
+      return;
+    cat = ITEM_RANGED_WEAPONS;
+  }
+  if (cat == ITEM_RANGED_WEAPONS) {
+    damage = data.rangedWeapons[item-1].damage;
+    ammo = (data.rangedWeapons[item-1].defaultAmmo < 0?
+	    -data.rangedWeapons[item-1].defaultAmmo :
+	    data.rangedWeapons[item-1].defaultAmmo);
+    if (!(ammo >= data.unknown_1ce5))
+      ammo = data.unknown_1ce5;
+    item += 8;
+  } else {
+    damage = data.weapons[item-1].damage;
+    ammo = 0;
+  }
+  if (!secondary) {
+    data.player[n].primaryWeaponId = item;
+    data.player[n].primaryWeaponDamage = damage;
+    data.player[n].primaryWeaponAmmo = ammo;
+  } else {
+    data.player[n].secondaryWeaponId = item;
+    data.player[n].secondaryWeaponDamage = damage;
+    data.player[n].secondaryWeaponAmmo = ammo;
+  }
 }
 
 void DatabaseImpl::setPlayerClass(unsigned n, unsigned c)
@@ -349,6 +402,19 @@ Utils::StringSpan DatabaseImpl::getRangedWeaponAmmoName(unsigned id) const
     return Utils::StringSpan();
 }
 
+byte DatabaseImpl::getMagicItemInitialUses(byte n) const
+{
+  n = abs(n)-1;
+  if (n < 40) {
+    n = data.magicItems[n].usesLimit;
+    if (abs(n) != n)
+      n = abs(n);
+    else
+      n = randomSource->random(1, n);
+  } else n = 0;
+  return n;
+}
+
 void DatabaseImpl::setPlayerColor(unsigned n, unsigned c)
 {
   static constexpr byte colors[] = { 0xce, 0x4e, 0xde, 0x6e };
@@ -500,15 +566,17 @@ int DatabaseImpl::getRoomNextLootSlot(DescriptorHandle room, unsigned &iterPos) 
 {
   const RoomDescriptor *r = roomDescriptor(room);
   while (iterPos < 6) {
-    byte mask = byte(1) << iterPos;	
-    if ((r->lootInfo & mask)) {
+    byte c = byte(1) << iterPos;	
+    if ((r->lootInfo & c)) {
       switch (iterPos) {
-      case 0: mask = byte(0) << 5; break;
-      case 1: mask = byte(2) << 5; break;
-      default: mask = byte(iterPos+2) << 5; break;
+      case 0: c = byte(0) << 5; break;
+      case 1: c = byte(2) << 5; break;
+      default: c = byte(iterPos+2) << 5; break;
       }
+      // byte mask = c; // Original code
+      byte mask = ((c & 0x80)? 0xe0 : 0xc0); // Fixed code
       for (int i = 0; i < 3; i++)
-	if (r->lootId[i] != 0 && (r->lootId[i] & mask) == mask) {
+	if (r->lootId[i] != 0 && (r->lootId[i] & mask) == c) {
 	  ++iterPos;
 	  return i;
 	}
@@ -527,11 +595,116 @@ void DatabaseImpl::clearRoomLootSlot(DescriptorHandle room, unsigned iterPos, un
     r->lootId[n] = 0;
 }
 
-byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat) const
+bool DatabaseImpl::dropItemInRoom(DescriptorHandle room, ItemCategory cat, byte id, byte itemStat, byte itemAmmo)
+{
+  if (!id)
+    return false;
+  if (cat == ITEM_MAGIC_ITEMS && !(id & byte(0x80)))
+    // Tested magical items can not be dropped
+    return false;
+  id = abs(id);
+  if ((cat == ITEM_ARMORS || cat == ITEM_WEAPONS) && id > 8) 
+    cat = ItemCategory(cat + 1);
+  if ((cat == ITEM_SHIELDS || cat == ITEM_RANGED_WEAPONS) && id > 8)
+    id -= 8;
+  switch (cat) {
+  case ITEM_ARMORS:
+    if (id > 8)
+      return false;
+    if (!(itemStat >= data.armors[id-1].protection))
+      // Dropping would improve stat
+      return false;
+    break;
+  case ITEM_SHIELDS:
+    if (id > 6)
+      return false;
+    if (!(itemStat >= data.shields[id-1].protection))
+      // Dropping would improve stat
+      return false;
+    break;
+  case ITEM_WEAPONS:
+    if (id > 8)
+      return false;
+    if (!(itemStat >= data.weapons[id-1].damage))
+      // Dropping would improve stat
+      return false;
+    break;
+  case ITEM_RANGED_WEAPONS:
+    if (id > 8)
+      return false;
+    if (!(itemStat >= data.rangedWeapons[id-1].damage))
+      // Dropping would improve stat
+      return false;
+    if (data.rangedWeapons[id-1].ammoType == 1 ||
+	data.rangedWeapons[id-1].ammoType == -1) {
+      byte defAmmo = (data.rangedWeapons[id-1].defaultAmmo < 0?
+		      -data.rangedWeapons[id-1].defaultAmmo :
+		      data.rangedWeapons[id-1].defaultAmmo);
+      if (defAmmo > itemAmmo)
+	// Dropping would replenish ammo
+	return false;
+    }
+    break;
+  }
+
+  RoomDescriptor *r = roomDescriptor(room);
+  unsigned n;
+  for (n=0; n<3; n++)
+    if (!r->lootId[n])
+      break;
+  if (n >= 3)
+    // No room for item in array
+    return false;
+  byte bit;
+  switch (cat) {
+  case ITEM_SHIELDS:
+    id |= 8;
+    /* FALLTHROUGH */
+  case ITEM_ARMORS:
+    bit = 4;
+    break;
+  case ITEM_RANGED_WEAPONS:
+    id |= 8;
+    /* FALLTHROUGH */
+  case ITEM_WEAPONS:
+    bit = 8;
+    break;
+  case ITEM_MAGIC_ITEMS:
+    bit = 3; // Two concurrent items possible
+    break;
+  case ITEM_QUEST_OBJECTS:
+    bit = 32;
+    break;
+  case ITEM_FLOOR_MAP:
+    bit = 16;
+    break;
+  default:
+    return false;
+  }
+  if ((r->lootInfo & bit) == bit)
+    // Already at limit for this category
+    return false;
+  bit ^= (r->lootInfo & bit);
+  if (bit == 3)
+    bit = 1;
+  r->lootInfo |= bit;
+  byte c = 0x40;
+  if (bit == 1)
+    c = 0;
+  else if (bit >= 4) do {
+      c += 0x20;
+    } while ((bit >>= 1) > 1);
+  r->lootId[n] = id | c;
+  return true;
+}
+
+byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat, byte &itemStat, byte &itemAmmo) const
 {
   if (n >= 3)
     return 0;
   byte id = roomDescriptor(room)->lootId[n];
+  itemStat = 0;
+  itemAmmo = 0;
   if (id & 0x80) {
     switch (id >> 5) {
     case 4: cat = ITEM_ARMORS; break;
@@ -540,9 +713,38 @@ byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCatego
     case 7: cat = ITEM_QUEST_OBJECTS; break;
     }
     id &= 0x1f;
+    if (cat < ITEM_MAGIC_ITEMS && id > 8) {
+      cat = ItemCategory(cat + 1);
+      id -= 8;
+    }
+    switch(cat) {
+    case ITEM_ARMORS:
+      if (id < 8)
+	itemStat = data.armors[id].protection;
+      break;
+    case ITEM_SHIELDS:
+      if (id < 6)
+	itemStat = data.shields[id].protection;
+      break;
+    case ITEM_WEAPONS:
+      if (id < 8)
+	itemStat = data.weapons[id].damage;
+      break;
+    case ITEM_RANGED_WEAPONS:
+      if (id < 8) {
+	itemStat = data.rangedWeapons[id].damage;
+	byte defAmmo = (data.rangedWeapons[id].defaultAmmo < 0?
+			-data.rangedWeapons[id].defaultAmmo :
+			data.rangedWeapons[id].defaultAmmo);
+	if (!(defAmmo >= data.unknown_1ce5))
+	  defAmmo = data.unknown_1ce5;
+	itemAmmo = defAmmo;
+      }
+      break;
+    }
   } else {
     cat = ITEM_MAGIC_ITEMS;
-    id &= 0x3f;
+    id = byte(~(id & 0x3f))+1;
   }
   return id;
 }

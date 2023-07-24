@@ -3,6 +3,7 @@
 
 #include "EventLoop.h"
 #include "GameTypes.h"
+#include "RandomSource.h"
 
 namespace Tunnels {
 
@@ -26,6 +27,7 @@ public:
   virtual void markSelection(byte ch) = 0;
   virtual void prepareStringInputField(unsigned len) = 0;
   virtual void endStringInputField(unsigned len, unsigned cnt) = 0;
+  virtual void replaceStringInputField(Utils::StringSpan str) = 0;
   virtual void addStringInputField(byte ch) = 0;
   virtual void eraseStringInputField(unsigned cnt) = 0;
   virtual void drawIoError(bool casette, byte error) = 0;
@@ -33,6 +35,7 @@ public:
   virtual void preparePlayerClassInput() = 0;
   virtual void preparePlayerColorInput() = 0;
   virtual void prepareItemNumberInput() = 0;
+  virtual void prepareGiveItemReceiverInput() = 0;
   virtual void askCharacterAccept() {};
   virtual void setPlayerColors() {}
   virtual void setPlayerShapes(unsigned n) {}
@@ -85,7 +88,7 @@ public:
   virtual void honk() = 0;
 };
 
-class GameEngine {
+class GameEngine : private RandomSource {
 private:
   EventLoop &eventLoop;
   Timer::TimerManager &timerManager;
@@ -151,11 +154,12 @@ public:
 
 private:
   byte random(byte upper);
-  byte random(byte lower, byte upper);
+  virtual byte random(byte lower, byte upper) override;
   Event nextEvent();
   EventType waitForEvent();
   Diversion delay(unsigned ms);
   Diversion waitForMusic();
+  Diversion getNamedPlayer();
   void initEnemyHealth();
   void pickUnoccupiedRoomSquare(byte &y, byte &x);
   void pickItemRoomSquare(byte &y, byte &x);
@@ -165,6 +169,11 @@ private:
   Diversion entrance();
   void placeRoomItems();
   void drawLoot();
+  bool takeArmor(unsigned player, byte item, bool &inventoryFull);
+  bool takeShield(unsigned player, byte item, bool &inventoryFull);
+  bool takeWeapon(unsigned player, ItemCategory cat, byte item, bool &secondary, bool &inventoryFull);
+  bool takeMagicItem(unsigned player, byte item, unsigned &slot);
+  Diversion giveItem(ItemCategory cat, byte item, byte itemStat, byte itemAmmo);
   Diversion lootRoom();
   void roomSetup(bool newLocation);
   Diversion room();
