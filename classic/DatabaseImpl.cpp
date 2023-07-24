@@ -710,7 +710,7 @@ bool DatabaseImpl::dropItemInRoom(DescriptorHandle room, ItemCategory cat, byte 
   return true;
 }
 
-byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat, byte &itemStat, byte &itemAmmo) const
+byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat, byte &itemStat, byte &itemAmmo)
 {
   if (n >= 3)
     return 0;
@@ -757,6 +757,14 @@ byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCatego
   } else {
     cat = ITEM_MAGIC_ITEMS;
     id = byte(~(id & 0x3f))+1;
+  }
+  data.itemId = id;
+  data.itemStat = itemStat;
+  data.itemAmmo = itemAmmo;
+  if (cat != ITEM_FLOOR_MAP) {
+    data.itemCategory = (cat == ITEM_RANGED_WEAPONS? ITEM_WEAPONS : cat);
+    if (cat == ITEM_SHIELDS || cat == ITEM_RANGED_WEAPONS)
+      data.itemId += 8;
   }
   return id;
 }

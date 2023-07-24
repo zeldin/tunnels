@@ -164,7 +164,7 @@ public:
   virtual int getRoomNextLootSlot(DescriptorHandle room, unsigned &iterPos) const = 0;
   virtual void clearRoomLootSlot(DescriptorHandle room, unsigned iterPos, unsigned n) = 0;
   virtual bool dropItemInRoom(DescriptorHandle room, ItemCategory cat, byte id, byte itemStat, byte itemAmmo) = 0;
-  virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat, byte &itemStat, byte &itemAmmo) const = 0;
+  virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat, byte &itemStat, byte &itemAmmo) = 0;
   virtual Utils::StringSpan getFloorMap() const = 0;
   virtual void setMapVisited(MapPosition pos, bool visited) = 0;
   virtual void prepareFloorMap(unsigned floor) = 0;

@@ -255,8 +255,12 @@ private:
     byte roomFeatureName[2][12]; // V@34A0
     byte floorMap[17*32-6]; // V@>34B8
     byte pab[10];         // V@>36D2
-    byte dsrname[28];     // V@>37DC
-    byte unknown_36f8[8];
+    byte dsrname[28];     // V@>36DC
+    byte itemCategory; // V@>36F8
+    byte itemId;       // V@>36F9
+    byte itemStat;     // V@>36FA
+    byte itemAmmo;     // V@>36FB
+    byte unknown_36fc[4];
   } data;
 protected:
   DatabaseImpl() { }
@@ -414,7 +418,7 @@ public:
   virtual int getRoomNextLootSlot(DescriptorHandle room, unsigned &iterPos) const override;
   virtual void clearRoomLootSlot(DescriptorHandle room, unsigned iterPos, unsigned n) override;
   virtual bool dropItemInRoom(DescriptorHandle room, ItemCategory cat, byte id, byte itemStat, byte itemAmmo) override;
-  virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat, byte &itemStat, byte &itemAmmo) const override;
+  virtual byte getRoomLootItem(DescriptorHandle room, unsigned n, ItemCategory &cat, byte &itemStat, byte &itemAmmo) override;
   virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;
   virtual void prepareFloorMap(unsigned floor) override;
