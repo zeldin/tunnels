@@ -386,7 +386,7 @@ int8 DatabaseImpl::getRangedWeaponAmmoType(unsigned id) const
 {
   if (id > 8)
     id -= 8;
-  if (id > 0 && id <= 6)
+  if (id > 0 && id <= 8)
     return data.rangedWeapons[id-1].ammoType;
   else
     return 0;
@@ -396,7 +396,7 @@ Utils::StringSpan DatabaseImpl::getRangedWeaponAmmoName(unsigned id) const
 {
   if (id > 8)
     id -= 8;
-  if (id > 0 && id <= 6)
+  if (id > 0 && id <= 8)
     return data.rangedWeapons[id-1].ammoName;
   else
     return Utils::StringSpan();
