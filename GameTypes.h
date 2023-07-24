@@ -73,6 +73,15 @@ enum RoomItem {
   ROOM_ITEM_LAST = ROOM_ITEM_LOOT3
 };
 
+enum ExtDictionaryWord {
+  EXT_DICTIONARY_FOUNTAIN = 0,
+  EXT_DICTIONARY_LIVING_STATUE = 1,
+  EXT_DICTIONARY_CURRENCY = 2,
+  EXT_DICTIONARY_ITEMS = 3,
+  EXT_DICTIONARY_CHEST = 4,
+  EXT_DICTIONARY_VAULT = 5
+};
+
 constexpr RoomItem next(RoomItem i)
 {
   return RoomItem(i + 1);

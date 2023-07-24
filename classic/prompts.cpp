@@ -689,7 +689,7 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
       uint16 n = param;
       x = putNumber(y, x, n);
       screen.hstr(y, x-1, "0 ");
-      screen.hstr(y, x+1, database->getExtDictionaryWord(2));
+      screen.hstr(y, x+1, database->getExtDictionaryWord(EXT_DICTIONARY_CURRENCY));
       screen.setXpt(x+1);
       return;
     }
@@ -1021,7 +1021,9 @@ void ScreenEngine::drawPrompt(unsigned n, unsigned param)
 	    n = *ptr++;
 	    if (n == 16 && !(addr & 15) &&
 		addr >= 0x3250 && addr <= 0x3280)
-	      text = database->getExtDictionaryWord((addr-0x3250)>>4);
+	      text = database->getExtDictionaryWord(ExtDictionaryWord((addr-0x3250)>>4));
+	    else if (n == 12 && (addr == 0x34a0 || addr == 0x34ac))
+	      text = database->getExtDictionaryWord(ExtDictionaryWord(EXT_DICTIONARY_CHEST+(addr-0x34a0)/12));
 	    else if (addr >= 0x600 && addr + n <= 0x780) {
 	      text = database->getDescription();
 	      text.subspan(addr-0x600, n);

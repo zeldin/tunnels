@@ -138,7 +138,7 @@ public:
   virtual Utils::StringSpan getChestTiles() const = 0;
   virtual Utils::StringSpan getMoneyTiles() const = 0;
   virtual byte getKeymapEntry(KeyMapping k) const = 0;
-  virtual Utils::StringSpan getExtDictionaryWord(byte n) const = 0;
+  virtual Utils::StringSpan getExtDictionaryWord(ExtDictionaryWord n) const = 0;
   virtual Utils::StringSpan getDictionaryWord(byte n) const = 0;
   virtual void getMagicEffectDescriptor(byte b, Base36Number (&effect)[3]) const = 0;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name) = 0;
@@ -156,8 +156,10 @@ public:
   virtual void clearRoomEnemies() = 0;
   virtual void prepareRoomEnemies(DescriptorHandle room) = 0;
   virtual bool roomHasUnopenedChest(DescriptorHandle room) const = 0;
+  virtual bool roomHasTrap(DescriptorHandle room) const = 0;
   virtual bool roomHasLivingStatue(DescriptorHandle room) const = 0;
   virtual bool roomHasFountain(DescriptorHandle room) const = 0;
+  virtual void clearRoomChestAndTrap(DescriptorHandle room) = 0;
   virtual void setRoomVisited(DescriptorHandle room) = 0;
   virtual byte getRoomMoneyAmount(DescriptorHandle room) const = 0;
   virtual void setRoomMoneyAmount(DescriptorHandle room, byte n) = 0;

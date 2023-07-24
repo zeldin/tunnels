@@ -453,9 +453,14 @@ Utils::StringSpan DatabaseImpl::getFountainTiles() const { return data.objectTil
 Utils::StringSpan DatabaseImpl::getChestTiles() const { return data.objectTiles[6]; }
 Utils::StringSpan DatabaseImpl::getMoneyTiles() const { return data.objectTiles[7]; }
 
-Utils::StringSpan DatabaseImpl::getExtDictionaryWord(byte n) const
+Utils::StringSpan DatabaseImpl::getExtDictionaryWord(ExtDictionaryWord n) const
 {
-  return data.extDictionary[n];
+  if (n < EXT_DICTIONARY_CHEST)
+    return data.extDictionary[n];
+  else if (n <= EXT_DICTIONARY_VAULT)
+    return data.roomFeatureName[n-EXT_DICTIONARY_CHEST];
+  else
+    return Utils::StringSpan();
 }
 
 Utils::StringSpan DatabaseImpl::getDictionaryWord(byte n) const

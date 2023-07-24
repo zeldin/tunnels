@@ -391,7 +391,7 @@ public:
   virtual Utils::StringSpan getChestTiles() const override;
   virtual Utils::StringSpan getMoneyTiles() const override;
   virtual byte getKeymapEntry(KeyMapping k) const override { return data.keymap[k]; }
-  virtual Utils::StringSpan getExtDictionaryWord(byte n) const override;
+  virtual Utils::StringSpan getExtDictionaryWord(ExtDictionaryWord n) const override;
   virtual Utils::StringSpan getDictionaryWord(byte n) const override;
   virtual void getMagicEffectDescriptor(byte b, Base36Number (&effect)[3]) const override;
   virtual void setFileData(bool isSave, unsigned len, Utils::StringSpan name)
@@ -410,8 +410,10 @@ public:
   virtual void clearRoomEnemies() override;
   virtual void prepareRoomEnemies(DescriptorHandle room) override;
   virtual bool roomHasUnopenedChest(DescriptorHandle room) const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_CHEST) != 0; }
+  virtual bool roomHasTrap(DescriptorHandle room) const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_TRAP) != 0; }
   virtual bool roomHasLivingStatue(DescriptorHandle room) const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_LIVING_STATUE) != 0; }
   virtual bool roomHasFountain(DescriptorHandle room)  const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_FOUNTAIN) != 0; }
+  virtual void clearRoomChestAndTrap(DescriptorHandle room) override { roomDescriptor(room)->roomFlags &= ~(ROOM_FLAG_CHEST | ROOM_FLAG_TRAP); }
   virtual void setRoomVisited(DescriptorHandle room) override { roomDescriptor(room)->roomFlags |= ROOM_FLAG_VISITED; }
   virtual byte getRoomMoneyAmount(DescriptorHandle room) const override { return roomDescriptor(room)->goldAmount; }
   virtual void setRoomMoneyAmount(DescriptorHandle room, byte n) override { roomDescriptor(room)->goldAmount = n; }

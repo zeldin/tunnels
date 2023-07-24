@@ -538,8 +538,26 @@ GameEngine::Diversion GameEngine::lootRoom()
   if (database->getCurrentLocation() == LOCATION_ROOM &&
       database->getRoomSpecialType(currentRoom) == 0) {
     screen.clearMessages();
-    if (database->roomHasUnopenedChest(currentRoom)) {
-      // FIXME: G@>C436
+    while (database->roomHasUnopenedChest(currentRoom)) {
+      screen.drawPrompt(0x58);
+      acceptMask = ACCEPT_ALPHANUMERIC;
+      if (Diversion d = getNamedPlayer())
+	return d;
+      int player = database->getCurrentPlayer();
+      if (player < 0) {
+	roomDone = -1;
+	return DIVERSION_ROOM_MAIN;
+      }
+      if (database->getPlayerWD(player) >= database->getPlayerHP(player)) {
+	screen.clearMessages();
+	continue;
+      }
+      if (database->roomHasTrap(currentRoom)) {
+	// FIXME: G@>C455
+      }
+      database->clearRoomChestAndTrap(currentRoom);
+      database->clearRoomItemPosition(ROOM_ITEM_CHEST);
+      break;
     }
     if (byte gold = database->getRoomMoneyAmount(currentRoom)) {
       database->setPartyGold(database->getPartyGold() + gold);
