@@ -78,6 +78,18 @@ void DatabaseImpl::setPlayerShield(unsigned n, byte item)
   data.player[n].shieldProtection = data.shields[item-1].protection;
 }
 
+byte DatabaseImpl::getPlayerWeapon(unsigned n, bool secondary, ItemCategory &cat) const
+{
+  byte id = (secondary? data.player[n].secondaryWeaponId :
+	     data.player[n].primaryWeaponId);
+  if (id > 8) {
+    id -= 8;
+    cat = ITEM_RANGED_WEAPONS;
+  } else
+    cat = ITEM_WEAPONS;
+  return id;
+}
+
 void DatabaseImpl::setPlayerWeapon(unsigned n, bool secondary, ItemCategory cat, byte item)
 {
   if (!item || (cat != ITEM_WEAPONS && cat != ITEM_RANGED_WEAPONS))

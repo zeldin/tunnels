@@ -186,7 +186,7 @@ GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
       screen.drawPrompt(0x10);
       screen.drawPlayerStatusHeader(player);
       if (!items) {
-	screen.drawPrompt(0x6b);
+	screen.drawPrompt(0x6b, player);
 	do {
 	  acceptMask = ACCEPT_BACK | ACCEPT_UP_DOWN | ACCEPT_ALPHANUMERIC;
 	  if (Diversion d = getKeyNoCursor(kc))
@@ -198,7 +198,7 @@ GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
 	  database->swapPlayerWeapon(player);
       } else {
 	database->compactPlayerMagicItems(player);
-	screen.drawPrompt(0x6c);
+	screen.drawPrompt(0x6c, player);
 	screen.prepareItemNumberInput();
 	acceptMask = ACCEPT_BACK | ACCEPT_UP_DOWN | ACCEPT_NUMERIC;
 	unsigned itemNumber;
@@ -423,8 +423,9 @@ bool GameEngine::takeWeapon(unsigned player, ItemCategory cat, byte item,
   if (!item)
     return true;
   // FIXME: G@>A4AF
-  secondary = (database->getPlayerWeaponId(player, false) != 0);
-  if (database->getPlayerWeaponId(player, secondary) != 0) {
+  ItemCategory oldCat;
+  secondary = (database->getPlayerWeapon(player, false, oldCat) != 0);
+  if (database->getPlayerWeapon(player, secondary, oldCat) != 0) {
     inventoryFull = true;
     return false;
   }

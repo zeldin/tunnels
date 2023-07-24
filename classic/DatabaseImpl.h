@@ -281,7 +281,7 @@ public:
   virtual void setPlayerShield(unsigned n, byte item) override;
   virtual int8 getPlayerShieldProtection(unsigned n) const override { return data.player[n].shieldProtection; }
   virtual void setPlayerShieldProtection(unsigned n, int8 prot) override { data.player[n].shieldProtection = prot; }
-  virtual byte getPlayerWeaponId(unsigned n, bool secondary) const override { return (secondary? data.player[n].secondaryWeaponId : data.player[n].primaryWeaponId); }
+  virtual byte getPlayerWeapon(unsigned n, bool secondary, ItemCategory &cat) const override;
   virtual void setPlayerWeapon(unsigned n, bool secondary, ItemCategory cat, byte item) override;
   virtual byte getPlayerWeaponDamage(unsigned n, bool secondary) const override { return (secondary? data.player[n].secondaryWeaponDamage : data.player[n].primaryWeaponDamage); }
   virtual void setPlayerWeaponDamage(unsigned n, bool secondary, byte dmg) override { if(secondary)  data.player[n].secondaryWeaponDamage = dmg; else data.player[n].primaryWeaponDamage = dmg; }

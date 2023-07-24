@@ -703,7 +703,7 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
   case Vocab::extAMMO: /* G@>F478 */
     {
       x = findEndOfLine()+2;
-      screen.hstr(y, x, database->getRangedWeaponAmmoName(displayedWeaponId));
+      screen.hstr(y, x, database->getRangedWeaponAmmoName(param));
       screen.setXpt(findEndOfLine()+2);
       return;
     }
@@ -756,32 +756,32 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
     {
       /* Player status */
       Utils::StringSpan className =
-	database->getClassName(database->getPlayerClass(displayedPlayer));
+	database->getClassName(database->getPlayerClass(param));
       unsigned offs = className.center();
       screen.hstr(5, 11+offs, className);
-      putNumberEol(7, database->getPlayerHP(displayedPlayer));
-      putNumberEol(8, database->getPlayerWD(displayedPlayer));
-      screen.hchar(9, putNumberEol(9, database->getPlayerExp(displayedPlayer)),
+      putNumberEol(7, database->getPlayerHP(param));
+      putNumberEol(8, database->getPlayerWD(param));
+      screen.hchar(9, putNumberEol(9, database->getPlayerExp(param)),
 		   '0');
-      putNumberEol(10, database->getPlayerLevel(displayedPlayer));
-      putNumber(12, 26, database->getPlayerWeaponBonus(displayedPlayer));
-      putWeaponDescription(13, 3, false, true);
-      putWeaponDescription(15, 3, true, true);
-      screen.hchar((database->isPlayerWeaponSwapped(displayedPlayer)? 15:13),
+      putNumberEol(10, database->getPlayerLevel(param));
+      putNumber(12, 26, database->getPlayerWeaponBonus(param));
+      putWeaponDescription(13, 3, param, false, true);
+      putWeaponDescription(15, 3, param, true, true);
+      screen.hchar((database->isPlayerWeaponSwapped(param)? 15:13),
 		   2, '\\');
       putNumber(20, 15,
-		int8(database->getPlayerBaseProtection(displayedPlayer)+
-		     database->getPlayerArmorProtection(displayedPlayer)+
-		     database->getPlayerShieldProtection(displayedPlayer)));
-      putArmorDescription(18, 15, false);
-      putArmorDescription(19, 15, true);
+		int8(database->getPlayerBaseProtection(param)+
+		     database->getPlayerArmorProtection(param)+
+		     database->getPlayerShieldProtection(param)));
+      putArmorDescription(18, 15, param, false);
+      putArmorDescription(19, 15, param, true);
       return;
     }
   case Vocab::extITEMS: /* G@>F620 */
     {
       /* Magical item list */
       for (unsigned i = 0; i < 8; i++) {
-	byte id = database->getPlayerMagicItemId(displayedPlayer, i);
+	byte id = database->getPlayerMagicItemId(param, i);
 	if (!id)
 	  break;
 	screen.setYpt(i+7);
@@ -841,21 +841,21 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
   }
 }
 
-void ScreenEngine::putWeaponDescription(unsigned y, unsigned x,
+void ScreenEngine::putWeaponDescription(unsigned y, unsigned x, unsigned player,
 					bool secondWeapon, bool showDamage)
 {
-  byte id = database->getPlayerWeaponId(displayedPlayer, secondWeapon);
-  displayedWeaponId = id;
+  ItemCategory cat;
+  byte id = database->getPlayerWeapon(player, secondWeapon, cat);
   screen.setYpt(y);
   screen.setXpt(x);
   if (id == 0)
     drawPrompt(0x5e);
   else
-    screen.hstr(y, x, database->getItemName(ITEM_WEAPONS, id));
+    screen.hstr(y, x, database->getItemName(cat, id));
   if (showDamage)
     putNumber(y, findEndOfLine()+1,
-	      database->getPlayerWeaponDamage(displayedPlayer, secondWeapon));
-  if (id > 8) {
+	      database->getPlayerWeaponDamage(player, secondWeapon));
+  if (cat == ITEM_RANGED_WEAPONS) {
     screen.setYpt(y+1);
     screen.setXpt(x+1);
     int8 ammoType = database->getRangedWeaponAmmoType(id);
@@ -863,13 +863,13 @@ void ScreenEngine::putWeaponDescription(unsigned y, unsigned x,
       ammoType = -ammoType;
     switch(ammoType) {
     case 0:
-      drawPrompt(0x5f);
+      drawPrompt(0x5f, id);
       break;
     case 1:
       screen.setXpt(putNumber(y+1, x+1,
-			      database->getPlayerWeaponAmmo(displayedPlayer,
+			      database->getPlayerWeaponAmmo(player,
 							    secondWeapon)));
-      promptExtension(Vocab::extAMMO);
+      promptExtension(Vocab::extAMMO, id);
       break;
     case 2:
       drawPrompt(0x60);
@@ -878,19 +878,16 @@ void ScreenEngine::putWeaponDescription(unsigned y, unsigned x,
   }
 }
 
-void ScreenEngine::putArmorDescription(unsigned y, unsigned x, bool shield)
+void ScreenEngine::putArmorDescription(unsigned y, unsigned x, unsigned player, bool shield)
 {
-  byte id = (shield? database->getPlayerShieldId(displayedPlayer) :
-	     database->getPlayerArmorId(displayedPlayer));
+  byte id = (shield? database->getPlayerShieldId(player) :
+	     database->getPlayerArmorId(player));
   if (!id) {
     screen.setYpt(y);
     screen.setXpt(x);
     drawPrompt(0x5d);
-  } else {
-    if (shield)
-      id |= 8;
-    screen.hstr(y, x, database->getItemName(ITEM_ARMORS, id));
-  }
+  } else
+    screen.hstr(y, x, database->getItemName((shield? ITEM_SHIELDS : ITEM_ARMORS), id));
 }
 
 void ScreenEngine::drawPlayerStatusHeader(unsigned n)
@@ -900,7 +897,6 @@ void ScreenEngine::drawPlayerStatusHeader(unsigned n)
   Utils::StringSpan name = database->getPlayerName(n);
   unsigned offs = name.center();
   screen.hstr(3, 9+offs, name);
-  displayedPlayer = n;
 }
 
 void ScreenEngine::drawMagicEffectDescription(byte n)

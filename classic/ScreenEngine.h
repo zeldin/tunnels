@@ -22,8 +22,6 @@ private:
     APAC_ROOM = 1,
     APAC_MENU = 2
   } activePatternsAndColors;
-  byte displayedPlayer;
-  byte displayedWeaponId;
   byte fixturePattern[32];
   class CursorTimer : public Timer::Timer {
   private:
@@ -121,9 +119,9 @@ private:
   bool isQuadBlocked(unsigned y, unsigned x);
   void putQuad(unsigned y, unsigned x, byte base);
   void putQuad(unsigned y, unsigned x, Utils::StringSpan tiles);
-  void putWeaponDescription(unsigned y, unsigned x,
+  void putWeaponDescription(unsigned y, unsigned x, unsigned player,
 			    bool secondWeapon, bool showDamage);
-  void putArmorDescription(unsigned y, unsigned x, bool shield);
+  void putArmorDescription(unsigned y, unsigned x, unsigned player, bool shield);
   unsigned findEndOfLine();
   void promptExtension(byte n, unsigned param = 0);
   void cursorCallback(uint32 expiry);

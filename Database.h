@@ -32,7 +32,7 @@ public:
   virtual void setPlayerShield(unsigned n, byte item) = 0;
   virtual int8 getPlayerShieldProtection(unsigned n) const = 0;
   virtual void setPlayerShieldProtection(unsigned n, int8 prot) = 0;
-  virtual byte getPlayerWeaponId(unsigned n, bool secondary) const = 0;
+  virtual byte getPlayerWeapon(unsigned n, bool secondary, ItemCategory &cat) const = 0;
   virtual void setPlayerWeapon(unsigned n, bool secondary, ItemCategory cat, byte item) = 0;
   virtual byte getPlayerWeaponDamage(unsigned n, bool secondary) const = 0;
   virtual void setPlayerWeaponDamage(unsigned n, bool secondary, byte dmg) = 0;
