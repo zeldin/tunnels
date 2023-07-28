@@ -835,7 +835,15 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
   case Vocab::extVAULT: /* G@>F7D9 */
     {
       /* Vault */
-      /* FIXME */
+      byte maxDigit;
+      unsigned numDigits;
+      database->getRoomVaultParameters(param, maxDigit, numDigits);
+      screen.setYpt(22);
+      screen.setXpt(findEndOfLine() + 2);
+      screen.hchar(screen.getYpt(), screen.getXpt(), '0'+numDigits);
+      screen.setYpt(23);
+      screen.setXpt(findEndOfLine() + 2);
+      screen.hchar(screen.getYpt(), screen.getXpt(), maxDigit);
       return;
     }
   }
@@ -1024,6 +1032,12 @@ void ScreenEngine::drawPrompt(unsigned n, unsigned param)
 	      text = database->getExtDictionaryWord(ExtDictionaryWord((addr-0x3250)>>4));
 	    else if (n == 12 && (addr == 0x34a0 || addr == 0x34ac))
 	      text = database->getExtDictionaryWord(ExtDictionaryWord(EXT_DICTIONARY_CHEST+(addr-0x34a0)/12));
+	    else if (n == 16 && addr == 0x1162)
+	      text = database->getExtDictionaryWord(EXT_DICTIONARY_COMBINATION);
+	    else if (n == 8 && addr == 0x2dbe)
+	      text = database->getExtDictionaryWord(EXT_DICTIONARY_OPEN);
+	    else if (n == 28 && addr == 0x2578)
+	      text = database->getExtDictionaryWord(EXT_DICTIONARY_COMBINATION_FOUND);
 	    else if (addr >= 0x600 && addr + n <= 0x780) {
 	      text = database->getDescription();
 	      text.subspan(addr-0x600, n);

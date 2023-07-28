@@ -23,6 +23,7 @@ public:
   virtual void initMenu() = 0;
   virtual void drawPrompt(unsigned n, unsigned param) = 0;
   virtual void setCursorEnabled(bool enabled) = 0;
+  virtual void enableAlternateCursor() = 0;
   virtual void setBorderFlashEnabled(bool enabled) = 0;
   virtual void markSelection(byte ch) = 0;
   virtual void prepareStringInputField(unsigned len) = 0;
@@ -36,6 +37,9 @@ public:
   virtual void preparePlayerColorInput() = 0;
   virtual void prepareItemNumberInput() = 0;
   virtual void prepareGiveItemReceiverInput() = 0;
+  virtual void prepareVaultPlayerInput() = 0;
+  virtual void prepareVaultDigitInput() = 0;
+  virtual void updateVaultTable(unsigned cnt, int dir, unsigned correctDigits) = 0;
   virtual void askCharacterAccept() {};
   virtual void setPlayerColors() {}
   virtual void setPlayerShapes(unsigned n) {}
@@ -44,6 +48,7 @@ public:
   virtual void corridorScreen() = 0;
   virtual void mapScreen() = 0;
   virtual void clearMessages() = 0;
+  virtual void clearVaultText() = 0;
   virtual void drawGameOver() = 0;
   virtual void drawVault() = 0;
   virtual void drawGeneralStore() = 0;
@@ -84,6 +89,8 @@ public:
   virtual void playMonsterSound(unsigned n) = 0;
   virtual void playQuestObjectFailedMusic() = 0;
   virtual void playQuestObjectCompleteMusic() = 0;
+  virtual void playVaultCombinationFoundMusic() = 0;
+  virtual void playVaultDigitSound(unsigned n) = 0;
   virtual void beep() = 0;
   virtual void honk() = 0;
 };
@@ -114,6 +121,7 @@ private:
     DIVERSION_ROOM_MAIN,      // G@>65B2
     DIVERSION_CORRIDOR,       // G@>66F7
     DIVERSION_CORRIDOR_MAIN,  // G@>670B
+    DIVERSION_VAULT,          // G@>C26D
     DIVERSION_LOOT_ROOM,      // G@>C41F
     DIVERSION_AID,
     DIVERSION_UP,
@@ -180,6 +188,7 @@ private:
   Diversion corridor();
   bool tryMove(bool checkOnly = false);
   Diversion getMovementKey(byte &kc, Direction &dir);
+  Diversion vault();
   Diversion titleScreen();
   Diversion loadSaveMenu();
   Diversion loadSave(bool isSave, unsigned len, Utils::StringSpan name);

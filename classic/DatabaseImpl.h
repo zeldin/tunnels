@@ -121,7 +121,8 @@ private:
     byte unknown_1157;  // V@>1157
     byte unknown_1158[6];
     byte unknown_115e;  // V@>115E
-    byte unknown_115f[0x13];
+    byte unknown_115f[3];
+    byte dictCombination[16]; // V@>1162
     struct {
       byte name[10];
       byte unknown[0xc];
@@ -179,7 +180,9 @@ private:
     msb16 descendingStairsDescriptorOffset; // V@>1D08
     msb16 fountainDescriptorOffset; // V@>1D0A
     byte floorDescriptors[0x85c]; // V@>1D0C
-    byte unknown_2568[0x3c];
+    byte unknown_2568[0x10];
+    byte dictCombinationFound[0x1c]; // V@>2578
+    byte dictGeneralStore[0x10]; // V@>2594
     byte monsterSoundTable[16]; // V@>25A4
     msb16 monsterSoundAddress;  // V@>25B4
     byte unknown_25b6[0x39];
@@ -241,7 +244,9 @@ private:
       byte tiles[4];
       byte unknown2[2];
     } questObjects[8];     // V@>2D16
-    byte unknown_2dae[0x90];
+    byte unknown_2dae[0x10];
+    byte dictOpen[8]; // V@>2DBE
+    byte unknown_2dc6[0x78];
     byte corridorColors[5][10]; // V@>2E3E
     byte patternColors[32];  // V@>2E70
     byte patternTable2[0x380]; // V@2E90
@@ -409,6 +414,8 @@ public:
   virtual void startCombat(DescriptorHandle room) override { data.monsterInfo = roomDescriptor(room)->monsterInfo; }
   virtual void clearRoomEnemies() override;
   virtual void prepareRoomEnemies(DescriptorHandle room) override;
+  virtual void getRoomVaultParameters(DescriptorHandle room, byte &maxDigit, unsigned &numDigits) const override;
+  virtual void clearRoomVault(DescriptorHandle room) override;
   virtual bool roomHasUnopenedChest(DescriptorHandle room) const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_CHEST) != 0; }
   virtual bool roomHasTrap(DescriptorHandle room) const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_TRAP) != 0; }
   virtual bool roomHasLivingStatue(DescriptorHandle room) const override { return (roomDescriptor(room)->roomFlags & ROOM_FLAG_LIVING_STATUE) != 0; }

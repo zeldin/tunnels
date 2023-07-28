@@ -724,8 +724,7 @@ GameEngine::Diversion GameEngine::room()
     switch (database->getRoomSpecialType(currentRoom)) {
     case 2:
       // Vault
-      // FIXME: Go to G@>C016
-      break;
+      return DIVERSION_VAULT;
     case 1:
       // General store
       if (database->getPartyGold() != 0 &&

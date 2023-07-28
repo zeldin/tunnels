@@ -155,6 +155,8 @@ public:
   virtual void startCombat(DescriptorHandle room) = 0;
   virtual void clearRoomEnemies() = 0;
   virtual void prepareRoomEnemies(DescriptorHandle room) = 0;
+  virtual void getRoomVaultParameters(DescriptorHandle room, byte &maxDigit, unsigned &numDigits) const = 0;
+  virtual void clearRoomVault(DescriptorHandle room) = 0;
   virtual bool roomHasUnopenedChest(DescriptorHandle room) const = 0;
   virtual bool roomHasTrap(DescriptorHandle room) const = 0;
   virtual bool roomHasLivingStatue(DescriptorHandle room) const = 0;

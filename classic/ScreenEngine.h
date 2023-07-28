@@ -23,6 +23,8 @@ private:
     APAC_MENU = 2
   } activePatternsAndColors;
   byte fixturePattern[32];
+  bool altCursor;
+  unsigned vaultLine;
   class CursorTimer : public Timer::Timer {
   private:
     ScreenEngine &engine;
@@ -42,7 +44,7 @@ private:
 
 public:
   ScreenEngine(VDP::Backend &backend_, Tunnels::Timer::TimerManager &timerManager_) :
-    timerManager(timerManager_), backend(backend_),
+    timerManager(timerManager_), backend(backend_), altCursor(false),
     cursorTimer(*this), borderTimer(*this) { setDatabase(nullptr); }
 
   virtual void refresh() override;
@@ -51,6 +53,7 @@ public:
   virtual void initMenu() override;
   virtual void drawPrompt(unsigned n, unsigned param) override;
   virtual void setCursorEnabled(bool enabled) override;
+  virtual void enableAlternateCursor() override;
   virtual void setBorderFlashEnabled(bool enabled) override;
   virtual void markSelection(byte ch) override;
   virtual void prepareStringInputField(unsigned len) override;
@@ -64,6 +67,9 @@ public:
   virtual void preparePlayerColorInput() override;
   virtual void prepareItemNumberInput() override;
   virtual void prepareGiveItemReceiverInput() override;
+  virtual void prepareVaultPlayerInput() override;
+  virtual void prepareVaultDigitInput() override;
+  virtual void updateVaultTable(unsigned cnt, int dir, unsigned correctDigits) override;
   virtual void askCharacterAccept() override;
   virtual void setPlayerColors() override;
   virtual void setPlayerShapes(unsigned n) override;
@@ -72,6 +78,7 @@ public:
   virtual void corridorScreen() override;
   virtual void mapScreen() override;
   virtual void clearMessages() override;
+  virtual void clearVaultText() override;
   virtual void drawGameOver() override;
   virtual void drawVault() override;
   virtual void drawGeneralStore() override;

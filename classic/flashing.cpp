@@ -7,18 +7,25 @@ namespace Tunnels { namespace Classic {
 
 void ScreenEngine::setCursorEnabled(bool enabled)
 {
+  altCursor = false;
   if (enabled)
     timerManager.addTimer(cursorTimer);
   else
     timerManager.removeTimer(cursorTimer);
 }
 
+void ScreenEngine::enableAlternateCursor()
+{
+  altCursor = true;
+  timerManager.addTimer(cursorTimer);
+}
+
 void ScreenEngine::cursorCallback(uint32 expiry)
 {
   byte old = screen.gchar(screen.getYpt(), screen.getXpt());
-  if (old == ']' || old == '^') {
+  if (altCursor || old == ']' || old == '^') {
     screen.hchar(screen.getYpt(), screen.getXpt(),
-		 ((expiry&256)? ']' : '^'));
+		 ((expiry&256)? ']' : (altCursor? ' ' : '^')));
     refresh();
   }
   timerManager.addTimer(cursorTimer, (expiry|255)+1);

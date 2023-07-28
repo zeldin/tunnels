@@ -101,6 +101,34 @@ void ScreenEngine::prepareGiveItemReceiverInput()
   screen.setXpt(findEndOfLine() + 2);
 }
 
+void ScreenEngine::prepareVaultPlayerInput()
+{
+  screen.setYpt(20);
+  screen.setXpt(findEndOfLine() + 2);
+}
+
+void ScreenEngine::prepareVaultDigitInput()
+{
+  int player = database->getCurrentPlayer();
+  putNumber(20, 6, database->getPlayerHP(player));
+  putNumber(20, 16, database->getPlayerWD(player));
+  unsigned x = screen.getXpt(), y = screen.getYpt();
+  while (x>0 && screen.gchar(y, x) != '?')
+    --x;
+  screen.setXpt(x+2);
+}
+
+void ScreenEngine::updateVaultTable(unsigned cnt, int dir, unsigned correctDigits)
+{
+  screen.hchar(vaultLine == 0? 17 : vaultLine - 1, 21, ' ');
+  screen.hstr(vaultLine, 22, screen.gstr(screen.getYpt(), screen.getXpt(), cnt));
+  screen.hchar(vaultLine, 21, '\\');
+  screen.hchar(vaultLine, 28, (dir? (dir < 0? '<' : '>') : '+'));
+  screen.hchar(vaultLine, 29, correctDigits + '0');
+  if (++vaultLine > 17)
+    vaultLine = 0;
+}
+
 void ScreenEngine::askCharacterAccept()
 {
   screen.setYpt(11);

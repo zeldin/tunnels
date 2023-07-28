@@ -149,7 +149,7 @@ static constexpr const auto soundData =
 	BEAT(40, 0x8b, 0x23, 0xab, 0x1a, 0xc3, 0x15, 0xd0),
 	JUMP<-1>(),
 	
-	INDEX<0xc91f>(),
+	INDEX<-5>(),  // Vault combination found
 	BEAT(2, 0x9f, 0xbf, 0xdf, 0xff),
 	BEAT(8, 0x8f, 0x05, 0x90),
 	BEAT(8, 0x85, 0x05),
@@ -301,6 +301,9 @@ static constexpr const auto soundData =
 
 static constexpr const auto soundIndex =
 	  index_array<0,15,-1>(soundData.index);
+
+static constexpr const auto vaultSoundTemplate =
+  music(BEAT(15, 0xc0, 0x00, 0xd0), BEAT(0, 0xdf));
 }
 
 void SoundEngine::stopMusic()
@@ -345,6 +348,24 @@ void SoundEngine::playQuestObjectFailedMusic()
 void SoundEngine::playQuestObjectCompleteMusic()
 {
   soundData.play<-4>(music);
+}
+
+void SoundEngine::playVaultCombinationFoundMusic()
+{
+  soundData.play<-5>(music);
+}
+
+void SoundEngine::playVaultDigitSound(unsigned n)
+{
+  vaultSound[2] = (n+2)<<2;
+  music.play(vaultSound);
+}
+
+
+SoundEngine::SoundEngine(DCSG::Backend &backend_, Timer::TimerManager &timerManager_) :
+  timerManager(timerManager_), music(backend_, timerManager_)
+{
+  vaultSoundTemplate.as_bytes(vaultSound);
 }
 
 }}

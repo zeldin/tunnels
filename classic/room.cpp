@@ -47,6 +47,20 @@ void ScreenEngine::clearMessages()
   fmt1(screen);
 }
 
+void ScreenEngine::clearVaultText()
+{
+  using namespace VDP::FMTBuilder;
+
+  // Clear character sheet display / vault progress chart
+  screen.setXpt(0);
+  screen.setYpt(0);
+  static constexpr const auto fmt1 =
+    fmt(RPTB(18, RIGHT(20), HCHA(10, ' '), RIGHT(2)));
+  fmt1(screen);
+  clearMessages();
+  vaultLine = 0;
+}
+
 void ScreenEngine::clearRoom()
 {
   using namespace VDP::FMTBuilder;
@@ -57,13 +71,7 @@ void ScreenEngine::clearRoom()
   static constexpr const auto fmt1 =
     fmt(RPTB(18, RIGHT(2), HCHA(18, 'k'), RIGHT(12)));
   fmt1(screen);
-  // Clear character sheet display
-  screen.setXpt(0);
-  screen.setYpt(0);
-  static constexpr const auto fmt2 =
-    fmt(RPTB(18, RIGHT(20), HCHA(10, ' '), RIGHT(2)));
-  fmt2(screen);
-  clearMessages();
+  clearVaultText();
 }
 
 void ScreenEngine::roomScreen()

@@ -13,9 +13,10 @@ private:
   Timer::TimerManager &timerManager;
   DCSG::Music music;
 
+  byte vaultSound[8];
+
 public:
-  SoundEngine(DCSG::Backend &backend_, Timer::TimerManager &timerManager_) :
-    timerManager(timerManager_), music(backend_, timerManager_) {}
+  SoundEngine(DCSG::Backend &backend_, Timer::TimerManager &timerManager_);
 
   virtual void stopMusic() override;
   virtual void playTitleMusic() override;
@@ -24,6 +25,8 @@ public:
   virtual void playMonsterSound(unsigned n) override;
   virtual void playQuestObjectFailedMusic() override;
   virtual void playQuestObjectCompleteMusic() override;
+  virtual void playVaultCombinationFoundMusic() override;
+  virtual void playVaultDigitSound(unsigned n) override;
   virtual void beep() override;
   virtual void honk() override;
 };

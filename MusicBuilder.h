@@ -156,6 +156,7 @@ template <int lo, int hi, int def, typename T> struct offset_array {
 
 template <typename T> struct indexed_music_sequence
 {
+  typedef byte as_bytes_type[T::metatype::len];
   typename T::metatype music;
   music_index_list<T> index;
   template <int i> void play(DCSG::Music &m, bool post=false) const
@@ -167,6 +168,11 @@ template <typename T> struct indexed_music_sequence
 	    int i, bool post=false) const
   {
     music.play(m, post, index.lookup(i));
+  }
+  void as_bytes(as_bytes_type &dst) const {
+    const as_bytes_type &src(*reinterpret_cast<const as_bytes_type*>(this));
+    for (unsigned i=0; i<T::metatype::len; i++)
+      dst[i] = src[i];
   }
 };
 

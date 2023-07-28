@@ -459,8 +459,18 @@ Utils::StringSpan DatabaseImpl::getExtDictionaryWord(ExtDictionaryWord n) const
     return data.extDictionary[n];
   else if (n <= EXT_DICTIONARY_VAULT)
     return data.roomFeatureName[n-EXT_DICTIONARY_CHEST];
-  else
-    return Utils::StringSpan();
+  else switch(n) {
+    case EXT_DICTIONARY_COMBINATION:
+      return data.dictCombination;
+    case EXT_DICTIONARY_OPEN:
+      return data.dictOpen;
+    case EXT_DICTIONARY_COMBINATION_FOUND:
+      return data.dictCombinationFound;
+    case EXT_DICTIONARY_GENERAL_STORE:
+      return data.dictGeneralStore;
+    default:
+      return Utils::StringSpan();
+    }
 }
 
 Utils::StringSpan DatabaseImpl::getDictionaryWord(byte n) const
@@ -577,6 +587,20 @@ void DatabaseImpl::prepareRoomEnemies(DescriptorHandle room)
   patterns.store(data.patternTable, 240*8);
   patterns.store(data.patternTable, 244*8);
   Utils::clearArray(data.monsterHP);
+}
+
+void DatabaseImpl::getRoomVaultParameters(DescriptorHandle room, byte &maxDigit, unsigned &numDigits) const
+{
+  byte info = roomDescriptor(room)->monsterInfo;
+  numDigits = info >> 4;
+  maxDigit = (info & 0xf) | '0';
+}
+
+void DatabaseImpl::clearRoomVault(DescriptorHandle room)
+{
+  RoomDescriptor *r = roomDescriptor(room);
+  r->specialRoomType = 0;
+  r->monsterInfo = 0;
 }
 
 int DatabaseImpl::getRoomNextLootSlot(DescriptorHandle room, unsigned &iterPos) const
