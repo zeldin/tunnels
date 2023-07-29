@@ -137,6 +137,9 @@ EventType GameEngine::run()
     case DIVERSION_CORRIDOR_MAIN:
       diversion = corridor();
       continue;
+    case DIVERSION_PARTY_ORDER:
+      diversion = partyOrder();
+      continue;
     case DIVERSION_VAULT:
       diversion = vault();
       continue;

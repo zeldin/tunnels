@@ -70,6 +70,7 @@ public:
   virtual void prepareVaultPlayerInput() override;
   virtual void prepareVaultDigitInput() override;
   virtual void updateVaultTable(unsigned cnt, int dir, unsigned correctDigits) override;
+  virtual void drawCurrentPartyOrder() override;
   virtual void askCharacterAccept() override;
   virtual void setPlayerColors() override;
   virtual void setPlayerShapes(unsigned n) override;

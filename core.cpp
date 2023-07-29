@@ -131,6 +131,33 @@ bool GameEngine::tryMove(bool checkOnly)
   return true;
 }
 
+GameEngine::Diversion GameEngine::partyOrder()
+{
+  // G@>C1E1
+  screen.drawPrompt(0x0e);
+  screen.drawPrompt(0x7c);
+  for(;;) {
+    screen.drawCurrentPartyOrder();
+    byte kc;
+    if (Diversion d = rawGetKey(kc))
+      return d;
+    if (kc == KEY_BACK)
+      return DIVERSION_CONTINUE_GAME;
+    if (kc == 'E')
+      database->exchangePlayerOrder(0, 1);
+    if (kc == 'S')
+      database->exchangePlayerOrder(0, 2);
+    if (kc == 'D')
+      database->exchangePlayerOrder(1, 3);
+    if (kc == 'X')
+      database->exchangePlayerOrder(2, 3);
+    if (database->getPlayerOrder(0) < 0 && database->getPlayerOrder(1) < 0) {
+      database->exchangePlayerOrder(0, 2);
+      database->exchangePlayerOrder(1, 3);
+    }
+  }
+}
+
 GameEngine::Diversion GameEngine::getMovementKey(byte &kc, Direction &dir)
 {
   acceptMask =
@@ -801,7 +828,7 @@ GameEngine::Diversion GameEngine::room()
 	// FIXME: Go to G@>771C
       }
       if (keyCode == database->getKeymapEntry(KEYMAP_CHANGE_ORDER)) {
-	/* ... */
+	return DIVERSION_PARTY_ORDER;
       }
       if (keyCode == database->getKeymapEntry(KEYMAP_TRADE_ITEMS)) {
 	/* ... */
@@ -946,7 +973,7 @@ GameEngine::Diversion GameEngine::corridor()
       } else if (keyCode == database->getKeymapEntry(KEYMAP_USE_ITEM)) {
 	/* FIXME G@>67DF */
       } else if (keyCode == database->getKeymapEntry(KEYMAP_CHANGE_ORDER)) {
-	/* FIXME G@>67E8 */
+	return DIVERSION_PARTY_ORDER;
       } else if (keyCode == database->getKeymapEntry(KEYMAP_LISTEN_AT_DOOR)) {
 	/* FIXME G@>67F2 */
       } else if (keyCode == database->getKeymapEntry(KEYMAP_TRADE_ITEMS)) {

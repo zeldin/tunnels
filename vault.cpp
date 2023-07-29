@@ -51,19 +51,10 @@ GameEngine::Diversion GameEngine::vault()
     }
     random(255);
     screen.enableAlternateCursor();
-    for (;;) {
-      Event e = nextEvent();
-      if (e.type() != EVENT_KEY) {
-	if (e.type() == EVENT_QUIT) {
-	  screen.setCursorEnabled(false);
-	  return DIVERSION_QUIT;
-	}
-	continue;
-      }
-      kc = e.keycode();
-      break;
-    }
+    Diversion d = rawGetKey(kc);
     screen.setCursorEnabled(false);
+    if (d)
+      return d;
     if (kc == KEY_BACK)
       return DIVERSION_CONTINUE_GAME;
     if (kc < '1' || kc > maxDigit)

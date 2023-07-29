@@ -40,6 +40,7 @@ public:
   virtual void prepareVaultPlayerInput() = 0;
   virtual void prepareVaultDigitInput() = 0;
   virtual void updateVaultTable(unsigned cnt, int dir, unsigned correctDigits) = 0;
+  virtual void drawCurrentPartyOrder() = 0;
   virtual void askCharacterAccept() {};
   virtual void setPlayerColors() {}
   virtual void setPlayerShapes(unsigned n) {}
@@ -121,6 +122,7 @@ private:
     DIVERSION_ROOM_MAIN,      // G@>65B2
     DIVERSION_CORRIDOR,       // G@>66F7
     DIVERSION_CORRIDOR_MAIN,  // G@>670B
+    DIVERSION_PARTY_ORDER,    // G@>C1E1
     DIVERSION_VAULT,          // G@>C26D
     DIVERSION_LOOT_ROOM,      // G@>C41F
     DIVERSION_AID,
@@ -188,6 +190,7 @@ private:
   Diversion corridor();
   bool tryMove(bool checkOnly = false);
   Diversion getMovementKey(byte &kc, Direction &dir);
+  Diversion partyOrder();
   Diversion vault();
   Diversion titleScreen();
   Diversion loadSaveMenu();
@@ -198,6 +201,7 @@ private:
   Diversion createPartyMenu();
   Diversion createPartyMember(unsigned player);
   Diversion pointOfNoReturnMenu();
+  Diversion rawGetKey(byte &kc);
   Diversion getKeyNoCursor(byte &kc);
   Diversion getKey(byte &kc);
   Diversion getNumberKey(byte &n, byte low, byte high);

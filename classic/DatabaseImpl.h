@@ -361,6 +361,8 @@ public:
   virtual void setCurrentFloor(byte floor) override { data.currentFloor = floor; }
   virtual int getCurrentPlayer() const override { return data.currentPlayer-1; }
   virtual void setCurrentPlayer(int n) override { data.currentPlayer = n+1; }
+  virtual int getPlayerOrder(unsigned n) const override { return (n < 4? data.playerOrder[n]-1 : -1); }
+  virtual void exchangePlayerOrder(unsigned n, unsigned m) override;
   virtual bool nextPlayerInOrder() override;
   virtual Location getCurrentLocation() const override { return static_cast<Location>(data.currentLocation); }
   virtual void setCurrentLocation(Location loc) override { data.currentLocation = loc; }

@@ -253,6 +253,15 @@ byte DatabaseImpl::getNumClassChoices() const
   return n;
 }
 
+void DatabaseImpl::exchangePlayerOrder(unsigned n, unsigned m)
+{
+  if (n < 4 && m < 4) {
+    byte tmp = data.playerOrder[n];
+    data.playerOrder[n] = data.playerOrder[m];
+    data.playerOrder[m] = tmp;
+  }
+}
+
 bool DatabaseImpl::nextPlayerInOrder()
 {
   unsigned order = 0;

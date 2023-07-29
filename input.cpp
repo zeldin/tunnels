@@ -5,7 +5,7 @@
 
 namespace Tunnels {
 
-GameEngine::Diversion GameEngine::getKeyNoCursor(byte &kc)
+GameEngine::Diversion GameEngine::rawGetKey(byte &kc)
 {
   for (;;) {
     Event e = nextEvent();
@@ -15,6 +15,15 @@ GameEngine::Diversion GameEngine::getKeyNoCursor(byte &kc)
       continue;
     }
     kc = e.keycode();
+    return DIVERSION_NULL;
+  }
+}
+
+GameEngine::Diversion GameEngine::getKeyNoCursor(byte &kc)
+{
+  for (;;) {
+    if (Diversion d = rawGetKey(kc))
+      return d;
     if ((kc >= '0' && kc <= '9') ||
 	kc == KEY_ERASE || kc == KEY_LEFT || kc == KEY_ENTER) {
       if (!(acceptMask &

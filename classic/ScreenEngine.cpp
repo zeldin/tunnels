@@ -129,6 +129,25 @@ void ScreenEngine::updateVaultTable(unsigned cnt, int dir, unsigned correctDigit
     vaultLine = 0;
 }
 
+void ScreenEngine::drawCurrentPartyOrder()
+{
+  unsigned x = 13, y=8;
+  for (unsigned n=0; n<4; n++) {
+    int player = database->getPlayerOrder(n);
+    if (player < 0) {
+      screen.hchar(y, x, 'k', 2);
+      screen.hchar(y+1, x, 'k', 2);
+    } else
+      putQuad(y, x, player<<3);
+    if (x == 13)
+      x += 5;
+    else {
+      x = 13;
+      y = 13;
+    }
+  }
+}
+
 void ScreenEngine::askCharacterAccept()
 {
   screen.setYpt(11);

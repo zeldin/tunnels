@@ -103,6 +103,8 @@ public:
   virtual void setCurrentFloor(byte floor) = 0;
   virtual int getCurrentPlayer() const = 0;
   virtual void setCurrentPlayer(int n) = 0;
+  virtual int getPlayerOrder(unsigned n) const = 0;
+  virtual void exchangePlayerOrder(unsigned n, unsigned m) = 0;
   virtual bool nextPlayerInOrder() = 0;
   virtual Location getCurrentLocation() const = 0;
   virtual void setCurrentLocation(Location loc) = 0;
