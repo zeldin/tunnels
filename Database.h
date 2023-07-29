@@ -80,6 +80,7 @@ public:
   virtual byte getMonsterRow(unsigned n) const = 0;
   virtual byte getMonsterColumn(unsigned n) const = 0;
   virtual bool isMonsterPlaced(unsigned n) const = 0;
+  virtual byte getListenAtDoorSuccessRate() const = 0;
   virtual Utils::StringSpan getClassName(unsigned n) const = 0;
   virtual Utils::StringSpan getClassPatternTable(unsigned n) const = 0;
   virtual Utils::StringSpan getSpecialAttackName(unsigned n) const = 0;

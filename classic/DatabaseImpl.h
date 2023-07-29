@@ -121,7 +121,9 @@ private:
     byte unknown_1157;  // V@>1157
     byte unknown_1158[6];
     byte unknown_115e;  // V@>115E
-    byte unknown_115f[3];
+    byte unknown_115f;  // V@>115F
+    byte listenAtDoorSuccessRate;  // V@>1160
+    byte unknown_1161;  // V@>1161
     byte dictCombination[16]; // V@>1162
     struct {
       byte name[10];
@@ -338,6 +340,7 @@ public:
   virtual byte getMonsterRow(unsigned n) const override { return data.monsterPosition[n].row; }
   virtual byte getMonsterColumn(unsigned n) const override { return data.monsterPosition[n].column; }
   virtual bool isMonsterPlaced(unsigned n) const override { return data.monsterPosition[n].row != 0 || data.monsterPosition[n].column != 0; }
+  virtual byte getListenAtDoorSuccessRate() const override { return data.listenAtDoorSuccessRate; }
   virtual Utils::StringSpan getClassName(unsigned n) const override;
   virtual Utils::StringSpan getClassPatternTable(unsigned n) const override;
   virtual Utils::StringSpan getSpecialAttackName(unsigned n) const override;

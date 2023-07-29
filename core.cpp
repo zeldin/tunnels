@@ -975,7 +975,16 @@ GameEngine::Diversion GameEngine::corridor()
       } else if (keyCode == database->getKeymapEntry(KEYMAP_CHANGE_ORDER)) {
 	return DIVERSION_PARTY_ORDER;
       } else if (keyCode == database->getKeymapEntry(KEYMAP_LISTEN_AT_DOOR)) {
-	/* FIXME G@>67F2 */
+	if (random(1, 100) <= database->getListenAtDoorSuccessRate() &&
+	    tryMove(true) && currentRoom != invalidHandle() &&
+	    database->roomHasEnemies(currentRoom)) {
+	  int s = database->getMonsterSound();
+	  if (s >= 0)
+	    sound.playMonsterSound(s);
+	}
+	database->clearCombat();
+	/* FIXME G@>6813 */
+	return DIVERSION_CORRIDOR_MAIN;
       } else if (keyCode == database->getKeymapEntry(KEYMAP_TRADE_ITEMS)) {
 	/* FIXME G@>6820 */
       }
