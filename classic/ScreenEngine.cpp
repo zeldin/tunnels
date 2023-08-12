@@ -67,6 +67,20 @@ void ScreenEngine::drawIoError(bool casette, byte error)
   screen.setXpt(3);
 }
 
+void ScreenEngine::drawTradingScreen(bool itemProvided)
+{
+  drawPrompt(0x47);
+  if (itemProvided) {
+    drawPrompt(0x48);
+    screen.setYpt(6);
+    screen.setXpt(6);
+  } else {
+    screen.setYpt(23);
+    screen.setXpt(2);
+    drawPrompt(0x02);
+  }
+}
+
 void ScreenEngine::preparePlayerNameInput(unsigned n)
 {
   screen.setYpt(3);
@@ -99,6 +113,12 @@ void ScreenEngine::prepareGiveItemReceiverInput()
 {
   screen.setYpt(19);
   screen.setXpt(findEndOfLine() + 2);
+}
+
+void ScreenEngine::prepareTradingNumberInput()
+{
+  screen.setYpt(18);
+  screen.setXpt(27);
 }
 
 void ScreenEngine::prepareVaultPlayerInput()

@@ -62,20 +62,20 @@ void DatabaseImpl::setPlayerName(unsigned n, Utils::StringSpan name)
 
 void DatabaseImpl::setPlayerArmor(unsigned n, byte item)
 {
-  if (!item || item > 8)
+  if (item > 8)
     return;
   data.player[n].armorId = item;
-  data.player[n].armorProtection = data.armors[item-1].protection;
+  data.player[n].armorProtection = (item? data.armors[item-1].protection : 0);
 }
 
 void DatabaseImpl::setPlayerShield(unsigned n, byte item)
 {
   if (item > 8)
     item -= 8;
-  if (!item || item > 6)
+  if (item > 6)
     return;
-  data.player[n].shieldId = item + 8;
-  data.player[n].shieldProtection = data.shields[item-1].protection;
+  data.player[n].shieldId = (item? item + 8 : 0);
+  data.player[n].shieldProtection = (item? data.shields[item-1].protection : 0);
 }
 
 byte DatabaseImpl::getPlayerWeapon(unsigned n, bool secondary, ItemCategory &cat) const
@@ -92,26 +92,27 @@ byte DatabaseImpl::getPlayerWeapon(unsigned n, bool secondary, ItemCategory &cat
 
 void DatabaseImpl::setPlayerWeapon(unsigned n, bool secondary, ItemCategory cat, byte item)
 {
-  if (!item || (cat != ITEM_WEAPONS && cat != ITEM_RANGED_WEAPONS))
+  if (cat != ITEM_WEAPONS && cat != ITEM_RANGED_WEAPONS)
     return;
-  byte damage, ammo;
-  if (item > 8) {
-    item -= 8;
-    if (item > 8)
-      return;
-    cat = ITEM_RANGED_WEAPONS;
-  }
-  if (cat == ITEM_RANGED_WEAPONS) {
-    damage = data.rangedWeapons[item-1].damage;
-    ammo = (data.rangedWeapons[item-1].defaultAmmo < 0?
-	    -data.rangedWeapons[item-1].defaultAmmo :
-	    data.rangedWeapons[item-1].defaultAmmo);
-    if (!(ammo >= data.unknown_1ce5))
-      ammo = data.unknown_1ce5;
-    item += 8;
-  } else {
-    damage = data.weapons[item-1].damage;
-    ammo = 0;
+  byte damage = 0, ammo = 0;
+  if (item) {
+    if (item > 8) {
+      item -= 8;
+      if (item > 8)
+	return;
+      cat = ITEM_RANGED_WEAPONS;
+    }
+    if (cat == ITEM_RANGED_WEAPONS) {
+      damage = data.rangedWeapons[item-1].damage;
+      ammo = (data.rangedWeapons[item-1].defaultAmmo < 0?
+	      -data.rangedWeapons[item-1].defaultAmmo :
+	      data.rangedWeapons[item-1].defaultAmmo);
+      if (!(ammo >= data.unknown_1ce5))
+	ammo = data.unknown_1ce5;
+      item += 8;
+    } else {
+      damage = data.weapons[item-1].damage;
+    }
   }
   if (!secondary) {
     data.player[n].primaryWeaponId = item;
@@ -767,6 +768,7 @@ byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCatego
       cat = ItemCategory(cat + 1);
       id -= 8;
     }
+    --id;
     switch(cat) {
     case ITEM_ARMORS:
       if (id < 8)
@@ -792,6 +794,7 @@ byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCatego
       }
       break;
     }
+    id++;
   } else {
     cat = ITEM_MAGIC_ITEMS;
     id = byte(~(id & 0x3f))+1;

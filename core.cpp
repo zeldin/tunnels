@@ -478,84 +478,304 @@ bool GameEngine::takeMagicItem(unsigned player, byte item, unsigned &slot)
   return false;
 }
 
+
+GameEngine::Diversion GameEngine::startTrade()
+{
+  screen.drawTradingScreen(0);
+  do {
+    screen.drawPrompt(0x49);
+    acceptMask = ACCEPT_ALPHANUMERIC | ACCEPT_NUMERIC | ACCEPT_BACK;
+    if (Diversion d = getNamedPlayer())
+      return d;
+  } while (database->getCurrentPlayer() < 0);
+  screen.prepareTradingNumberInput();
+  unsigned catNum;
+  if (Diversion d = getNumber(0, 4, catNum))
+    return d;
+  ItemCategory cat;
+  switch (catNum) {
+  case 1: cat = ITEM_ARMORS; break;
+  case 2: cat = ITEM_SHIELDS; break;
+  case 3: cat = ITEM_WEAPONS; break;
+  case 4: cat = ITEM_MAGIC_ITEMS; break;
+  default:
+    return DIVERSION_CONTINUE_GAME;
+  }
+  currentItemCategory = cat;
+  currentItem = 0;
+  currentItemStat = 0;
+  currentItemAmmo = 0;
+  return DIVERSION_TRADE_ITEM;
+}
+
+GameEngine::Diversion GameEngine::tradeItem(ItemCategory cat, byte item,
+					    byte itemStat, byte itemAmmo)
+{
+  // G@>6F52
+  struct { ItemCategory cat; byte id; byte stat; byte ammo; } items[11];
+  items[0].cat = cat;
+  items[0].id = item;
+  items[0].stat = itemStat;
+  items[0].ammo = itemAmmo;
+  acceptMask = ACCEPT_NUMERIC;
+  int currentPlayer = database->getCurrentPlayer();
+  unsigned numItems = 1;
+  if (item)
+    numItems = 0;
+  else
+    acceptMask |= ACCEPT_BACK;
+  screen.drawTradingScreen(item);
+  switch (cat) {
+  case ITEM_ARMORS:
+    if (item)
+      screen.drawArmorChoice(item, itemStat, false);
+    screen.draw1Choice();
+    items[1].cat = ITEM_ARMORS;
+    items[1].id = database->getPlayerArmorId(currentPlayer);
+    items[1].stat = database->getPlayerArmorProtection(currentPlayer);
+    items[1].ammo = 0;
+    screen.drawArmorChoice(items[1].id, items[1].stat, false);
+    numItems = 1;
+    break;
+  case ITEM_SHIELDS:
+    if (item)
+      screen.drawArmorChoice(item, itemStat, true);
+    screen.draw1Choice();
+    items[1].cat = ITEM_SHIELDS;
+    items[1].id = database->getPlayerShieldId(currentPlayer);
+    items[1].stat = database->getPlayerShieldProtection(currentPlayer);
+    items[1].ammo = 0;
+    screen.drawArmorChoice(items[1].id, items[1].stat, true);
+    numItems = 1;
+    break;
+  case ITEM_WEAPONS:
+  case ITEM_RANGED_WEAPONS:
+    if (item)
+      screen.drawWeaponChoice(cat, item, itemStat, itemAmmo);
+    screen.draw2Choice();
+    for (unsigned i=0; i<2; i++) {
+      items[i+1].id = database->getPlayerWeapon(currentPlayer, i,
+						items[i+1].cat);
+      items[i+1].stat = database->getPlayerWeaponDamage(currentPlayer, i);
+      items[i+1].ammo = database->getPlayerWeaponAmmo(currentPlayer, i);
+      if (!items[i+1].stat)
+	items[i+1].stat = 2;
+      screen.drawWeaponChoice(items[i+1].cat, items[i+1].id,
+			      items[i+1].stat, items[i+1].ammo);
+    }
+    numItems = 2;
+    break;
+  case ITEM_MAGIC_ITEMS:
+    if (item)
+      screen.drawMagicItemChoice(item, itemStat);
+    screen.drawPrompt(0x46);
+    for (unsigned i=0; i<10; i++) {
+      items[i+1].cat = ITEM_MAGIC_ITEMS;
+      items[i+1].id = database->getPlayerMagicItemId(currentPlayer, i);
+      items[i+1].stat = database->getPlayerMagicItemRemainingUses(currentPlayer, i);
+      items[i+1].ammo = 0;
+      screen.drawMagicItemChoice(items[i+1].id, items[i+1].stat);
+    }
+    numItems = 10;
+    break;
+  }
+  unsigned choice = 0;
+  if (numItems == 1 && !item) {
+    screen.drawPrompt(0x82);
+    if (items[1].id)
+      choice = 1;
+    else
+      sound.honk();
+  }
+  if (!choice)
+    do {
+      screen.prepareTradingNumberInput();
+      if (Diversion d = getNumber(0, numItems, choice))
+	return d;
+      if (!items[choice].id)
+	sound.honk();
+    } while (!items[choice].id);
+  currentItemCategory = items[choice].cat;
+  currentItem = items[choice].id;
+  currentItemStat = items[choice].stat;
+  currentItemAmmo = items[choice].ammo;
+  if (choice != 0)
+    items[choice] = items[0];
+  switch (cat) {
+  case ITEM_ARMORS:
+    database->setPlayerArmor(currentPlayer, items[1].id);
+    database->setPlayerArmorProtection(currentPlayer, items[1].stat);
+    break;
+  case ITEM_SHIELDS:
+    database->setPlayerShield(currentPlayer, items[1].id);
+    database->setPlayerShieldProtection(currentPlayer, items[1].stat);
+    break;
+  case ITEM_WEAPONS:
+  case ITEM_RANGED_WEAPONS:
+    database->setPlayerWeapon(currentPlayer, false, items[1].cat, items[1].id);
+    database->setPlayerWeaponDamage(currentPlayer, false, items[1].stat);
+    database->setPlayerWeaponAmmo(currentPlayer, false, items[1].ammo);
+    database->setPlayerWeapon(currentPlayer, true, items[2].cat, items[2].id);
+    database->setPlayerWeaponDamage(currentPlayer, true, items[2].stat);
+    database->setPlayerWeaponAmmo(currentPlayer, true, items[2].ammo);
+    break;
+  case ITEM_MAGIC_ITEMS:
+    for (unsigned i=0; i<10; i++) {
+      database->setPlayerMagicItemId(currentPlayer, i, items[i+1].id);
+      database->setPlayerMagicItemRemainingUses(currentPlayer, i, items[i+1].stat);
+    }
+    break;
+  }
+  return DIVERSION_GIVE_ITEM;
+}
+
 GameEngine::Diversion GameEngine::giveItem(ItemCategory cat, byte item,
 					   byte itemStat, byte itemAmmo)
 {
   // G@>7179
-  for (;;) {
-    if (!item)
-      return backTarget;
-    acceptMask = ACCEPT_NUMERIC | ACCEPT_ALPHANUMERIC;
-    int currentPlayer = database->getCurrentPlayer();
-    screen.drawPrompt(0x4a);
-    screen.prepareGiveItemReceiverInput();
-    if (Diversion d = getNamedPlayer())
-      return d;
-    int player = database->getCurrentPlayer();
-    if (player >= 0) {
-      bool inventoryFull = false;
-      switch (cat) {
-      case ITEM_ARMORS:
-	if (takeArmor(player, item, inventoryFull)) {
-	  if (itemStat != 0)
-	    database->setPlayerArmorProtection(player, itemStat);
-	  return backTarget;
-	}
-	break;
-      case ITEM_SHIELDS:
-	if (takeShield(player, item, inventoryFull)) {
-	  if (itemStat != 0)
-	    database->setPlayerShieldProtection(player, itemStat);
-	  return backTarget;
-	}
-	break;
-      case ITEM_WEAPONS:
-      case ITEM_RANGED_WEAPONS:
-	bool secondary;
-	if (takeWeapon(player, cat, item, secondary, inventoryFull)) {
-	  if (itemStat != 0)
-	    database->setPlayerWeaponDamage(player, secondary, itemStat);
-	  return backTarget;
-	}
-	break;
-      case ITEM_MAGIC_ITEMS:
-	unsigned slot;
-	if (takeMagicItem(player, item, slot)) {
-	  if (itemStat != 0)
-	    database->setPlayerMagicItemRemainingUses(player, slot, itemStat);
-	  return backTarget;
-	}
-	inventoryFull = true;
-	break;
-      }
-      if (inventoryFull) {
-	// FIXME: G@>7298
-      }
-      database->setCurrentPlayer(currentPlayer);
-      if (database->getNumConfiguredPlayers() > 1) {
-	sound.honk();
-	continue;
-      }
-    }
-
-    if (database->getCurrentLocation() != LOCATION_ROOM ||
-	database->getRoomSpecialType(currentRoom) != 0 ||
-	database->roomHasUnopenedChest(currentRoom) ||
-	!database->dropItemInRoom(currentRoom, cat, item, itemStat, itemAmmo)) {
-      screen.drawPrompt(0x4b);
-      database->setCurrentPlayer(currentPlayer);
-      procdTarget = backTarget;
-      redoTarget = DIVERSION_REDO;
-      acceptMask = ACCEPT_PROCD | ACCEPT_REDO;
-      byte kc;
-      Diversion d = getKeyNoCursor(kc);
-      if (d == DIVERSION_REDO)
-	continue;
-      else if (d)
-	return d;
-    }
-
+  if (!item)
     return backTarget;
+  acceptMask = ACCEPT_NUMERIC | ACCEPT_ALPHANUMERIC;
+  int currentPlayer = database->getCurrentPlayer();
+  screen.drawPrompt(0x4a);
+  screen.prepareGiveItemReceiverInput();
+  if (Diversion d = getNamedPlayer())
+    return d;
+  int player = database->getCurrentPlayer();
+  if (player >= 0) {
+    bool inventoryFull = false;
+    switch (cat) {
+    case ITEM_ARMORS:
+      if (takeArmor(player, item, inventoryFull)) {
+	if (itemStat != 0)
+	  database->setPlayerArmorProtection(player, itemStat);
+	return backTarget;
+      }
+      break;
+    case ITEM_SHIELDS:
+      if (takeShield(player, item, inventoryFull)) {
+	if (itemStat != 0)
+	  database->setPlayerShieldProtection(player, itemStat);
+	return backTarget;
+      }
+      break;
+    case ITEM_WEAPONS:
+    case ITEM_RANGED_WEAPONS:
+      bool secondary;
+      if (takeWeapon(player, cat, item, secondary, inventoryFull)) {
+	if (itemStat != 0)
+	  database->setPlayerWeaponDamage(player, secondary, itemStat);
+	return backTarget;
+      }
+      break;
+    case ITEM_MAGIC_ITEMS:
+      unsigned slot;
+      if (takeMagicItem(player, item, slot)) {
+	if (itemStat != 0)
+	  database->setPlayerMagicItemRemainingUses(player, slot, itemStat);
+	return backTarget;
+      }
+      inventoryFull = true;
+      break;
+    }
+    if (inventoryFull) {
+      if (itemStat != 0) {
+	// FIXME: G@>72A3
+      }
+      currentItemCategory = cat;
+      currentItem = item;
+      currentItemStat = itemStat;
+      currentItemAmmo = itemAmmo;
+      return DIVERSION_TRADE_ITEM;
+    }
+    database->setCurrentPlayer(currentPlayer);
+    if (database->getNumConfiguredPlayers() > 1) {
+      sound.honk();
+      return DIVERSION_GIVE_ITEM;
+    }
+  }
+
+  if (database->getCurrentLocation() != LOCATION_ROOM ||
+      database->getRoomSpecialType(currentRoom) != 0 ||
+      database->roomHasUnopenedChest(currentRoom) ||
+      !database->dropItemInRoom(currentRoom, cat, item, itemStat, itemAmmo)) {
+    screen.drawPrompt(0x4b);
+    database->setCurrentPlayer(currentPlayer);
+    procdTarget = backTarget;
+    redoTarget = DIVERSION_GIVE_ITEM;
+    acceptMask = ACCEPT_PROCD | ACCEPT_REDO;
+    byte kc;
+    return getKeyNoCursor(kc);
+  }
+
+  return backTarget;
+}
+
+GameEngine::Diversion GameEngine::lootFixtures()
+{
+  if /* while */ (database->roomHasFountain(currentRoom)) {
+    // FIXME: G@>C68B
+  }
+  if /* while */ (database->roomHasLivingStatue(currentRoom)) {
+    // FIXME: G@>C699
+  }
+  roomDone = -1;
+  return DIVERSION_ROOM_MAIN;
+}
+
+GameEngine::Diversion GameEngine::lootItems()
+{
+  redoTarget = DIVERSION_LOOT_FIRST_ITEM;
+  procdTarget = DIVERSION_LOOT_FIXTURES;
+  backTarget = DIVERSION_LOOT_NEXT_ITEM;
+  screen.clearMessages();
+  int slot;
+  if ((slot = database->getRoomNextLootSlot(currentRoom, itemIterPos)) < 0)
+    return DIVERSION_LOOT_FIXTURES;
+  ItemCategory cat;
+  byte itemStat, itemAmmo;
+  byte item = database->getRoomLootItem(currentRoom, slot, cat, itemStat, itemAmmo);
+  switch(cat) {
+  case ITEM_MAGIC_ITEMS:
+  case ITEM_ARMORS:
+  case ITEM_SHIELDS:
+  case ITEM_WEAPONS:
+  case ITEM_RANGED_WEAPONS:
+    screen.drawLootItemName(cat, item);
+    break;
+  case ITEM_FLOOR_MAP:
+    screen.drawPrompt(0x5b);
+    if (database->getCurrentFloor() > database->getMappedFloors())
+      database->setMappedFloors(database->getCurrentFloor());
+    break;
+  case ITEM_QUEST_OBJECTS:
+    if (database->tryAchieveQuestObject(item)) {
+      sound.playQuestObjectCompleteMusic();
+      screen.drawPrompt(0x5c, item);
+    } else {
+      screen.drawPrompt(0x19, item);
+      sound.playQuestObjectFailedMusic();
+    }
+    break;
+  }
+  for (unsigned i = 0; i < 3; i++) {
+    screen.clearLootItem(slot);
+    if (Diversion diversion = delay(133))
+      return diversion;
+    screen.drawLootItem(slot, cat, item);
+    if (Diversion diversion = delay(133))
+      return diversion;
+  }
+  database->clearRoomLootSlot(currentRoom, itemIterPos, slot);
+  if (cat >= ITEM_QUEST_OBJECTS)
+    return DIVERSION_LOOT_ITEM_DONE;
+  else {
+    backTarget = DIVERSION_LOOT_ITEM_DONE;
+    currentItemCategory = cat;
+    currentItem = item;
+    currentItemStat = itemStat;
+    currentItemAmmo = itemAmmo;
+    return DIVERSION_GIVE_ITEM;
   }
 }
 
@@ -596,77 +816,7 @@ GameEngine::Diversion GameEngine::lootRoom()
       if (Diversion d = flashBorder())
 	return d;
     }
-    Diversion diversion;
-    do {
-      unsigned iterPos = 0;
-      for (;;) {
-	diversion = DIVERSION_NULL;
-	redoTarget = DIVERSION_REDO;
-	procdTarget = DIVERSION_PROCD;
-	backTarget = DIVERSION_BACK;
-	screen.clearMessages();
-	int slot;
-	if ((slot = database->getRoomNextLootSlot(currentRoom, iterPos)) < 0)
-	  break;
-	ItemCategory cat;
-	byte itemStat, itemAmmo;
-	byte item = database->getRoomLootItem(currentRoom, slot, cat, itemStat, itemAmmo);
-	switch(cat) {
-	case ITEM_MAGIC_ITEMS:
-	case ITEM_ARMORS:
-	case ITEM_SHIELDS:
-	case ITEM_WEAPONS:
-	case ITEM_RANGED_WEAPONS:
-	  screen.drawLootItemName(cat, item);
-	  break;
-	case ITEM_FLOOR_MAP:
-	  screen.drawPrompt(0x5b);
-	  if (database->getCurrentFloor() > database->getMappedFloors())
-	    database->setMappedFloors(database->getCurrentFloor());
-	  break;
-	case ITEM_QUEST_OBJECTS:
-	  if (database->tryAchieveQuestObject(item)) {
-	    sound.playQuestObjectCompleteMusic();
-	    screen.drawPrompt(0x5c, item);
-	  } else {
-	    screen.drawPrompt(0x19, item);
-	    sound.playQuestObjectFailedMusic();
-	  }
-	  break;
-	}
-	for (unsigned i = 0; i < 3; i++) {
-	  screen.clearLootItem(slot);
-	  if ((diversion = delay(133)))
-	    break;
-	  screen.drawLootItem(slot, cat, item);
-	  if ((diversion = delay(133)))
-	    break;
-	}
-	if (!diversion) {
-	  database->clearRoomLootSlot(currentRoom, iterPos, slot);
-	  if (cat >= ITEM_QUEST_OBJECTS)
-	    diversion = DIVERSION_BACK;
-	  else
-	    diversion = giveItem(cat, item, itemStat, itemAmmo);
-	  if (diversion == DIVERSION_BACK) {
-	    if (Diversion d2 = flashBorder())
-	      diversion = d2;
-	  }
-	}
-	if (diversion == DIVERSION_BACK) {
-	  roomSetup(false);
-	} else if (diversion)
-	  break;
-      }
-    } while(diversion == DIVERSION_REDO);
-    if (diversion && diversion != DIVERSION_PROCD)
-      return diversion;
-    if /* while */ (database->roomHasFountain(currentRoom)) {
-      // FIXME: G@>C68B
-    }
-    if /* while */ (database->roomHasLivingStatue(currentRoom)) {
-      // FIXME: G@>C699
-    }
+    return DIVERSION_LOOT_FIRST_ITEM;
   }
   // G@>C424
   roomDone = -1;
@@ -831,7 +981,7 @@ GameEngine::Diversion GameEngine::room()
 	return DIVERSION_PARTY_ORDER;
       }
       if (keyCode == database->getKeymapEntry(KEYMAP_TRADE_ITEMS)) {
-	/* ... */
+	return startTrade();
       }
       if (keyCode == KEY_UP) {
 	if (database->getCurrentLocation() != LOCATION_ASCENDING_STAIRCASE)
@@ -986,7 +1136,8 @@ GameEngine::Diversion GameEngine::corridor()
 	/* FIXME G@>6813 */
 	return DIVERSION_CORRIDOR_MAIN;
       } else if (keyCode == database->getKeymapEntry(KEYMAP_TRADE_ITEMS)) {
-	/* FIXME G@>6820 */
+	backTarget = DIVERSION_CORRIDOR;
+	return startTrade();
       }
     }
   }

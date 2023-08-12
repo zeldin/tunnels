@@ -499,6 +499,16 @@ unsigned ScreenEngine::putNumberEol(unsigned y, uint16 n)
   return x;
 }
 
+unsigned ScreenEngine::putParenthesizedNumberEol(unsigned y, byte n)
+{
+  screen.setYpt(y);
+  unsigned x = findEndOfLine()+1;
+  screen.hchar(y, x++, '(');
+  x = putNumber(y, x, n)-1;
+  screen.hchar(y, x, ')');
+  return x;
+}
+
 unsigned ScreenEngine::putPlural()
 {
   unsigned y = screen.getYpt();
@@ -672,14 +682,15 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
     }
   case Vocab::extPLAYERNAME: /* G@>F429 */
     {
-      Utils::StringSpan name{"#####          "}; /* FIXME */
+      Utils::StringSpan name =
+	database->getPlayerName(database->getCurrentPlayer());
       unsigned offs = name.center();
       screen.hstr(2, 9+offs, name);
       return;
     }
   case Vocab::extITEMSLABEL: /* G@>F43B */
     {
-      Utils::StringSpan label{"     #######    "}; /* FIXME */
+      Utils::StringSpan label = database->getExtDictionaryWord(EXT_DICTIONARY_ITEMS);
       label.uncenter();
       screen.hstr(8, 6, label);
       return;
@@ -849,11 +860,9 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
   }
 }
 
-void ScreenEngine::putWeaponDescription(unsigned y, unsigned x, unsigned player,
-					bool secondWeapon, bool showDamage)
+void ScreenEngine::putWeaponDescription(unsigned y, unsigned x, ItemCategory cat,
+					byte id, byte damage, byte ammo, bool showDamage)
 {
-  ItemCategory cat;
-  byte id = database->getPlayerWeapon(player, secondWeapon, cat);
   screen.setYpt(y);
   screen.setXpt(x);
   if (id == 0)
@@ -861,8 +870,7 @@ void ScreenEngine::putWeaponDescription(unsigned y, unsigned x, unsigned player,
   else
     screen.hstr(y, x, database->getItemName(cat, id));
   if (showDamage)
-    putNumber(y, findEndOfLine()+1,
-	      database->getPlayerWeaponDamage(player, secondWeapon));
+    putNumber(y, findEndOfLine()+1, damage);
   if (cat == ITEM_RANGED_WEAPONS) {
     screen.setYpt(y+1);
     screen.setXpt(x+1);
@@ -874,9 +882,7 @@ void ScreenEngine::putWeaponDescription(unsigned y, unsigned x, unsigned player,
       drawPrompt(0x5f, id);
       break;
     case 1:
-      screen.setXpt(putNumber(y+1, x+1,
-			      database->getPlayerWeaponAmmo(player,
-							    secondWeapon)));
+      screen.setXpt(putNumber(y+1, x+1, ammo));
       promptExtension(Vocab::extAMMO, id);
       break;
     case 2:
@@ -884,6 +890,17 @@ void ScreenEngine::putWeaponDescription(unsigned y, unsigned x, unsigned player,
       break;
     }
   }
+}
+
+void ScreenEngine::putWeaponDescription(unsigned y, unsigned x, unsigned player,
+					bool secondWeapon, bool showDamage)
+{
+  ItemCategory cat;
+  byte id = database->getPlayerWeapon(player, secondWeapon, cat);
+  putWeaponDescription(y, x, cat, id,
+		       database->getPlayerWeaponDamage(player, secondWeapon),
+		       database->getPlayerWeaponAmmo(player, secondWeapon),
+		       showDamage);
 }
 
 void ScreenEngine::putArmorDescription(unsigned y, unsigned x, unsigned player, bool shield)
@@ -896,6 +913,41 @@ void ScreenEngine::putArmorDescription(unsigned y, unsigned x, unsigned player, 
     drawPrompt(0x5d);
   } else
     screen.hstr(y, x, database->getItemName((shield? ITEM_SHIELDS : ITEM_ARMORS), id));
+}
+
+void ScreenEngine::drawWeaponChoice(ItemCategory cat, byte id, byte damage, byte ammo)
+{
+  unsigned y = screen.getYpt();
+  putWeaponDescription(y, 6, cat, id, damage, ammo, false);
+  screen.setXpt(putParenthesizedNumberEol(y, damage));
+  screen.setYpt(y+2);
+}
+
+void ScreenEngine::drawMagicItemChoice(byte id, byte uses)
+{
+  unsigned y = screen.getYpt();
+  if (y == 16)
+    y = 7;
+  else
+    ++y;
+  screen.setYpt(y);
+  screen.setXpt(6);
+  if (id) {
+    if ((id & 0x80))
+      drawPrompt(0x85);
+    screen.hstr(y, screen.getXpt(),
+		database->getItemName(ITEM_MAGIC_ITEMS, id));
+  }
+}
+
+void ScreenEngine::drawArmorChoice(byte id, byte protection, bool shield)
+{
+  if (!id)
+    drawPrompt(0x5d);
+  else
+    screen.hstr(screen.getYpt(), screen.getXpt(),
+		database->getItemName((shield? ITEM_SHIELDS : ITEM_ARMORS), id));
+  screen.setXpt(putParenthesizedNumberEol(screen.getYpt(), protection));
 }
 
 void ScreenEngine::drawPlayerStatusHeader(unsigned n)
@@ -953,6 +1005,22 @@ void ScreenEngine::drawMagicItemDescription(unsigned n)
   screen.setXpt(2);
   screen.setYpt(19);
   drawMagicEffectDescription(database->getMagicItemEffect(n));
+}
+
+void ScreenEngine::draw1Choice()
+{
+  using namespace VDP::FMTBuilder;
+  static constexpr const auto fmt1 =
+    fmt(COL(4), ROW(7), HSTR("1 "));
+  fmt1(screen);
+}
+
+void ScreenEngine::draw2Choice()
+{
+  using namespace VDP::FMTBuilder;
+  static constexpr const auto fmt1 =
+    fmt(COL(4), ROW(8), VSTR("1 2"), DOWN(21), RIGHT(2));
+  fmt1(screen);
 }
 
 void ScreenEngine::drawPrompt(unsigned n, unsigned param)

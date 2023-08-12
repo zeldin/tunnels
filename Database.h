@@ -37,6 +37,7 @@ public:
   virtual byte getPlayerWeaponDamage(unsigned n, bool secondary) const = 0;
   virtual void setPlayerWeaponDamage(unsigned n, bool secondary, byte dmg) = 0;
   virtual byte getPlayerWeaponAmmo(unsigned n, bool secondary) const = 0;
+  virtual void setPlayerWeaponAmmo(unsigned n, bool secondary, byte ammo) = 0;
   virtual int8 getPlayerBaseProtection(unsigned n) const = 0;
   virtual byte getPlayerWeaponBonus(unsigned n) const = 0;
   virtual uint16 getPlayerExp(unsigned n) const = 0;

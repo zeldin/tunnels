@@ -62,11 +62,13 @@ public:
   virtual void addStringInputField(byte ch) override;
   virtual void eraseStringInputField(unsigned cnt) override;
   virtual void drawIoError(bool casette, byte error) override;
+  virtual void drawTradingScreen(bool itemProvided) override;
   virtual void preparePlayerNameInput(unsigned n) override;
   virtual void preparePlayerClassInput() override;
   virtual void preparePlayerColorInput() override;
   virtual void prepareItemNumberInput() override;
   virtual void prepareGiveItemReceiverInput() override;
+  virtual void prepareTradingNumberInput() override;
   virtual void prepareVaultPlayerInput() override;
   virtual void prepareVaultDigitInput() override;
   virtual void updateVaultTable(unsigned cnt, int dir, unsigned correctDigits) override;
@@ -104,8 +106,13 @@ public:
   virtual void drawMonster(unsigned n) override;
   virtual bool isMonsterBlocked(unsigned n) override;
   virtual void drawPlayerStatusHeader(unsigned n) override;
+  virtual void drawWeaponChoice(ItemCategory cat, byte id, byte damage, byte ammo) override;
+  virtual void drawArmorChoice(byte id, byte protection, bool shield) override;
+  virtual void drawMagicItemChoice(byte id, byte uses) override;
   virtual void drawMagicEffectDescription(byte id) override;
   virtual void drawMagicItemDescription(unsigned id) override;
+  virtual void draw1Choice() override;
+  virtual void draw2Choice() override;
   virtual bool checkIfRoomSquareOccupied(unsigned y, unsigned x) override;
   void drawPrompt(unsigned n) { drawPrompt(n, 0); }
 
@@ -123,10 +130,13 @@ private:
   unsigned putNumber(unsigned y, unsigned x, uint16 n);
   unsigned putNumberEol(unsigned y, byte n);
   unsigned putNumberEol(unsigned y, uint16 n);
+  unsigned putParenthesizedNumberEol(unsigned y, byte n);
   unsigned putPlural();
   bool isQuadBlocked(unsigned y, unsigned x);
   void putQuad(unsigned y, unsigned x, byte base);
   void putQuad(unsigned y, unsigned x, Utils::StringSpan tiles);
+  void putWeaponDescription(unsigned y, unsigned x, ItemCategory cat,
+			    byte id, byte damage, byte ammo, bool showDamage);
   void putWeaponDescription(unsigned y, unsigned x, unsigned player,
 			    bool secondWeapon, bool showDamage);
   void putArmorDescription(unsigned y, unsigned x, unsigned player, bool shield);

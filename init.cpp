@@ -137,6 +137,12 @@ EventType GameEngine::run()
     case DIVERSION_CORRIDOR_MAIN:
       diversion = corridor();
       continue;
+    case DIVERSION_TRADE_ITEM:
+      diversion = tradeItem(currentItemCategory, currentItem, currentItemStat, currentItemAmmo);
+      continue;
+    case DIVERSION_GIVE_ITEM:
+      diversion = giveItem(currentItemCategory, currentItem, currentItemStat, currentItemAmmo);
+      continue;
     case DIVERSION_PARTY_ORDER:
       diversion = partyOrder();
       continue;
@@ -145,6 +151,20 @@ EventType GameEngine::run()
       continue;
     case DIVERSION_LOOT_ROOM:
       diversion = lootRoom();
+      continue;
+    case DIVERSION_LOOT_FIRST_ITEM:
+      itemIterPos = 0;
+      diversion = lootItems();
+      continue;
+    case DIVERSION_LOOT_ITEM_DONE:
+      if ((diversion = flashBorder()))
+	continue;
+    case DIVERSION_LOOT_NEXT_ITEM:
+      roomSetup(false);
+      diversion = lootItems();
+      continue;
+    case DIVERSION_LOOT_FIXTURES:
+      diversion = lootFixtures();
       continue;
     case DIVERSION_QUIT:
       return EVENT_QUIT;

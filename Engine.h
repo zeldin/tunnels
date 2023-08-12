@@ -32,11 +32,13 @@ public:
   virtual void addStringInputField(byte ch) = 0;
   virtual void eraseStringInputField(unsigned cnt) = 0;
   virtual void drawIoError(bool casette, byte error) = 0;
+  virtual void drawTradingScreen(bool itemProvided) = 0;
   virtual void preparePlayerNameInput(unsigned n) = 0;
   virtual void preparePlayerClassInput() = 0;
   virtual void preparePlayerColorInput() = 0;
   virtual void prepareItemNumberInput() = 0;
   virtual void prepareGiveItemReceiverInput() = 0;
+  virtual void prepareTradingNumberInput() = 0;
   virtual void prepareVaultPlayerInput() = 0;
   virtual void prepareVaultDigitInput() = 0;
   virtual void updateVaultTable(unsigned cnt, int dir, unsigned correctDigits) = 0;
@@ -74,8 +76,13 @@ public:
   virtual void drawMonster(unsigned n) = 0;
   virtual bool isMonsterBlocked(unsigned n) = 0;
   virtual void drawPlayerStatusHeader(unsigned n) = 0;
+  virtual void drawWeaponChoice(ItemCategory cat, byte id, byte damage, byte ammo) = 0;
+  virtual void drawArmorChoice(byte id, byte protection, bool shield) = 0;
+  virtual void drawMagicItemChoice(byte id, byte uses) = 0;
   virtual void drawMagicEffectDescription(byte id) = 0;
   virtual void drawMagicItemDescription(unsigned id) = 0;
+  virtual void draw1Choice() = 0;
+  virtual void draw2Choice() = 0;
   virtual bool checkIfRoomSquareOccupied(unsigned y, unsigned x) = 0;
   void drawPrompt(unsigned n) { drawPrompt(n, 0); }
 };
@@ -122,15 +129,20 @@ private:
     DIVERSION_ROOM_MAIN,      // G@>65B2
     DIVERSION_CORRIDOR,       // G@>66F7
     DIVERSION_CORRIDOR_MAIN,  // G@>670B
+    DIVERSION_TRADE_ITEM,     // G@>6F52
+    DIVERSION_GIVE_ITEM,      // G@>7179
     DIVERSION_PARTY_ORDER,    // G@>C1E1
     DIVERSION_VAULT,          // G@>C26D
     DIVERSION_LOOT_ROOM,      // G@>C41F
+    DIVERSION_LOOT_FIRST_ITEM,// G@>C4CD
+    DIVERSION_LOOT_NEXT_ITEM, // G@>C4D2
+    DIVERSION_LOOT_ITEM_DONE, // G@>C659
+    DIVERSION_LOOT_FIXTURES,  // G@>C684
     DIVERSION_AID,
     DIVERSION_UP,
     DIVERSION_DOWN,
     DIVERSION_REDO,
     DIVERSION_PROCD,
-    DIVERSION_BACK,
     DIVERSION_QUIT
   };
   Diversion redoTarget;
@@ -155,6 +167,11 @@ private:
   byte progression;
   uint16 randState;
   int8 roomDone;
+  unsigned itemIterPos;
+  ItemCategory currentItemCategory;
+  byte currentItem;
+  byte currentItemStat;
+  byte currentItemAmmo;
 
 public:
   GameEngine(EventLoop &eventLoop_, Timer::TimerManager &timerManager_,
@@ -183,7 +200,11 @@ private:
   bool takeShield(unsigned player, byte item, bool &inventoryFull);
   bool takeWeapon(unsigned player, ItemCategory cat, byte item, bool &secondary, bool &inventoryFull);
   bool takeMagicItem(unsigned player, byte item, unsigned &slot);
+  Diversion startTrade();
+  Diversion tradeItem(ItemCategory cat, byte item, byte itemStat, byte itemAmmo);
   Diversion giveItem(ItemCategory cat, byte item, byte itemStat, byte itemAmmo);
+  Diversion lootFixtures();
+  Diversion lootItems();
   Diversion lootRoom();
   void roomSetup(bool newLocation);
   Diversion room();

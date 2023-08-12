@@ -297,6 +297,7 @@ public:
   virtual byte getPlayerWeaponDamage(unsigned n, bool secondary) const override { return (secondary? data.player[n].secondaryWeaponDamage : data.player[n].primaryWeaponDamage); }
   virtual void setPlayerWeaponDamage(unsigned n, bool secondary, byte dmg) override { if(secondary)  data.player[n].secondaryWeaponDamage = dmg; else data.player[n].primaryWeaponDamage = dmg; }
   virtual byte getPlayerWeaponAmmo(unsigned n, bool secondary) const override { return (secondary? data.player[n].secondaryWeaponAmmo : data.player[n].primaryWeaponAmmo); }
+  virtual void setPlayerWeaponAmmo(unsigned n, bool secondary, byte ammo) override { if(secondary)  data.player[n].secondaryWeaponAmmo = ammo; else data.player[n].primaryWeaponAmmo = ammo; }
   virtual int8 getPlayerBaseProtection(unsigned n) const override { return data.player[n].baseProtection; }
   virtual byte getPlayerWeaponBonus(unsigned n) const override { return data.player[n].weaponBonus; }
   virtual uint16 getPlayerExp(unsigned n) const override { return data.player[n].exp; }
