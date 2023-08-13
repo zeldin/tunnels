@@ -422,7 +422,8 @@ bool GameEngine::takeArmor(unsigned player, byte item, bool &inventoryFull)
 {
   if (!item)
     return true;
-  // FIXME: G@>A458
+  if (!database->playerCanUseItem(player, ITEM_ARMORS, item))
+    return false;
   if (database->getPlayerArmorProtection(player) != 0) {
     inventoryFull = true;
     return false;
@@ -435,7 +436,8 @@ bool GameEngine::takeShield(unsigned player, byte item, bool &inventoryFull)
 {
   if (!item)
     return true;
-  // FIXME: G@>A472
+  if (!database->playerCanUseItem(player, ITEM_SHIELDS, item))
+    return false;
   if (database->getPlayerShieldProtection(player) != 0) {
     inventoryFull = true;
     return false;
@@ -449,7 +451,8 @@ bool GameEngine::takeWeapon(unsigned player, ItemCategory cat, byte item,
 {
   if (!item)
     return true;
-  // FIXME: G@>A4AF
+  if (!database->playerCanUseItem(player, cat, item))
+    return false;
   ItemCategory oldCat;
   secondary = (database->getPlayerWeapon(player, false, oldCat) != 0);
   if (database->getPlayerWeapon(player, secondary, oldCat) != 0) {
