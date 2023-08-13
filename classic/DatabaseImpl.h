@@ -74,7 +74,8 @@ private:
       byte unknown3[0x2];
       byte level;
       byte flags;
-      byte unknown4[0x2];
+      byte unknown4;
+      byte equipmentAllowed;
       byte row;
       byte column;
       struct {
@@ -149,12 +150,15 @@ private:
     } specialAttacks[20]; // V@>179A
     byte monsterPatternTable[16][0x40]; // V@>18DA
     byte maxPlayers;      // V@>1CDA
-    byte unknown_1cdb[5];
+    byte rationQuantum;   // V@>1CDB
+    byte unknown_1cdc[2];
+    byte rationBasePrice; // V@>1CDE
+    byte unknown_1cdf;    // V@>1CDF
     byte unknown_1ce0;    // V@>1CE0
     byte numClasses;      // V@>1CE1
     byte maxFloors;       // V@>1CE2
     byte unknown_1ce3[2]; // V@>1CE3
-    byte unknown_1ce5;    // V@>1CE5
+    byte ammoQuantum;     // V@>1CE5
     byte numFountainsPerFloor; // V@>1CE6
     byte numStairsPerFloor;    // V@>1CE7
     byte unknown_1ce8;    // V@>1CE8
@@ -172,7 +176,9 @@ private:
     byte unknown_1cf9;    // V@>1CF9
     byte currentPlayer;   // V@>1CFA
     byte unknown_1cfb;    // V@>1CFB
-    byte unknown_1cfc[4];
+    byte unknown_1cfc;    // V@>1CFC
+    byte healingBasePrice;// V@>1CFD
+    byte unknown_1cfe[2];
     byte currentLocation; // V@>1D00
     byte activeHighPatternTable; // V@>1D01
     byte unknown_1d02;    // V@>1D02
@@ -207,26 +213,30 @@ private:
     struct {
       byte name[15];
       byte damage;
-      byte unknown[2];
+      byte storePrice;
+      byte storeAvailability;
     } weapons[8]; // V@>26F8
     struct {
       byte name[15];
       byte damage;
-      byte unknown1[2];
+      byte storePrice;
+      byte storeAvailability;
       int8 defaultAmmo;
       int8 ammoType;
-      byte unknown2;
+      byte ammoStorePrice;
       byte ammoName[13];
     } rangedWeapons[8]; // V@>2788
     struct {
       byte name[15];
       byte protection;
-      byte unknown[2];
+      byte storePrice;
+      byte storeAvailability;
     } armors[8]; // V@>2898
     struct {
       byte name[15];
       byte protection;
-      byte unknown[2];
+      byte storePrice;
+      byte storeAvailability;
     } shields[6]; // V@>2928
     struct {
       byte name[11];
@@ -253,7 +263,9 @@ private:
     byte patternColors[32];  // V@>2E70
     byte patternTable2[0x380]; // V@2E90
     byte objectTiles[9][4]; // V@3210
-    byte unknown_3234[0x9];
+    byte unknown_3234[5];
+    byte unknown_3239;      // V@3239
+    byte unknown_323a[3];
     byte keymap[11];         // V@323D
     byte unknown_3248[0x8];
     byte extDictionary[4][16]; // V@3250
@@ -284,6 +296,7 @@ public:
   virtual void setPlayerName(unsigned n, Utils::StringSpan name) override;
   virtual byte getPlayerHP(unsigned n) const override { return data.player[n].HP; }
   virtual byte getPlayerWD(unsigned n) const override { return data.player[n].WD; }
+  virtual void setPlayerWD(unsigned n, byte WD) override { data.player[n].WD = WD; }
   virtual byte getPlayerArmorId(unsigned n) const override { return data.player[n].armorId; }
   virtual void setPlayerArmor(unsigned n, byte item) override;
   virtual int8 getPlayerArmorProtection(unsigned n) const override { return data.player[n].armorProtection; }
@@ -323,6 +336,7 @@ public:
   virtual void clearRemainingQuestObjects() override { data.remainingQuestObjects = 0; }
   virtual uint16 getTurnsLeft(unsigned n) const override { return data.turnsLeft[n]; }
   virtual byte getRations() const override { return data.rations; }
+  virtual void setRations(byte rations) override { data.rations = rations; }
   virtual Utils::StringSpan getMonsterName() const override;
   virtual byte getMonsterHPNumD6() const override { return data.monsterHPNumD6; }
   virtual byte getMonsterDefense() const override { return data.monsterDefense; }
@@ -347,8 +361,11 @@ public:
   virtual Utils::StringSpan getSpecialAttackName(unsigned n) const override;
   virtual byte getSpecialAttackEffect(unsigned n) const override { return data.specialAttacks[n-1].effect; }
   virtual byte getMaxPlayers() const override { return data.maxPlayers; }
+  virtual byte getRationQuantum() const override { return data.rationQuantum; }
+  virtual uint16 getRationPrice() const override { return adjustPrice(data.rationBasePrice); }
   virtual byte getNumClassChoices() const override;
   virtual byte getMaxFloors() const override { return data.maxFloors; }
+  virtual byte getAmmoQuantum() const override { return data.ammoQuantum; }
   virtual bool hasHiddenMap() const override { return data.unknown_1ce8 != 0; }
   virtual byte getNumConfiguredPlayers() const override { return data.numConfPlayers; }
   virtual void setNumConfiguredPlayers(byte num) override { data.numConfPlayers = num; }
@@ -365,6 +382,7 @@ public:
   virtual void setCurrentFloor(byte floor) override { data.currentFloor = floor; }
   virtual int getCurrentPlayer() const override { return data.currentPlayer-1; }
   virtual void setCurrentPlayer(int n) override { data.currentPlayer = n+1; }
+  virtual uint16 getHealingPrice() const override { return adjustPrice(data.healingBasePrice); }
   virtual int getPlayerOrder(unsigned n) const override { return (n < 4? data.playerOrder[n]-1 : -1); }
   virtual void exchangePlayerOrder(unsigned n, unsigned m) override;
   virtual bool nextPlayerInOrder() override;
@@ -388,7 +406,11 @@ public:
   virtual bool isRoomItemPlaced(RoomItem n) const override { return data.roomItemPosition[n].row != 0 || data.roomItemPosition[n].column != 0; }
   virtual Utils::StringSpan getItemName(ItemCategory cat, byte id) const override;
   virtual Utils::StringSpan getItemTiles(ItemCategory cat, byte id) const override;
+  virtual uint16 getItemStorePrice(ItemCategory cat, byte id) const override;
+  virtual void getDefaultItemStats(ItemCategory cat, byte id, byte &stat, byte &ammo) const override;
+  virtual bool playerCanUseItem(unsigned player, ItemCategory cat, byte id) const override;
   virtual int8 getRangedWeaponAmmoType(unsigned id) const override;
+  virtual uint16 getRangedWeaponAmmoStorePrice(unsigned id) const override;
   virtual Utils::StringSpan getRangedWeaponAmmoName(unsigned id) const override;
   virtual byte getMagicItemEffect(byte n) const override { n = abs(n)-1; return (n < 40? data.magicItems[n].effect : 0); }
   virtual byte getMagicItemInitialUses(byte n) const override;
@@ -453,6 +475,7 @@ private:
     return ((n & 0x80)? byte(~n)+1 : n);
   }
 
+  byte adjustPrice(byte price) const;
   void clearMap(unsigned mode);
   unsigned findDescriptor(uint16 pos, unsigned offs, unsigned cnt, unsigned delta) const;
   unsigned findDescriptor(uint16 pos) const { return findDescriptor(pos, 0, data.numRoomsPerFloor, 10); }

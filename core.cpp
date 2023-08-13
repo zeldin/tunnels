@@ -711,6 +711,260 @@ GameEngine::Diversion GameEngine::giveItem(ItemCategory cat, byte item,
   return backTarget;
 }
 
+void GameEngine::populateStoreList(byte (&ids)[10], uint16 (&prices)[10], unsigned &index, unsigned &selectable, ItemCategory cat, byte id)
+{
+  int player = database->getCurrentPlayer();
+  uint16 price = database->getItemStorePrice(cat, id);
+  if (price) {
+    bool isSelectable =
+      (player >= 0 && database->playerCanUseItem(player, cat, id));
+    screen.drawStoreItem(cat, id, isSelectable);
+    ids[index] = id;
+    prices[index] = price;
+    ids[++index] = 0;
+    if (isSelectable)
+      selectable |= 1U << index;
+  } else {
+    if (cat != ITEM_RANGED_WEAPONS ||
+	!database->getRangedWeaponAmmoStorePrice(id))
+      return;
+    screen.drawStoreItem(cat, 0);
+    ids[index] = id;
+    prices[index] = 0;
+    ids[++index] = 0;
+  }
+  if (cat == ITEM_RANGED_WEAPONS) {
+    bool isSelectable = false;
+    price = database->getRangedWeaponAmmoStorePrice(id);
+    ids[index] = id;
+    if (!price || !(database->getRangedWeaponAmmoType(id) & 1))
+      id = 0;
+    else if (player >= 0) {
+      ItemCategory cat2;
+      if ((database->getPlayerWeapon(player, false, cat2) == id && cat2 == cat) ||
+	  (database->getPlayerWeapon(player, true, cat2) == id && cat2 == cat))
+	isSelectable = true;
+    }
+    screen.drawStoreItem(ITEM_RANGED_WEAPONS, id, isSelectable, true);
+    prices[index] = price;
+    ids[++index] = 0;
+    if (isSelectable)
+      selectable |= 1U << index;
+  }
+}
+
+GameEngine::Diversion GameEngine::generalStore()
+{
+  // G@>6CC8
+  redoTarget = DIVERSION_GENERAL_STORE;
+  backTarget = DIVERSION_GENERAL_STORE;
+  unsigned price, choice, category = 0;
+  bool keepState = false;
+  for (;;) {
+    if (keepState)
+      keepState = false;
+    else {
+      if (category > 5)
+	return DIVERSION_GENERAL_STORE;
+      roomDone = -1;
+      if (database->getPartyGold() == 0)
+	return DIVERSION_ROOM_SETUP;
+      screen.drawPrompt(0x3d);
+      database->setCurrentPlayer(-1);
+      choice = 0;
+      price = 0;
+    }
+    byte listIds[10];
+    uint16 listPrices[10];
+    unsigned listIndex = 0, selectable = 0;
+    screen.prepareStoreItemList();
+    switch (category) {
+    case 0:
+      screen.drawPrompt(0x3e);
+      procdTarget = DIVERSION_ROOM_SETUP;
+      acceptMask = ACCEPT_PROCD | ACCEPT_REDO | ACCEPT_NUMERIC;
+      if (Diversion d = getNumber(1, 7, category))
+	return d;
+      if (category < 6)
+	continue;
+      if (category == 6) {
+	// Rations
+	price = database->getRationPrice();
+	if (!price)
+	  continue;
+	if (database->getRations() >= 100) {
+	  screen.drawPrompt(0x44);
+	  break;
+	}
+	if (database->getPartyGold() < price) {
+	  screen.drawPrompt(0x42);
+	  break;
+	}
+	database->setRations(database->getRations() + database->getRationQuantum());
+      } else {
+	// Healing
+	price = database->getHealingPrice();
+	if (database->getPartyGold() < price) {
+	  screen.drawPrompt(0x42);
+	  break;
+	}
+	screen.drawPrompt(0x3b);
+	acceptMask = ACCEPT_PROCD | ACCEPT_REDO | ACCEPT_ALPHANUMERIC;
+	if (Diversion d = getNamedPlayer())
+	  return d;
+	int player = database->getCurrentPlayer();
+	if (player < 0 || database->getPlayerWD(player) == 0)
+	  return DIVERSION_GENERAL_STORE;
+	database->setPlayerWD(player, database->getPlayerWD(player) >> 1);
+      }
+      database->setPartyGold(database->getPartyGold() - price);
+      screen.drawPrompt(0x45);
+      break;
+    case 1:
+      // Weapons
+      for (byte id = 1; id <= 8; id++)
+	populateStoreList(listIds, listPrices, listIndex, selectable,
+			  ITEM_WEAPONS, id);
+      break;
+    case 2:
+    case 3:
+      // Ranged weapons
+      {
+	byte id = (category == 3? 5 : 1);
+	do
+	  populateStoreList(listIds, listPrices, listIndex, selectable,
+			    ITEM_RANGED_WEAPONS, id);
+	while((++id & 3) != 1);
+      }
+      break;
+    case 4:
+      // Armors
+      for (byte id = 1; id <= 8; id++)
+	populateStoreList(listIds, listPrices, listIndex, selectable,
+			  ITEM_ARMORS, id);
+      break;
+    case 5:
+      // Shields
+      for (byte id = 1; id <= 6; id++)
+	populateStoreList(listIds, listPrices, listIndex, selectable,
+			  ITEM_SHIELDS, id);
+      break;
+    }
+    if (category < 6) {
+      for (;;) {
+	int player;
+	if (!listIndex) {
+	  category = 0;
+	  screen.drawPrompt(0x3c);
+	} else if ((player = database->getCurrentPlayer()) >= 0) {
+	  if (choice) {
+	    bool inventoryFull = false, success = false, secondary;
+	    currentItem = listIds[choice-1];
+	    switch (category) {
+	    case 2:
+	    case 3:
+	      if (!(choice & 1)) {
+		ItemCategory cat;
+		if (currentItem ==
+		    database->getPlayerWeapon(player, false, cat) &&
+		    cat == ITEM_RANGED_WEAPONS)
+		  secondary = false;
+		else if (currentItem ==
+			 database->getPlayerWeapon(player, true, cat) &&
+			 cat == ITEM_RANGED_WEAPONS)
+		  secondary = true;
+		else
+		  break;
+		success = true;
+		if (database->getPlayerWeaponAmmo(player, secondary) > 100)
+		  inventoryFull = true;
+		else
+		  database->setPlayerWeaponAmmo(player, secondary,
+						database->getPlayerWeaponAmmo(player, secondary) +
+						database->getAmmoQuantum());
+		break;
+	      }
+	    case 1:
+	      currentItemCategory = (category == 1? ITEM_WEAPONS :
+				     ITEM_RANGED_WEAPONS);
+	      success = takeWeapon(player, currentItemCategory,
+				   currentItem, secondary, inventoryFull);
+	      break;
+	    case 4:
+	      currentItemCategory = ITEM_ARMORS;
+	      success = takeArmor(player, currentItem, inventoryFull);
+	      break;
+	    case 5:
+	      currentItemCategory = ITEM_SHIELDS;
+	      success = takeShield(player, currentItem, inventoryFull);
+	      break;
+	    }
+	    if (success) {
+	      if (inventoryFull) {
+		screen.drawPrompt(0x44);
+		database->setPartyGold(database->getPartyGold() + price);
+	      } else
+		screen.drawPrompt(0x45);
+	    } else if (!inventoryFull) {
+	      screen.drawPrompt(0x43);
+	      choice = 0;
+	    } else {
+	      database->getDefaultItemStats(currentItemCategory, currentItem,
+					    currentItemStat, currentItemAmmo);
+	      return DIVERSION_TRADE_ITEM;
+	    }
+	  } else {
+	    if (listIndex == 1)
+	      choice = 1;
+	    else {
+	      screen.drawPrompt(0x3f);
+	      Diversion d = getNumber(0, listIndex, choice);
+	      if (d == DIVERSION_REDO) {
+		choice = 0;
+		continue;
+	      }
+	      if (d)
+		return d;
+	    }
+	    if (!(selectable & (1U << choice))) {
+	      screen.drawPrompt(0x43);
+	      choice = 0;
+	    } else {
+	      price = listPrices[choice-1];
+	      if (database->getPartyGold() < price)
+		screen.drawPrompt(0x42);
+	      else {
+		database->setPartyGold(database->getPartyGold() - price);
+		keepState = true;
+	      }
+	    }
+	  }
+	} else {
+	  screen.drawPrompt(0x3b);
+	  redoTarget = DIVERSION_REDO;
+	  acceptMask = ACCEPT_BACK | ACCEPT_REDO | ACCEPT_ALPHANUMERIC;
+	  Diversion d = getNamedPlayer();
+	  if (d == DIVERSION_REDO) {
+	    choice = 0;
+	    continue;
+	  }
+	  if (d)
+	    return d;
+	  int player = database->getCurrentPlayer();
+	  if (player < 0)
+	    return DIVERSION_GENERAL_STORE;
+	  keepState = true;
+	}
+	break;
+      }
+      if (keepState)
+	continue;
+    }
+    if (Diversion d = flashBorder())
+      return d;
+  }
+}
+
 GameEngine::Diversion GameEngine::lootFixtures()
 {
   if /* while */ (database->roomHasFountain(currentRoom)) {
@@ -909,8 +1163,7 @@ GameEngine::Diversion GameEngine::room()
 	sound.playGeneralStoreMusic();
 	if (Diversion d = waitForMusic())
 	  return d;
-	// FIXME: Go to G@>6CC8
-	roomDone = -1; // at G@>6CD7...
+	return DIVERSION_GENERAL_STORE;
       }
       break;
     case 0:
@@ -946,8 +1199,7 @@ GameEngine::Diversion GameEngine::room()
       sound.playGeneralStoreMusic();
       if (Diversion d = waitForMusic())
 	return d;
-      // FIXME: Go to G@>6CC8
-      roomDone = -1; // at G@>6CD7...
+      return DIVERSION_GENERAL_STORE;
     }
   }
   // G@>663F

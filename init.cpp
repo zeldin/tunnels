@@ -126,7 +126,8 @@ EventType GameEngine::run()
       diversion = core(diversion == DIVERSION_ENTER_LOCATION);
       continue;
     case DIVERSION_ENTER_ROOM:
-      roomSetup(true);
+    case DIVERSION_ROOM_SETUP:
+      roomSetup(diversion == DIVERSION_ENTER_ROOM);
     case DIVERSION_ROOM_MAIN:
       diversion = room();
       continue;
@@ -136,6 +137,9 @@ EventType GameEngine::run()
       screen.corridorScreen();
     case DIVERSION_CORRIDOR_MAIN:
       diversion = corridor();
+      continue;
+    case DIVERSION_GENERAL_STORE:
+      diversion = generalStore();
       continue;
     case DIVERSION_TRADE_ITEM:
       diversion = tradeItem(currentItemCategory, currentItem, currentItemStat, currentItemAmmo);

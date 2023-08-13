@@ -33,6 +33,7 @@ public:
   virtual void eraseStringInputField(unsigned cnt) = 0;
   virtual void drawIoError(bool casette, byte error) = 0;
   virtual void drawTradingScreen(bool itemProvided) = 0;
+  virtual void prepareStoreItemList() = 0;
   virtual void preparePlayerNameInput(unsigned n) = 0;
   virtual void preparePlayerClassInput() = 0;
   virtual void preparePlayerColorInput() = 0;
@@ -83,6 +84,7 @@ public:
   virtual void drawMagicItemDescription(unsigned id) = 0;
   virtual void draw1Choice() = 0;
   virtual void draw2Choice() = 0;
+  virtual void drawStoreItem(ItemCategory cat, byte id, bool selectable = false, bool ammo = false) = 0;
   virtual bool checkIfRoomSquareOccupied(unsigned y, unsigned x) = 0;
   void drawPrompt(unsigned n) { drawPrompt(n, 0); }
 };
@@ -126,9 +128,11 @@ private:
     DIVERSION_ENTER_ROOM,     // G@>654C
     DIVERSION_ENTER_LOCATION, // G@>6551
     DIVERSION_CONTINUE_GAME,  // G@>6556
+    DIVERSION_ROOM_SETUP,     // G@>657E
     DIVERSION_ROOM_MAIN,      // G@>65B2
     DIVERSION_CORRIDOR,       // G@>66F7
     DIVERSION_CORRIDOR_MAIN,  // G@>670B
+    DIVERSION_GENERAL_STORE,  // G@>6CC8
     DIVERSION_TRADE_ITEM,     // G@>6F52
     DIVERSION_GIVE_ITEM,      // G@>7179
     DIVERSION_PARTY_ORDER,    // G@>C1E1
@@ -203,6 +207,8 @@ private:
   Diversion startTrade();
   Diversion tradeItem(ItemCategory cat, byte item, byte itemStat, byte itemAmmo);
   Diversion giveItem(ItemCategory cat, byte item, byte itemStat, byte itemAmmo);
+  void populateStoreList(byte (&ids)[10], uint16 (&prices)[10], unsigned &index, unsigned &selectable, ItemCategory cat, byte id);
+  Diversion generalStore();
   Diversion lootFixtures();
   Diversion lootItems();
   Diversion lootRoom();

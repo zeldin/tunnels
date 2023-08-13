@@ -63,6 +63,7 @@ public:
   virtual void eraseStringInputField(unsigned cnt) override;
   virtual void drawIoError(bool casette, byte error) override;
   virtual void drawTradingScreen(bool itemProvided) override;
+  virtual void prepareStoreItemList() override;
   virtual void preparePlayerNameInput(unsigned n) override;
   virtual void preparePlayerClassInput() override;
   virtual void preparePlayerColorInput() override;
@@ -113,6 +114,7 @@ public:
   virtual void drawMagicItemDescription(unsigned id) override;
   virtual void draw1Choice() override;
   virtual void draw2Choice() override;
+  virtual void drawStoreItem(ItemCategory cat, byte id, bool selectable, bool ammo) override;
   virtual bool checkIfRoomSquareOccupied(unsigned y, unsigned x) override;
   void drawPrompt(unsigned n) { drawPrompt(n, 0); }
 

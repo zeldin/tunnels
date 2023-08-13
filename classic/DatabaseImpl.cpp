@@ -102,17 +102,9 @@ void DatabaseImpl::setPlayerWeapon(unsigned n, bool secondary, ItemCategory cat,
 	return;
       cat = ITEM_RANGED_WEAPONS;
     }
-    if (cat == ITEM_RANGED_WEAPONS) {
-      damage = data.rangedWeapons[item-1].damage;
-      ammo = (data.rangedWeapons[item-1].defaultAmmo < 0?
-	      -data.rangedWeapons[item-1].defaultAmmo :
-	      data.rangedWeapons[item-1].defaultAmmo);
-      if (!(ammo >= data.unknown_1ce5))
-	ammo = data.unknown_1ce5;
-      item += 8;
-    } else {
-      damage = data.weapons[item-1].damage;
-    }
+    getDefaultItemStats(cat, item, damage, ammo);
+    if (cat == ITEM_RANGED_WEAPONS)
+      item |= 8;
   }
   if (!secondary) {
     data.player[n].primaryWeaponId = item;
@@ -404,6 +396,128 @@ Utils::StringSpan DatabaseImpl::getItemTiles(ItemCategory cat, byte id) const
   return Utils::StringSpan();
 }
 
+uint16 DatabaseImpl::getItemStorePrice(ItemCategory cat, byte id) const
+{
+  if (!id--)
+    return 0;
+  byte price = 0, availability = 0;
+  switch (cat) {
+  case ITEM_WEAPONS:
+    if (id < 8) {
+      price = data.weapons[id].storePrice;
+      availability = data.weapons[id].storeAvailability;
+      break;
+    }
+  case ITEM_RANGED_WEAPONS:
+    if (id >= 8) id-=8;
+    if (id < 8) {
+      price = data.rangedWeapons[id].storePrice;
+      availability = data.rangedWeapons[id].storeAvailability;
+    }
+    break;
+  case ITEM_ARMORS:
+    if (id < 8) {
+      price = data.armors[id].storePrice;
+      availability = data.armors[id].storeAvailability;
+      break;
+    }
+  case ITEM_SHIELDS:
+    if (id >= 8) id-=8;
+    if (id < 6) {
+      price = data.shields[id].storePrice;
+      availability = data.shields[id].storeAvailability;
+    }
+    break;
+  }
+  if (!availability || !price)
+    return 0;
+  availability = abs(availability);
+  if (availability > 1 && availability > data.currentFloor)
+    return 0;
+  return adjustPrice(price);
+}
+
+void DatabaseImpl::getDefaultItemStats(ItemCategory cat, byte id, byte &stat, byte &ammo) const
+{
+  stat = 0;
+  ammo = 0;
+  if (!id)
+    return;
+  --id;
+  switch(cat) {
+  case ITEM_ARMORS:
+    if (id < 8) {
+      stat = data.armors[id].protection;
+      break;
+    }
+  case ITEM_SHIELDS:
+    if (id >= 8) id -= 8;
+    if (id < 6)
+      stat = data.shields[id].protection;
+    break;
+  case ITEM_WEAPONS:
+    if (id < 8) {
+      stat = data.weapons[id].damage;
+      break;
+    }
+  case ITEM_RANGED_WEAPONS:
+    if (id >= 8) id -= 8;
+    if (id < 8) {
+      stat = data.rangedWeapons[id].damage;
+      byte defAmmo = (data.rangedWeapons[id].defaultAmmo < 0?
+		      -data.rangedWeapons[id].defaultAmmo :
+		      data.rangedWeapons[id].defaultAmmo);
+      if (!(defAmmo >= data.ammoQuantum))
+	defAmmo = data.ammoQuantum;
+      ammo = defAmmo;
+    }
+    break;
+  }
+}
+
+bool DatabaseImpl::playerCanUseItem(unsigned player, ItemCategory cat, byte id) const
+{
+  if (player >= 4 || !id--)
+    return false;
+  byte availability, mask;
+  switch (cat) {
+  case ITEM_WEAPONS:
+    if (id < 8) {
+      availability = data.weapons[id].storeAvailability;
+      mask = 4;
+      break;
+    }
+  case ITEM_RANGED_WEAPONS:
+    if (id >= 8) id-=8;
+    if (id < 8) {
+      availability = data.rangedWeapons[id].storeAvailability;
+      mask = 8;
+    } else
+      return false;
+    break;
+  case ITEM_ARMORS:
+    if (id < 8) {
+      availability = data.armors[id].storeAvailability;
+      mask = 1;
+      break;
+    }
+  case ITEM_SHIELDS:
+    if (id >= 8) id-=8;
+    if (id < 6) {
+      availability = data.shields[id].storeAvailability;
+      mask = 2;
+    } else
+      return false;
+    break;
+  default:
+    return false;
+  }
+  if ((data.player[player].equipmentAllowed & mask) || (availability & 0x80))
+    return true;
+  else
+    return false;
+}
+
 int8 DatabaseImpl::getRangedWeaponAmmoType(unsigned id) const
 {
   if (id > 8)
@@ -411,6 +525,20 @@ int8 DatabaseImpl::getRangedWeaponAmmoType(unsigned id) const
   if (id > 0 && id <= 8)
     return data.rangedWeapons[id-1].ammoType;
   else
+    return 0;
+}
+
+uint16 DatabaseImpl::getRangedWeaponAmmoStorePrice(unsigned id) const
+{
+  if (id > 8)
+    id -= 8;
+  if (id > 0 && id <= 8) {
+    if (!data.rangedWeapons[id-1].storeAvailability ||
+	!data.rangedWeapons[id-1].ammoStorePrice)
+      return 0;
+    else
+      return adjustPrice(data.rangedWeapons[id-1].ammoStorePrice);
+  } else
     return 0;
 }
 
@@ -768,33 +896,7 @@ byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCatego
       cat = ItemCategory(cat + 1);
       id -= 8;
     }
-    --id;
-    switch(cat) {
-    case ITEM_ARMORS:
-      if (id < 8)
-	itemStat = data.armors[id].protection;
-      break;
-    case ITEM_SHIELDS:
-      if (id < 6)
-	itemStat = data.shields[id].protection;
-      break;
-    case ITEM_WEAPONS:
-      if (id < 8)
-	itemStat = data.weapons[id].damage;
-      break;
-    case ITEM_RANGED_WEAPONS:
-      if (id < 8) {
-	itemStat = data.rangedWeapons[id].damage;
-	byte defAmmo = (data.rangedWeapons[id].defaultAmmo < 0?
-			-data.rangedWeapons[id].defaultAmmo :
-			data.rangedWeapons[id].defaultAmmo);
-	if (!(defAmmo >= data.unknown_1ce5))
-	  defAmmo = data.unknown_1ce5;
-	itemAmmo = defAmmo;
-      }
-      break;
-    }
-    id++;
+    getDefaultItemStats(cat, id, itemStat, itemAmmo);
   } else {
     cat = ITEM_MAGIC_ITEMS;
     id = byte(~(id & 0x3f))+1;
@@ -808,6 +910,13 @@ byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCatego
       data.itemId += 8;
   }
   return id;
+}
+
+byte DatabaseImpl::adjustPrice(byte price) const
+{
+  if (data.currentFloor != 0 && data.unknown_3239 > 1)
+    price *= data.currentFloor;
+  return price;
 }
 
 void DatabaseImpl::setMapVisited(MapPosition pos, bool visited)

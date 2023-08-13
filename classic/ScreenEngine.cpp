@@ -81,6 +81,39 @@ void ScreenEngine::drawTradingScreen(bool itemProvided)
   }
 }
 
+void ScreenEngine::drawStoreItem(ItemCategory cat, byte id, bool selectable,
+				 bool ammo)
+{
+  unsigned y = screen.getYpt();
+  screen.hchar(y, 3, '0'+(y-3));
+  if (!id) {
+    screen.setXpt(3);
+    drawPrompt(0x40);
+  } else {
+    if (selectable)
+      screen.hchar(y, 2, '\\');
+    screen.hstr(y, 5, (ammo? database->getRangedWeaponAmmoName(id) :
+		       database->getItemName(cat, id)));
+    uint16 price = (ammo? database->getRangedWeaponAmmoStorePrice(id) :
+		    database->getItemStorePrice(cat, id));
+    if (price) {
+      screen.setXpt(putNumber(y, 21, price)-1);
+      screen.hchar(y, screen.getXpt(), '0');
+      if (ammo) {
+	screen.hchar(y, screen.getXpt()+1, '/');
+	screen.setXpt(putNumber(y, screen.getXpt()+2,
+				database->getAmmoQuantum()));
+      }
+    }
+  }
+  screen.setYpt(y+1);
+}
+
+void ScreenEngine::prepareStoreItemList()
+{
+  screen.setYpt(4);
+}
+
 void ScreenEngine::preparePlayerNameInput(unsigned n)
 {
   screen.setYpt(3);

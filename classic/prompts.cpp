@@ -658,9 +658,8 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
     }
   case Vocab::extPARTYGOLD: /* G@>F3BE */
     {
-      uint16 n = 12; /* FIXME */
-      x = putNumberEol(13, n);
-      screen.hchar(13, --x, '0');
+      x = putNumberEol(13, database->getPartyGold());
+      screen.hchar(13, x, '0');
       screen.setXpt(x);
       return;
     }
@@ -668,13 +667,10 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
     {
       screen.setYpt(9);
       putPlural();
-      byte n = 34; /* FIXME */
-      x = putNumber(9, 21, n);
+      x = putNumber(9, 21, database->getRationPrice());
       screen.hstr(9, x-1, "0/");
-      n = 56; /* FIXME */
-      putNumber(9, x+1, n);
-      n = 78; /* FIXME */
-      x = putNumber(10, 21, n);
+      putNumber(9, x+1, database->getRationQuantum());
+      x = putNumber(10, 21, database->getHealingPrice());
       screen.hchar(10, --x, '0');
       screen.setYpt(16);
       screen.setXpt(20);
@@ -1106,6 +1102,8 @@ void ScreenEngine::drawPrompt(unsigned n, unsigned param)
 	      text = database->getExtDictionaryWord(EXT_DICTIONARY_OPEN);
 	    else if (n == 28 && addr == 0x2578)
 	      text = database->getExtDictionaryWord(EXT_DICTIONARY_COMBINATION_FOUND);
+	    else if (n == 16 && addr == 0x2594)
+	      text = database->getExtDictionaryWord(EXT_DICTIONARY_GENERAL_STORE);
 	    else if (addr >= 0x600 && addr + n <= 0x780) {
 	      text = database->getDescription();
 	      text.subspan(addr-0x600, n);

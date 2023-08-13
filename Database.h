@@ -24,6 +24,7 @@ public:
   virtual void setPlayerName(unsigned n, Utils::StringSpan name) = 0;
   virtual byte getPlayerHP(unsigned n) const = 0;
   virtual byte getPlayerWD(unsigned n) const = 0;
+  virtual void setPlayerWD(unsigned n, byte WD) = 0;
   virtual byte getPlayerArmorId(unsigned n) const = 0;
   virtual void setPlayerArmor(unsigned n, byte item) = 0;
   virtual int8 getPlayerArmorProtection(unsigned n) const = 0;
@@ -63,6 +64,7 @@ public:
   virtual void clearRemainingQuestObjects() = 0;
   virtual uint16 getTurnsLeft(unsigned n) const = 0;
   virtual byte getRations() const = 0;
+  virtual void setRations(byte rations) = 0;
   virtual Utils::StringSpan getMonsterName() const = 0;
   virtual byte getMonsterHPNumD6() const = 0;
   virtual byte getMonsterDefense() const = 0;
@@ -87,8 +89,11 @@ public:
   virtual Utils::StringSpan getSpecialAttackName(unsigned n) const = 0;
   virtual byte getSpecialAttackEffect(unsigned n) const = 0;
   virtual byte getMaxPlayers() const = 0;
+  virtual byte getRationQuantum() const = 0;
+  virtual uint16 getRationPrice() const = 0;
   virtual byte getNumClassChoices() const = 0;
   virtual byte getMaxFloors() const = 0;
+  virtual byte getAmmoQuantum() const = 0;
   virtual bool hasHiddenMap() const = 0;
   virtual byte getNumConfiguredPlayers() const = 0;
   virtual void setNumConfiguredPlayers(byte num) = 0;
@@ -105,6 +110,7 @@ public:
   virtual void setCurrentFloor(byte floor) = 0;
   virtual int getCurrentPlayer() const = 0;
   virtual void setCurrentPlayer(int n) = 0;
+  virtual uint16 getHealingPrice() const = 0;
   virtual int getPlayerOrder(unsigned n) const = 0;
   virtual void exchangePlayerOrder(unsigned n, unsigned m) = 0;
   virtual bool nextPlayerInOrder() = 0;
@@ -128,7 +134,11 @@ public:
   virtual bool isRoomItemPlaced(RoomItem n) const = 0;
   virtual Utils::StringSpan getItemName(ItemCategory cat, byte id) const = 0;
   virtual Utils::StringSpan getItemTiles(ItemCategory cat, byte id) const = 0;
+  virtual uint16 getItemStorePrice(ItemCategory cat, byte id) const = 0;
+  virtual void getDefaultItemStats(ItemCategory cat, byte id, byte &stat, byte &ammo) const = 0;
+  virtual bool playerCanUseItem(unsigned player, ItemCategory cat, byte id) const = 0;
   virtual int8 getRangedWeaponAmmoType(unsigned id) const = 0;
+  virtual uint16 getRangedWeaponAmmoStorePrice(unsigned id) const = 0;
   virtual Utils::StringSpan getRangedWeaponAmmoName(unsigned id) const = 0;
   virtual byte getMagicItemEffect(byte n) const = 0;
   virtual byte getMagicItemInitialUses(byte n) const = 0;
