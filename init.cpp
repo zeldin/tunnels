@@ -12,7 +12,8 @@ GameEngine::GameEngine(EventLoop &eventLoop_,
 		       File::Backend &file_, DatabaseFactory &databaseFactory_)
   : eventLoop(eventLoop_), timerManager(timerManager_),
     screen(screen_), sound(sound_), file(file_),
-    databaseFactory(databaseFactory_), database(nullptr), randState(0x3567)
+    databaseFactory(databaseFactory_), database(nullptr), randState(0x3567),
+    roomDone(0)
 {
 }
 
