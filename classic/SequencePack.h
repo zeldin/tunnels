@@ -114,8 +114,8 @@ UniformSequence<n+1, uint16> indexSequence(Sequence<n, T, U> s, uint16 offs=0) {
   return UniformSequence<n+1, uint16>{offs, indexSequence(s.tail, offs+T::len)};
 }
 
-template <typename T> class SpanType { };
-template <> class SpanType<byte> { typedef Utils::StringSpan type; };
+template <typename T> struct SpanType { };
+template <> struct SpanType<byte> { typedef Utils::StringSpan type; };
 
 template <typename S> class IndexedSequence
 {
