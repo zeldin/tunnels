@@ -29,7 +29,7 @@ public:
   virtual ~SDLBackend() override;
   virtual VDP::ScopedRender startRender() override;
   virtual DCSG::ScopedSynthesis startSynthesis() override;
-  virtual Event runEventLoop(Timer::TimerManager& timerManager) override;
+  virtual Event runEventLoop(Timer::TimerManager& timerManager, bool nonBlock) override;
 
 protected:
   static constexpr unsigned BORDER_W = 8;

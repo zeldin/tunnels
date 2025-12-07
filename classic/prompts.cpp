@@ -607,8 +607,7 @@ void ScreenEngine::promptExtension(byte n, unsigned param)
     }
   case Vocab::extFLOOREOL: /* G@>F29F */
     {
-      byte n = 17; /* FIXME */
-      putNumberEol(y, n);
+      putNumberEol(y, database->getCurrentFloor());
       return;
     }
   case Vocab::extGAMEOVER: /* G@>F2AA */

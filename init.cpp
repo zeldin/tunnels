@@ -41,15 +41,15 @@ byte GameEngine::random(byte lower, byte upper)
   return n;
 }
 
-Event GameEngine::nextEvent()
+Event GameEngine::nextEvent(bool nonBlock)
 {
   screen.refresh();
-  return eventLoop.runEventLoop(timerManager);
+  return eventLoop.runEventLoop(timerManager, nonBlock);
 }
 
 EventType GameEngine::waitForEvent()
 {
-  return nextEvent().type();
+  return nextEvent(false).type();
 }
 
 GameEngine::Diversion GameEngine::delay(unsigned ms)
@@ -112,6 +112,9 @@ EventType GameEngine::run()
 	continue;
     case DIVERSION_POINT_OF_NR:
       if ((diversion = pointOfNoReturnMenu()))
+	continue;
+    case DIVERSION_BUILD_DUNGEON:
+      if ((diversion = buildDungeon()))
 	continue;
     default:
       // internal error...

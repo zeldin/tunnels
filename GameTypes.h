@@ -86,6 +86,13 @@ enum ExtDictionaryWord {
   EXT_DICTIONARY_GENERAL_STORE = 9
 };
 
+enum TimedMagicalEffect {
+  TIMED_MAGICAL_EFFECT_SPEED = 0,
+  TIMED_MAGICAL_EFFECT_ENCOUNTER_PROBABILITY = 1,
+  TIMED_MAGICAL_EFFECT_RATION_INTERVAL = 2,
+  TIMED_MAGICAL_EFFECT_HEALING_INTERVAL = 3
+};
+
 constexpr RoomItem next(RoomItem i)
 {
   return RoomItem(i + 1);

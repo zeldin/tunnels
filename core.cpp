@@ -1171,7 +1171,7 @@ GameEngine::Diversion GameEngine::room()
       break;
     case 0:
       // Normal room
-      if (database->roomHasEnemies(currentRoom))
+      if (false && database->roomHasEnemies(currentRoom))
 	database->startCombat(currentRoom);
       else {
 	database->clearCombat();
@@ -1186,7 +1186,7 @@ GameEngine::Diversion GameEngine::room()
     if (!database->isAnyQuestObjectRemaining()) {
       backTarget = DIVERSION_CONTINUE_GAME;
       database->clearRemainingQuestObjects();
-      database->setUnknown1CEB(0);
+      database->setNumStockedFloors(0); // Prevent continue game
       screen.drawGameOver();
       database->revealAllMagicItems();
       sound.playTitleMusic();

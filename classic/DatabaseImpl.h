@@ -43,9 +43,40 @@ private:
   enum {
     ROOM_FLAG_CHEST = 0x01,
     ROOM_FLAG_TRAP = 0x02,
+    ROOM_FLAG_UNKNOWN = 0x04,
     ROOM_FLAG_VISITED = 0x08,
     ROOM_FLAG_LIVING_STATUE = 0x10,
     ROOM_FLAG_FOUNTAIN = 0x20
+  };
+  enum LootInfo {
+    LOOT_INFO_MAGIC_ITEM_1 = 0,
+    LOOT_INFO_MAGIC_ITEM_2,
+    LOOT_INFO_ARMOR_OR_SHIELD,
+    LOOT_INFO_WEAPON_OR_RANGED,
+    LOOT_INFO_MAP,
+    LOOT_INFO_QUEST_OBJECT
+  };
+  struct FountainDescriptor {
+    msb16 mapPosition;
+    byte effect;
+  };
+
+  enum {
+    DUNGEON_FLAG_INCREASED_MIN_MONSTERS = 0x20
+  };
+  enum FloorItem {
+    FLOOR_ITEM_GOLD = 0,
+    FLOOR_ITEM_MAGIC_ITEM,
+    FLOOR_ITEM_WEAPON,
+    FLOOR_ITEM_ARMOR,
+    FLOOR_ITEM_MAP,
+    FLOOR_ITEM_UNKNOWN,
+    FLOOR_ITEM_LIVING_STATUE,
+    FLOOR_ITEM_FOUNTAIN
+  };
+  enum {
+    INFLATION_FLAG_MONSTER_TYPE = 0x01,
+    INFLATION_FLAG_FLOOR = 0x02
   };
 
   struct {
@@ -93,11 +124,20 @@ private:
     byte foundQuestObjects; // V@>1100
     byte remainingQuestObjects; // V@>1101
     msb16 turnsLeft[8];   // V@>1102
-    byte unknown_1112;    // V@>1112
+    byte encounterProbability;  // V@>1112
     byte rations;         // V@>1113
-    byte unknown_1114[8];
+    msb16 turnsSinceLastRationEaten; // V@>1114
+    msb16 rationInterval; // V@>1116
+    byte unknown_1118;
+    byte healingInterval; // V@>1119
+    byte turnsSinceLastHealing; // V@>111A
+    byte subTime;         // V@>111B
     byte unknown_111c;    // V@>111C
-    byte unknown_111d[9];
+    byte unknown_111d;
+    struct {
+      byte timeRemaining;
+      byte defaultTime;
+    } currentMagicalEffects[4]; // V@>111E
     byte monsterName[12]; // V@>1126
     byte monsterHPNumD6;  // V@>1132
     byte monsterDefense;  // V@>1133
@@ -128,9 +168,22 @@ private:
     byte dictCombination[16]; // V@>1162
     struct {
       byte name[10];
-      byte unknown[0xc];
+      byte initialGold;
+      byte equipmentAllowed;
+      byte initialArmorId;
+      int8 initialArmorProtection;
+      byte initialPrimaryWeaponId;
+      byte initialPrimaryWeaponDamage;
+      byte initialSecondaryWeaponId;
+      byte initialSecondaryWeaponDamage;
+      byte initialMagicItem1Id;
+      byte initialMagicItem1RemainingUses;
+      byte initialMagicItem2Id;
+      byte initialMagicItem2RemainingUses;
     } classes[4];         // V@>1172
     byte classPatternTable[4][0x40]; // V@>11CA
+    /* Four types of monster per floor, including monsters for floor 11-14 since
+       each floor (including floor 10) can have monsters from up to 4 floors below */
     struct {
       byte name[12];
       byte hpNumD6;
@@ -151,10 +204,10 @@ private:
     byte monsterPatternTable[16][0x40]; // V@>18DA
     byte maxPlayers;      // V@>1CDA
     byte rationQuantum;   // V@>1CDB
-    byte unknown_1cdc[2];
+    msb16 baseRationInterval; // V@>1CDC
     byte rationBasePrice; // V@>1CDE
-    byte unknown_1cdf;    // V@>1CDF
-    byte unknown_1ce0;    // V@>1CE0
+    byte baseEncounterProbability;   // V@>1CDF
+    byte baseHealingInterval;   // V@>1CE0
     byte numClasses;      // V@>1CE1
     byte maxFloors;       // V@>1CE2
     byte unknown_1ce3[2]; // V@>1CE3
@@ -164,11 +217,12 @@ private:
     byte unknown_1ce8;    // V@>1CE8
     byte unknown_1ce9;    // V@>1CE9
     byte numConfPlayers;  // V@>1CEA
-    byte unknown_1ceb;    // V@>1CEB
+    byte numStockedFloors;// V@>1CEB
     byte numRoomsPerFloor;// V@>1CEC
     byte minFloors;       // V@>1CED
-    byte unknown_1cee[6]; // V@>1CEE
-    byte unknown_1cf4;    // V@>1CF4
+    byte numSpecialRoomsPerFloor; // V@>1CEE
+    byte unknown_1cef[5]; // V@>1CEF
+    byte numDugFloors;    // V@>1CF4
     byte numFloors;       // V@>1CF5
     byte numPlayers;      // V@>1CF6
     byte difficulty;      // V@>1CF7
@@ -188,13 +242,16 @@ private:
     msb16 descendingStairsDescriptorOffset; // V@>1D08
     msb16 fountainDescriptorOffset; // V@>1D0A
     byte floorDescriptors[0x85c]; // V@>1D0C
-    byte unknown_2568[0x10];
+    struct {
+      byte monsterCountFromDepth[5];
+    } monsterDataPerDifficulty[3]; // V@>2568
+    byte unknown_2577; // V@>2577
     byte dictCombinationFound[0x1c]; // V@>2578
     byte dictGeneralStore[0x10]; // V@>2594
     byte monsterSoundTable[16]; // V@>25A4
     msb16 monsterSoundAddress;  // V@>25B4
     byte unknown_25b6[0x39];
-    byte unknown_25ef;    // V@>25EF
+    byte dungeonFlags;    // V@>25EF
     byte savedDirection;  // V@>25F0
     byte unknown_25f1[0x3];
     msb16 savedFloorDescriptorAddr; // V@>25F4
@@ -202,25 +259,32 @@ private:
     byte unknown_25f8[0x4];
     byte savedActionKey;   // V@>25FC
     byte savedProgression; // V@>25FD
-    byte unknown_25fe[0x78];
+    byte specialRoomTypePerFloor[10][5]; // V@>25FE
+    byte specialRoomInfoPerFloor[10][5]; // V@>2630
+    byte fountainEffectPerFloor[10][2];  // V@>2662
     byte playerOrder[4];  // V@>2676
-    byte unknown_267a[0xa];
+    byte extraMonstersPerFloor[10]; // V@>267A
     struct {
       byte row;
       byte column;
     } roomItemPosition[6]; // V@>2684
-    byte unknown_2690[0x68];
+    byte classHP[4];       // V@>2690
+    struct {
+      byte floorItems[8];
+      byte chestItemCount;
+      byte chestTrapPercentage;
+    } roomLootPerFloor[10]; // V@>2694
     struct {
       byte name[15];
       byte damage;
       byte storePrice;
-      byte storeAvailability;
+      byte availability;
     } weapons[8]; // V@>26F8
     struct {
       byte name[15];
       byte damage;
       byte storePrice;
-      byte storeAvailability;
+      byte availability;
       int8 defaultAmmo;
       int8 ammoType;
       byte ammoStorePrice;
@@ -230,18 +294,18 @@ private:
       byte name[15];
       byte protection;
       byte storePrice;
-      byte storeAvailability;
+      byte availability;
     } armors[8]; // V@>2898
     struct {
       byte name[15];
       byte protection;
       byte storePrice;
-      byte storeAvailability;
+      byte availability;
     } shields[6]; // V@>2928
     struct {
       byte name[11];
       byte tiles[4];
-      byte unknown;
+      byte availability;
     } magicItemCategories[8]; // V@>2994
     struct {
       byte name[15];
@@ -252,9 +316,10 @@ private:
     byte unknown_2ce4[0x32];
     struct {
       byte name[11];
-      byte unknown1[2];
+      byte targetSpecialRoomType;
+      byte targetFloor;
       byte tiles[4];
-      byte unknown2[2];
+      msb16 timePerFloorsDeep;
     } questObjects[8];     // V@>2D16
     byte unknown_2dae[0x10];
     byte dictOpen[8]; // V@>2DBE
@@ -264,10 +329,14 @@ private:
     byte patternTable2[0x380]; // V@2E90
     byte objectTiles[9][4]; // V@3210
     byte unknown_3234[5];
-    byte unknown_3239;      // V@3239
-    byte unknown_323a[3];
+    byte inflationFlags;    // V@3239
+    byte startFloor;        // V@323A
+    byte unknown_323b[2];
     byte keymap[11];         // V@323D
-    byte unknown_3248[0x8];
+    byte unknown_3248[0x5];
+    byte defaultWeaponDamage;  // V@>324D
+    byte vaultBaseGoldLimit;   // V@>324E
+    byte vaultLootProbabilityDeduction; // V@>324F
     byte extDictionary[4][16]; // V@3250
     byte dictionary[36][12]; // V@3290
     byte magicEffect[32][3]; // V@3440
@@ -295,6 +364,7 @@ public:
   virtual Utils::StringSpan getPlayerName(unsigned n) const override;
   virtual void setPlayerName(unsigned n, Utils::StringSpan name) override;
   virtual byte getPlayerHP(unsigned n) const override { return data.player[n].HP; }
+  virtual void setPlayerHP(unsigned n, byte HP) override { data.player[n].HP = HP; }
   virtual byte getPlayerWD(unsigned n) const override { return data.player[n].WD; }
   virtual void setPlayerWD(unsigned n, byte WD) override { data.player[n].WD = WD; }
   virtual byte getPlayerArmorId(unsigned n) const override { return data.player[n].armorId; }
@@ -329,14 +399,28 @@ public:
   virtual void setPlayerMagicItemRemainingUses(unsigned n, unsigned m, byte uses) override { data.player[n].magicItems[m].remainingUses = uses; }
   virtual void compactPlayerMagicItems(unsigned n) override;
   virtual void revealAllMagicItems() override;
+  virtual void resetQuestObjects() override;
   virtual bool isQuestObjectFound(unsigned n) const override { return (data.foundQuestObjects >> n)&1; }
   virtual bool isQuestObjectRemaining(unsigned n) const override { return (data.remainingQuestObjects >> n)&1; }
   virtual bool isAnyQuestObjectRemaining() const override { return data.remainingQuestObjects != 0; }
   virtual bool tryAchieveQuestObject(unsigned n) override;
   virtual void clearRemainingQuestObjects() override { data.remainingQuestObjects = 0; }
   virtual uint16 getTurnsLeft(unsigned n) const override { return data.turnsLeft[n]; }
+  virtual void resetEncounterProbability() override { data.encounterProbability = data.baseEncounterProbability; }
   virtual byte getRations() const override { return data.rations; }
   virtual void setRations(byte rations) override { data.rations = rations; }
+  virtual void setInitialRations() override { data.rations = (data.rationBasePrice? 0 : data.rationQuantum); }
+  virtual void resetRationTurns() override { data.turnsSinceLastRationEaten = 0; }
+  virtual void resetRationInterval() override { data.rationInterval = data.baseRationInterval; }
+  virtual void resetUnknown1118() override { data.unknown_1118 = 0; }
+  virtual void resetHealingInterval() override { data.healingInterval = data.baseHealingInterval; }
+  virtual void resetHealingTurns() override { data.turnsSinceLastHealing = 0; }
+  virtual void resetSubtime() override { data.subTime = 0; }
+  virtual void resetUnknown111C() override { data.unknown_111c = 0; }
+  virtual void resetUnknown111D() override { data.unknown_111d = 0; }
+  virtual void setCurrentMagicalEffect(TimedMagicalEffect effect) override { data.currentMagicalEffects[effect].timeRemaining = data.currentMagicalEffects[effect].defaultTime; }
+  virtual void setCurrentMagicalEffect(TimedMagicalEffect effect, byte t) override { data.currentMagicalEffects[effect].timeRemaining = t; }
+  virtual bool expireCurrentMagicalEffect(TimedMagicalEffect effect) override { return data.currentMagicalEffects[effect].timeRemaining && !--data.currentMagicalEffects[effect].timeRemaining; }
   virtual Utils::StringSpan getMonsterName() const override;
   virtual byte getMonsterHPNumD6() const override { return data.monsterHPNumD6; }
   virtual byte getMonsterDefense() const override { return data.monsterDefense; }
@@ -357,6 +441,8 @@ public:
   virtual bool isMonsterPlaced(unsigned n) const override { return data.monsterPosition[n].row != 0 || data.monsterPosition[n].column != 0; }
   virtual byte getListenAtDoorSuccessRate() const override { return data.listenAtDoorSuccessRate; }
   virtual Utils::StringSpan getClassName(unsigned n) const override;
+  virtual byte getClassInitialGold(unsigned n) const override { return data.classes[n].initialGold; }
+  virtual byte getClassInitialEquipment(unsigned n, unsigned &m, ItemCategory &cat) const override;
   virtual Utils::StringSpan getClassPatternTable(unsigned n) const override;
   virtual Utils::StringSpan getSpecialAttackName(unsigned n) const override;
   virtual byte getSpecialAttackEffect(unsigned n) const override { return data.specialAttacks[n-1].effect; }
@@ -369,26 +455,31 @@ public:
   virtual bool hasHiddenMap() const override { return data.unknown_1ce8 != 0; }
   virtual byte getNumConfiguredPlayers() const override { return data.numConfPlayers; }
   virtual void setNumConfiguredPlayers(byte num) override { data.numConfPlayers = num; }
-  virtual byte getUnknown1CEB() const override { return data.unknown_1ceb; }
-  virtual void setUnknown1CEB(byte x) override { data.unknown_1ceb = x; }
+  virtual byte getNumStockedFloors() const override { return data.numStockedFloors; }
+  virtual void setNumStockedFloors(byte x) override { data.numStockedFloors = x; }
+  virtual byte getNumRoomsPerFloor() const override { return data.numRoomsPerFloor; }
   virtual byte getMinFloors() const override { return data.minFloors; }
-  virtual byte getUnknown1CF4() const override { return data.unknown_1cf4; }
-  virtual void setUnknown1CF4(byte x) override { data.unknown_1cf4 = x; }
+  virtual byte getNumDugFloors() const override { return data.numDugFloors; }
+  virtual void setNumDugFloors(byte x) override { data.numDugFloors = x; }
+  virtual byte getNumFloors() const override { return data.numFloors; }
   virtual void setNumFloors(byte num) override { data.numFloors = num; }
   virtual byte getNumPlayers() const override { return data.numPlayers; }
   virtual void setNumPlayers(byte num) override { data.numPlayers = num; }
+  virtual byte getDifficulty() const override { return data.difficulty; }
   virtual void setDifficulty(byte dif) override { data.difficulty = dif; }
   virtual byte getCurrentFloor() const override { return data.currentFloor; }
   virtual void setCurrentFloor(byte floor) override { data.currentFloor = floor; }
+  virtual void setUnknown1CF9(byte x) override { data.unknown_1cf9 = x; }
   virtual int getCurrentPlayer() const override { return data.currentPlayer-1; }
   virtual void setCurrentPlayer(int n) override { data.currentPlayer = n+1; }
   virtual uint16 getHealingPrice() const override { return adjustPrice(data.healingBasePrice); }
+  virtual void initPlayerOrder() override;
   virtual int getPlayerOrder(unsigned n) const override { return (n < 4? data.playerOrder[n]-1 : -1); }
   virtual void exchangePlayerOrder(unsigned n, unsigned m) override;
   virtual bool nextPlayerInOrder() override;
   virtual Location getCurrentLocation() const override { return static_cast<Location>(data.currentLocation); }
   virtual void setCurrentLocation(Location loc) override { data.currentLocation = loc; }
-  virtual byte getUnknown25EF() const override { return data.unknown_25ef; }
+  virtual byte getUnknown25EF() const override { return data.dungeonFlags; }
   virtual Direction getSavedDirection() const override { return static_cast<Direction>(data.savedDirection & 3); }
   virtual void setSavedDirection(Direction direction) override { data.savedDirection = direction; }
   virtual DescriptorHandle getSavedRoomAddress() const override;
@@ -423,7 +514,9 @@ public:
   virtual Utils::StringSpan getFountainTiles() const override;
   virtual Utils::StringSpan getChestTiles() const override;
   virtual Utils::StringSpan getMoneyTiles() const override;
+  virtual byte getStartFloor() const override { return data.startFloor; }
   virtual byte getKeymapEntry(KeyMapping k) const override { return data.keymap[k]; }
+  virtual byte getDefaultWeaponDamage() const override { return data.defaultWeaponDamage; }
   virtual Utils::StringSpan getExtDictionaryWord(ExtDictionaryWord n) const override;
   virtual Utils::StringSpan getDictionaryWord(byte n) const override;
   virtual void getMagicEffectDescriptor(byte b, Base36Number (&effect)[3]) const override;
@@ -431,12 +524,17 @@ public:
     override;
   virtual MapPosition getMapPosition() const override { return PosWord(data.mapPosition); }
   virtual void setMapPosition(MapPosition pos) { data.mapPosition = PosWord(pos); }
+  virtual void setUnknown10FA(byte x) override { data.unknown_10fa = x; }
   virtual byte getUnknown10FB() const override { return data.unknown_10fb; }
+  virtual void setUnknown10FB(byte x) override { data.unknown_10fb = x; }
   virtual uint16 getPartyGold() const override { return data.partyGold; }
   virtual void setPartyGold(uint16 n) override { data.partyGold = n; }
   virtual byte getMappedFloors() const override { return data.numMappedFloors; }
   virtual void setMappedFloors(byte n) override { data.numMappedFloors = n; }
+  virtual void setUnknown10FF(byte x) override { data.unknown_10ff = x; }
+  virtual MapPosition getEntryStairsPosition() const override;
   virtual DescriptorHandle getRoomDescriptor(MapPosition pos) const override { return findDescriptor(PosWord(pos)); }
+  virtual DescriptorHandle getFirstRoomDescriptor(MapPosition &pos) const override;
   virtual byte getRoomSpecialType(DescriptorHandle room) const override { return roomDescriptor(room)->specialRoomType; }
   virtual bool roomHasEnemies(DescriptorHandle room) const override { return (roomDescriptor(room)->monsterInfo & 0xe0) != 0; }
   virtual void startCombat(DescriptorHandle room) override { data.monsterInfo = roomDescriptor(room)->monsterInfo; }
@@ -459,6 +557,8 @@ public:
   virtual Utils::StringSpan getFloorMap() const override;
   virtual void setMapVisited(MapPosition pos, bool visited) override;
   virtual void prepareFloorMap(unsigned floor) override;
+  virtual void digFloor() override;
+  virtual void stockFloor() override;
   virtual void restoreFloorVisitedMarkers() override;
   virtual bool inCombat() const override { return data.monsterInfo != 0; }
   virtual byte getNumEnemies() const override { return data.monsterInfo >> 5; }
@@ -483,7 +583,16 @@ private:
   unsigned countBlankNeighbors(unsigned offs);
   void addMapVerticalCorridors();
   void addMapHorizontalCorridors();
-  void fixupConnections();
+  PosWord findNonemptyMapPosition(PosWord start, int d1, int d2);
+  bool mazeSearch(MapPosition pos, PosWord target, Direction dir);
+  bool fixupConnections(bool digging);
+  void placeMapFeatures(unsigned offs, unsigned cnt, byte code,
+			unsigned delta);
+  bool addCorridors(bool digging);
+  unsigned countLootItems(const RoomDescriptor &room) const;
+  bool stockItemToRoom(RoomDescriptor &room, LootInfo info) const;
+  bool addLootToRoom(RoomDescriptor &room, FloorItem item, unsigned max) const;
+  RoomDescriptor* getRandomRoom(RoomDescriptor *first) const;
   RoomDescriptor *roomDescriptor(DescriptorHandle h) { return reinterpret_cast<RoomDescriptor *>(data.floorDescriptors + (h > sizeof(data.floorDescriptors)/sizeof(data.floorDescriptors[0])-10? 0 : h)); }
   const RoomDescriptor *roomDescriptor(DescriptorHandle h) const { return reinterpret_cast<const RoomDescriptor *>(data.floorDescriptors + (h > sizeof(data.floorDescriptors)/sizeof(data.floorDescriptors[0])-10? 0 : h)); }
 };

@@ -189,7 +189,7 @@ Event SDLBackend::handleEvent(const SDL_Event &event)
   return Event::nullEvent();
 }
 
-Event SDLBackend::runEventLoop(Timer::TimerManager& timerManager)
+Event SDLBackend::runEventLoop(Timer::TimerManager& timerManager, bool nonBlock)
 {
   SDL_Event event;
   while (true) {
@@ -198,12 +198,14 @@ Event SDLBackend::runEventLoop(Timer::TimerManager& timerManager)
     Event timerEvent = timerManager.pollTimerEvent();
     if (timerEvent)
       return timerEvent;
-    else if (delay? SDL_WaitEventTimeout(&event, delay) :
-	     SDL_WaitEvent(&event)) {
+    else if (nonBlock? SDL_PollEvent(&event) :
+	     (delay? SDL_WaitEventTimeout(&event, delay) :
+	      SDL_WaitEvent(&event))) {
       Event handledEvent = handleEvent(event);
       if (handledEvent)
 	return handledEvent;
-    }
+    } else if (nonBlock)
+      return Event::nullEvent();
   }
 }
 

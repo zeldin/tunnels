@@ -55,7 +55,7 @@ public:
 
 class EventLoop {
  public:
-  virtual Event runEventLoop(Timer::TimerManager& timerManager) = 0;
+  virtual Event runEventLoop(Timer::TimerManager& timerManager, bool nonBlock=false) = 0;
 };
 
 }

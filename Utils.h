@@ -84,7 +84,7 @@ template <unsigned n, typename T> void clearArray(T (&dst)[n], T value=0)
     dst[i] = value;
 }
 
-template <unsigned n, typename T> void clearArray(T (&dst)[n], unsigned offs, unsigned count, T value=0)
+template <unsigned n, typename T> void clearArray(T (&dst)[n], unsigned offs, unsigned count=n, T value=0)
 {
   if (offs >= n)
     return;
@@ -92,6 +92,28 @@ template <unsigned n, typename T> void clearArray(T (&dst)[n], unsigned offs, un
     count = n-offs;
   for (unsigned i=0; i<count; i++)
     dst[offs+i] = value;
+}
+
+template <typename T> void clearStruct(T &dst, unsigned offs=0) {
+  char (*dstp)[sizeof(T)] = reinterpret_cast<char (*)[sizeof(T)]>(&dst);
+  clearArray(*dstp, offs);
+}
+
+template<class T> const T& min(const T& a, const T& b)
+{
+    return (b < a) ? b : a;
+}
+
+template<class T> const T& max(const T& a, const T& b)
+{
+    return (b > a) ? b : a;
+}
+
+template<class T> void swap(T&a, T&b)
+{
+  T tmp = a;
+  a = b;
+  b = tmp;
 }
 
 }}

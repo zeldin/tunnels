@@ -5,10 +5,14 @@
 
 namespace Tunnels {
 
-GameEngine::Diversion GameEngine::rawGetKey(byte &kc)
+GameEngine::Diversion GameEngine::rawGetKey(byte &kc, bool nonBlock)
 {
   for (;;) {
-    Event e = nextEvent();
+    Event e = nextEvent(nonBlock);
+    if (nonBlock && !e) {
+      kc = 0;
+      return DIVERSION_NULL;
+    }
     if (e.type() != EVENT_KEY) {
       if (e.type() == EVENT_QUIT)
 	return DIVERSION_QUIT;

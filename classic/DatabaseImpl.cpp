@@ -46,8 +46,7 @@ void DatabaseImpl::setRoomFixture(RoomFixture fixture)
 
 void DatabaseImpl::clearPlayerSheet(unsigned n)
 {
-  /* FIXME */
-  data.player[n].flags = 0;
+  Utils::clearStruct(data.player[n], 15);
 }
 
 Utils::StringSpan DatabaseImpl::getPlayerName(unsigned n) const
@@ -120,6 +119,8 @@ void DatabaseImpl::setPlayerWeapon(unsigned n, bool secondary, ItemCategory cat,
 void DatabaseImpl::setPlayerClass(unsigned n, unsigned c)
 {
   data.player[n].flags = c << 6;
+  data.player[n].equipmentAllowed = data.classes[c].equipmentAllowed;
+  data.player[n].HP = data.classHP[c];
   for (unsigned i = 0; i < 64; i++)
     data.patternTable[(n << 6) | i] = data.classPatternTable[c][i];
 }
@@ -177,6 +178,19 @@ void DatabaseImpl::revealAllMagicItems()
 	data.player[n].magicItems[i].id = -data.player[n].magicItems[i].id;
 }
 
+void DatabaseImpl::resetQuestObjects()
+{
+  byte validQuestObjs = 0;
+  for (unsigned n = 0; n < 8; n++) {
+    if (isQuestObjectValid(n))
+      validQuestObjs |= 1u << n;
+    data.turnsLeft[n] = data.questObjects[n].timePerFloorsDeep *
+      Utils::min(data.numStockedFloors, data.questObjects[n].targetFloor);
+  }
+  data.foundQuestObjects = 0;
+  data.remainingQuestObjects = validQuestObjs;
+}
+		    
 bool DatabaseImpl::tryAchieveQuestObject(unsigned n)
 {
   if (n--) {
@@ -222,6 +236,49 @@ Utils::StringSpan DatabaseImpl::getClassName(unsigned n) const
   return data.classes[n].name;
 }
 
+byte DatabaseImpl::getClassInitialEquipment(unsigned n, unsigned &m, ItemCategory &cat) const
+{
+  while (m < 5) {
+    byte id;
+    ItemCategory c;
+    switch (m) {
+    case 0:
+      id = data.classes[n].initialArmorId;
+      c = ITEM_ARMORS;
+      if (id > 8) {
+	id -= 8;
+	c = ITEM_SHIELDS;
+      }
+      break;
+    case 1:
+    case 2:
+      id = (m == 1? data.classes[n].initialPrimaryWeaponId :
+	    data.classes[n].initialSecondaryWeaponId);
+      c = ITEM_WEAPONS;
+      if (id > 8) {
+	id -= 8;
+	c = ITEM_RANGED_WEAPONS;
+      }
+      break;
+    case 3:
+      id = data.classes[n].initialMagicItem1Id;
+      c = ITEM_MAGIC_ITEMS;
+      break;
+    case 4:
+      id = data.classes[n].initialMagicItem2Id;
+      c = ITEM_MAGIC_ITEMS;
+      break;
+    }
+    m++;
+    if (id) {
+      cat = c;
+      return id;
+    }
+  }
+  return 0;
+}
+
+
 Utils::StringSpan DatabaseImpl::getClassPatternTable(unsigned n) const
 {
   return data.classPatternTable[n];
@@ -244,6 +301,13 @@ byte DatabaseImpl::getNumClassChoices() const
       --n;
   }
   return n;
+}
+
+void DatabaseImpl::initPlayerOrder()
+{
+  Utils::clearArray(data.playerOrder);
+  for (unsigned n=0; n<data.numConfPlayers; n++)
+    data.playerOrder[n] = n+1;
 }
 
 void DatabaseImpl::exchangePlayerOrder(unsigned n, unsigned m)
@@ -405,27 +469,27 @@ uint16 DatabaseImpl::getItemStorePrice(ItemCategory cat, byte id) const
   case ITEM_WEAPONS:
     if (id < 8) {
       price = data.weapons[id].storePrice;
-      availability = data.weapons[id].storeAvailability;
+      availability = data.weapons[id].availability;
       break;
     }
   case ITEM_RANGED_WEAPONS:
     if (id >= 8) id-=8;
     if (id < 8) {
       price = data.rangedWeapons[id].storePrice;
-      availability = data.rangedWeapons[id].storeAvailability;
+      availability = data.rangedWeapons[id].availability;
     }
     break;
   case ITEM_ARMORS:
     if (id < 8) {
       price = data.armors[id].storePrice;
-      availability = data.armors[id].storeAvailability;
+      availability = data.armors[id].availability;
       break;
     }
   case ITEM_SHIELDS:
     if (id >= 8) id-=8;
     if (id < 6) {
       price = data.shields[id].storePrice;
-      availability = data.shields[id].storeAvailability;
+      availability = data.shields[id].availability;
     }
     break;
   }
@@ -483,28 +547,28 @@ bool DatabaseImpl::playerCanUseItem(unsigned player, ItemCategory cat, byte id) 
   switch (cat) {
   case ITEM_WEAPONS:
     if (id < 8) {
-      availability = data.weapons[id].storeAvailability;
+      availability = data.weapons[id].availability;
       mask = 4;
       break;
     }
   case ITEM_RANGED_WEAPONS:
     if (id >= 8) id-=8;
     if (id < 8) {
-      availability = data.rangedWeapons[id].storeAvailability;
+      availability = data.rangedWeapons[id].availability;
       mask = 8;
     } else
       return false;
     break;
   case ITEM_ARMORS:
     if (id < 8) {
-      availability = data.armors[id].storeAvailability;
+      availability = data.armors[id].availability;
       mask = 1;
       break;
     }
   case ITEM_SHIELDS:
     if (id >= 8) id-=8;
     if (id < 6) {
-      availability = data.shields[id].storeAvailability;
+      availability = data.shields[id].availability;
       mask = 2;
     } else
       return false;
@@ -533,7 +597,7 @@ uint16 DatabaseImpl::getRangedWeaponAmmoStorePrice(unsigned id) const
   if (id > 8)
     id -= 8;
   if (id > 0 && id <= 8) {
-    if (!data.rangedWeapons[id-1].storeAvailability ||
+    if (!data.rangedWeapons[id-1].availability ||
 	!data.rangedWeapons[id-1].ammoStorePrice)
       return 0;
     else
@@ -676,6 +740,20 @@ Utils::StringSpan DatabaseImpl::getFloorMap() const
   return data.floorMap;
 }
 
+MapPosition DatabaseImpl::getEntryStairsPosition() const
+{
+  return
+    PosWord(*reinterpret_cast<const msb16*>(data.floorDescriptors +
+					    data.ascendingStairsDescriptorOffset));
+}
+
+DescriptorHandle DatabaseImpl::getFirstRoomDescriptor(MapPosition &pos) const
+{
+  unsigned offs = (data.currentFloor-1) * data.descriptorBytesPerFloor;
+  pos = PosWord(*reinterpret_cast<const msb16*>(data.floorDescriptors + offs));
+  return offs;
+}
+
 void DatabaseImpl::clearRoomEnemies()
 {
   Utils::clearArray(data.monsterName);
@@ -744,12 +822,12 @@ void DatabaseImpl::clearRoomVault(DescriptorHandle room)
 int DatabaseImpl::getRoomNextLootSlot(DescriptorHandle room, unsigned &iterPos) const
 {
   const RoomDescriptor *r = roomDescriptor(room);
-  while (iterPos < 6) {
+  while (iterPos <= LOOT_INFO_QUEST_OBJECT) {
     byte c = byte(1) << iterPos;	
     if ((r->lootInfo & c)) {
       switch (iterPos) {
-      case 0: c = byte(0) << 5; break;
-      case 1: c = byte(2) << 5; break;
+      case LOOT_INFO_MAGIC_ITEM_1: c = byte(0) << 5; break;
+      case LOOT_INFO_MAGIC_ITEM_2: c = byte(2) << 5; break;
       default: c = byte(iterPos+2) << 5; break;
       }
       // byte mask = c; // Original code
@@ -827,6 +905,9 @@ bool DatabaseImpl::dropItemInRoom(DescriptorHandle room, ItemCategory cat, byte 
   }
 
   RoomDescriptor *r = roomDescriptor(room);
+  if (countLootItems(*r) >= 3)
+    // No more than 3 bits should be set in loot info
+    return false;
   unsigned n;
   for (n=0; n<3; n++)
     if (!r->lootId[n])
@@ -840,22 +921,23 @@ bool DatabaseImpl::dropItemInRoom(DescriptorHandle room, ItemCategory cat, byte 
     id |= 8;
     /* FALLTHROUGH */
   case ITEM_ARMORS:
-    bit = 4;
+    bit = 1 << LOOT_INFO_ARMOR_OR_SHIELD;
     break;
   case ITEM_RANGED_WEAPONS:
     id |= 8;
     /* FALLTHROUGH */
   case ITEM_WEAPONS:
-    bit = 8;
+    bit = 1 << LOOT_INFO_WEAPON_OR_RANGED;
     break;
   case ITEM_MAGIC_ITEMS:
-    bit = 3; // Two concurrent items possible
+    // Two concurrent items possible
+    bit = (1 << LOOT_INFO_MAGIC_ITEM_1) | (1 << LOOT_INFO_MAGIC_ITEM_2);
     break;
   case ITEM_QUEST_OBJECTS:
-    bit = 32;
+    bit = 1 << LOOT_INFO_QUEST_OBJECT;
     break;
   case ITEM_FLOOR_MAP:
-    bit = 16;
+    bit = 1 << LOOT_INFO_MAP;
     break;
   default:
     return false;
@@ -864,13 +946,13 @@ bool DatabaseImpl::dropItemInRoom(DescriptorHandle room, ItemCategory cat, byte 
     // Already at limit for this category
     return false;
   bit ^= (r->lootInfo & bit);
-  if (bit == 3)
-    bit = 1;
+  if (bit == ((1 << LOOT_INFO_MAGIC_ITEM_1) | (1 << LOOT_INFO_MAGIC_ITEM_2)))
+    bit = 1 << LOOT_INFO_MAGIC_ITEM_1;
   r->lootInfo |= bit;
   byte c = 0x40;
-  if (bit == 1)
+  if (bit == (1 << LOOT_INFO_MAGIC_ITEM_1))
     c = 0;
-  else if (bit >= 4) do {
+  else if (bit >= (1 << LOOT_INFO_ARMOR_OR_SHIELD)) do {
       c += 0x20;
     } while ((bit >>= 1) > 1);
   r->lootId[n] = id | c;
@@ -914,7 +996,7 @@ byte DatabaseImpl::getRoomLootItem(DescriptorHandle room, unsigned n, ItemCatego
 
 byte DatabaseImpl::adjustPrice(byte price) const
 {
-  if (data.currentFloor != 0 && data.unknown_3239 > 1)
+  if (data.currentFloor != 0 && (data.inflationFlags & INFLATION_FLAG_FLOOR))
     price *= data.currentFloor;
   return price;
 }
@@ -1097,12 +1179,61 @@ void DatabaseImpl::addMapHorizontalCorridors()
   }
 }
 
-void DatabaseImpl::fixupConnections()
+DatabaseImpl::PosWord DatabaseImpl::findNonemptyMapPosition(PosWord start, int d1, int d2)
+{
+  uint16 pos0 = start;
+  uint16 pos = pos0;
+  while (data.floorMap[pos] == 0x6b) {
+    pos += uint16(d1);
+    if (pos >= sizeof(data.floorMap)) {
+      pos = (pos0 += uint16(d2));
+      if (pos >= sizeof(data.floorMap))
+	return 0;
+    }
+  }
+  return pos;
+}
+
+bool DatabaseImpl::mazeSearch(MapPosition pos, PosWord target, Direction dir)
+{
+  for (unsigned i=0; i<256; i++) {
+    Location dummy;
+    while (!canMove(pos, dir, dummy))
+      dir = left(dir);
+    pos.forward(dir);
+    if (PosWord(pos) == target)
+      return true;
+    dir = right(dir);
+  }
+  return false;
+}
+
+bool DatabaseImpl::fixupConnections(bool digging)
 {
   for (unsigned y=0; y<17; y++)
     for (unsigned x=0; x<26; x++) {
       unsigned offs = (y<<5)+x;
       byte code = data.floorMap[offs];
+
+      if (digging && code >= 0x67 && code <= 0x6a &&
+	  countBlankNeighbors(offs) == 4) {
+	if (code != 0x67)
+	  return false;
+	// Remove this room
+	data.floorMap[offs] = 0x6b;
+	unsigned room_offs = findDescriptor(offs);
+	if (room_offs == ~0u)
+	  return false;
+	RoomDescriptor *rd =
+	  reinterpret_cast<RoomDescriptor*>(&data.floorDescriptors[room_offs]);
+	RoomDescriptor *lrd =
+	  reinterpret_cast<RoomDescriptor*>(&data.floorDescriptors[(data.currentFloor-1) * data.descriptorBytesPerFloor + 10 * data.numRoomsPerFloor]);
+	while (!((--lrd)->mapPosition))
+	  ;
+	rd->mapPosition = lrd->mapPosition;
+	lrd->mapPosition = 0;
+      }
+
       if (code >= 0x68 && code <= 0x6a) {
 	if (offs >= 32) {
 	  code = data.floorMap[offs-32];
@@ -1134,6 +1265,30 @@ void DatabaseImpl::fixupConnections()
 	}
       }
     }
+
+  if (!digging)
+    return true;
+
+  PosWord target = findNonemptyMapPosition(MapPosition{25, 16}, 31, -32);
+  PosWord start = findNonemptyMapPosition(MapPosition{0, 0}, -31, 32);
+  if (!target || !start || !mazeSearch(start, target, DIR_SOUTH))
+    return false;
+
+  target = findNonemptyMapPosition(MapPosition{0, 16}, 33, -32);
+  start = findNonemptyMapPosition(MapPosition{25, 0}, -33, 32);
+  if (!target || !start || !mazeSearch(start, target, DIR_NORTH))
+    return false;
+
+  return true;
+}
+
+bool DatabaseImpl::addCorridors(bool digging)
+{
+  for (unsigned round = 0; round < 2; round++) {
+    addMapVerticalCorridors();
+    addMapHorizontalCorridors();
+  }
+  return fixupConnections(digging);
 }
 
 void DatabaseImpl::prepareFloorMap(unsigned floor)
@@ -1149,11 +1304,69 @@ void DatabaseImpl::prepareFloorMap(unsigned floor)
 		 data.numStairsPerFloor, 0x69, 2);
   addMapFeatures(floorBase + data.fountainDescriptorOffset,
 		 data.numFountainsPerFloor, 0x6a, 3);
-  for (unsigned round = 0; round < 2; round++) {
-    addMapVerticalCorridors();
-    addMapHorizontalCorridors();
+  addCorridors(false);
+}
+
+void DatabaseImpl::placeMapFeatures(unsigned offs, unsigned cnt, byte code,
+				    unsigned delta)
+{
+  while (cnt--) {
+    if (offs >= sizeof(data.floorDescriptors)/sizeof(data.floorDescriptors[0])-1)
+      break;
+    for(;;) {
+      MapPosition pos{ byte(randomSource->random(3, 28) - 3),
+		       byte(randomSource->random(2, 18) - 2) };
+      uint16 mapoffs = PosWord(pos);
+      if (data.floorMap[mapoffs] != 0x6b ||
+	  countBlankNeighbors(mapoffs) != 4)
+	continue;
+      data.floorMap[mapoffs] = code;
+      *reinterpret_cast<msb16*>(data.floorDescriptors + offs) = mapoffs;
+      break;
+    }
+    offs += delta;
   }
-  fixupConnections();
+}
+
+void DatabaseImpl::digFloor()
+{
+  unsigned floor = data.currentFloor;
+  uint16 floorBase = (floor-1) * data.descriptorBytesPerFloor;
+  // G@>8246
+  Utils::clearArray(data.floorDescriptors, floorBase, data.descriptorBytesPerFloor);
+
+  if (floor == 1) {
+    clearMap(2);
+    placeMapFeatures(floorBase + data.ascendingStairsDescriptorOffset,
+		     1, 0x68, 2);
+  } else {
+    clearMap(0);
+    // copy stair locations from previous floor
+    // (GPL implementation hardcodes 2 stairs and 2 fountains per floor
+    //  to simplify calculations)
+    uint16 prev_descending_offs =
+      floorBase - data.descriptorBytesPerFloor + data.descendingStairsDescriptorOffset;
+    unsigned curr_ascending_offs =
+      floorBase + data.ascendingStairsDescriptorOffset;
+    for (unsigned n = 0; n < 2 * data.numStairsPerFloor; n++)
+      data.floorDescriptors[curr_ascending_offs++] =
+	data.floorDescriptors[prev_descending_offs++];
+  }
+
+  for (;;) {
+    placeMapFeatures(floorBase + 0, data.numRoomsPerFloor, 0x67, 10);
+    placeMapFeatures(floorBase + data.fountainDescriptorOffset,
+		     data.numFountainsPerFloor, 0x6a, 3);
+    if (floor != data.numFloors)
+      placeMapFeatures(floorBase + data.descendingStairsDescriptorOffset,
+		       data.numStairsPerFloor, 0x69, 2);
+
+    if (addCorridors(true))
+      return;
+
+    // Clear map except for ascending stairs, then try again
+    clearMap(1);
+  }
 }
 
 void DatabaseImpl::restoreFloorVisitedMarkers()
@@ -1226,6 +1439,282 @@ bool DatabaseImpl::blockedForward(MapPosition pos, Direction dir) const
     }
   }
   return true;
+}
+
+unsigned DatabaseImpl::countLootItems(const RoomDescriptor &room) const
+{
+  unsigned count = 0;
+  for (unsigned i = LOOT_INFO_MAGIC_ITEM_1; i <= LOOT_INFO_QUEST_OBJECT; i++)
+    if ((room.lootInfo & (1u << i)))
+      count++;
+  return count;
+}
+
+bool DatabaseImpl::stockItemToRoom(RoomDescriptor &room, LootInfo info) const
+{
+  byte idCode;
+  if (info == LOOT_INFO_MAP)
+    idCode = 0xc0;
+  else {
+    byte availability;
+    do {
+      unsigned subId = randomSource->random(1, 8);
+      unsigned subCat = randomSource->random(0, 1);
+      idCode = (subCat? subId + 8 : subId);
+      switch(info) {
+      case LOOT_INFO_ARMOR_OR_SHIELD:
+	availability =
+	  subCat? data.shields[subId-1].availability : data.armors[subId-1].availability;
+	idCode |= 0x80;
+	break;
+      case LOOT_INFO_WEAPON_OR_RANGED:
+	availability =
+	  subCat? data.weapons[subId-1].availability : data.rangedWeapons[subId-1].availability;
+	idCode |= 0xA0;
+	break;
+      case LOOT_INFO_MAGIC_ITEM_1:
+      case LOOT_INFO_MAGIC_ITEM_2:
+	availability = data.magicItemCategories[subId-1].availability;
+	idCode = subId*5;
+	if (info == LOOT_INFO_MAGIC_ITEM_2)
+	  idCode |= 0x40;
+	break;
+      }
+    }
+    while (!availability || abs(availability) > data.currentFloor);
+    if (idCode < 0x80) // Randomize magic item within category
+      idCode -= randomSource->random(0, 4);
+  }
+  if (!room.lootId[0])
+    room.lootId[0] = idCode;
+  else if (!room.lootId[1])
+    room.lootId[1] = idCode;
+  else if (!room.lootId[2])
+    room.lootId[2] = idCode;
+  else
+    return false;
+  return true;
+}
+
+bool DatabaseImpl::addLootToRoom(RoomDescriptor &room, FloorItem item, unsigned max) const
+{
+  if (countLootItems(room) >= max)
+    return false;
+  if (room.specialRoomType == 2) {
+    if (item > FLOOR_ITEM_MAP)
+      /* Vaults can't contain statues or fountains */
+      return false;
+    if (item == FLOOR_ITEM_GOLD)
+      /* Vaults already have gold, make the extra disappear... */
+      return true;
+  }
+  switch (item) {
+  case FLOOR_ITEM_GOLD:
+    /* Any additional gold just goes away */
+    if (room.goldAmount == 0) {
+      unsigned gold = randomSource->random(1, 5);
+      unsigned multiplier = 1 + (room.monsterInfo >> 5); // Number of monsters + 1
+      if ((data.inflationFlags & INFLATION_FLAG_MONSTER_TYPE))
+	/* Increase multiplier by one if the monster type is from 2-3 floors down,
+	   by two if the monster type is from 4 floors down */
+	multiplier += (room.monsterInfo & 0x1c) >> 3;
+      if ((data.inflationFlags & INFLATION_FLAG_FLOOR))
+	multiplier += data.currentFloor;
+      room.goldAmount = gold * multiplier;
+    }
+    break;
+  case FLOOR_ITEM_MAGIC_ITEM:
+    if ((room.lootInfo & (1u << LOOT_INFO_MAGIC_ITEM_1)))
+      room.lootInfo |= 1u << LOOT_INFO_MAGIC_ITEM_2;
+    else
+      room.lootInfo |= 1u << LOOT_INFO_MAGIC_ITEM_1;
+    break;
+  case FLOOR_ITEM_WEAPON:
+    room.lootInfo |= 1u << LOOT_INFO_WEAPON_OR_RANGED;
+    break;
+  case FLOOR_ITEM_ARMOR:
+    room.lootInfo |= 1u << LOOT_INFO_ARMOR_OR_SHIELD;
+    break;
+  case FLOOR_ITEM_MAP:
+    room.lootInfo |= 1u << LOOT_INFO_MAP;
+    break;
+  case FLOOR_ITEM_UNKNOWN:
+    room.roomFlags |= ROOM_FLAG_UNKNOWN;
+    break;
+  case FLOOR_ITEM_LIVING_STATUE:
+    room.roomFlags |= ROOM_FLAG_LIVING_STATUE;
+    break;
+  case FLOOR_ITEM_FOUNTAIN:
+    if ((room.roomFlags & ROOM_FLAG_LIVING_STATUE))
+      return false;
+    room.roomFlags |= ROOM_FLAG_FOUNTAIN;
+    room.roomFlags |= (randomSource->random(0, 2)+1) << 6;
+    break;
+  }
+  return true;
+}
+
+DatabaseImpl::RoomDescriptor* DatabaseImpl::getRandomRoom(RoomDescriptor *first) const
+{
+  RoomDescriptor *room;
+  do
+    room = first + (randomSource->random(1, data.numRoomsPerFloor)-1);
+  while (!room->mapPosition);
+  return room;
+}
+
+void DatabaseImpl::stockFloor()
+{
+  clearCombat();
+  unsigned floor = data.currentFloor;
+  byte *floorDescriptors = data.floorDescriptors + --floor * data.descriptorBytesPerFloor;
+  RoomDescriptor *room = reinterpret_cast<RoomDescriptor *>(floorDescriptors);
+  for (unsigned i = 0; i < data.numRoomsPerFloor; i++)
+    Utils::swap(getRandomRoom(room)->mapPosition, getRandomRoom(room)->mapPosition);
+
+  auto monsterData = data.monsterDataPerDifficulty[data.difficulty];
+  auto floorLoot = data.roomLootPerFloor[floor];
+  byte extraMonsters = data.extraMonstersPerFloor[floor];
+
+  // Special rooms
+  if (data.numSpecialRoomsPerFloor != 0) {
+    const auto &specialRoomType = data.specialRoomTypePerFloor[floor];
+    const auto &specialRoomInfo = data.specialRoomInfoPerFloor[floor];
+    for (unsigned i = 0; i < data.numSpecialRoomsPerFloor; i++, room++) {
+      Utils::clearStruct(*room, 2);
+      if ((room->specialRoomType = specialRoomType[i]) != 0)
+	room->monsterInfo = specialRoomInfo[i];
+      else
+	room->lootInfo = specialRoomInfo[i];
+      if (room->specialRoomType == 2) {
+	// Vault, add loot
+	// Note: gold, statues or fountains will not be added here, but we roll for them anyway
+	for (unsigned j = FLOOR_ITEM_GOLD; j <= FLOOR_ITEM_FOUNTAIN; j++)
+	  if (floorLoot.floorItems[j] && !(floorLoot.floorItems[j] & 0x80))
+	    /* +n means n% probability of item in any room, but vaults get penalty */
+	    if (randomSource->random(1, 100) + data.vaultLootProbabilityDeduction <=
+		floorLoot.floorItems[j])
+	      addLootToRoom(*room, FloorItem(j), 2);
+	// Add gold
+	unsigned goldUpperLimit = data.vaultBaseGoldLimit;
+	if ((data.inflationFlags & INFLATION_FLAG_FLOOR))
+	  goldUpperLimit *= data.currentFloor;
+	unsigned goldLowerLimit = goldUpperLimit >> 1;
+	room->goldAmount = randomSource->random(goldLowerLimit, goldUpperLimit);
+      }
+    }
+  }
+
+  // Normal rooms
+  for (unsigned monsterDepth = 4, i = data.numSpecialRoomsPerFloor;
+       i < data.numRoomsPerFloor; i++, room++) {
+    Utils::clearStruct(*room, 2);
+    if (!room->mapPosition)
+      break;
+    while (monsterData.monsterCountFromDepth[monsterDepth] == 0 &&
+	   monsterDepth > 0)
+      --monsterDepth;
+    if (monsterData.monsterCountFromDepth[monsterDepth] != 0) {
+      unsigned monsterId = monsterDepth * 4 + randomSource->random(0, 3);
+      unsigned minMonsters = 1;
+      unsigned maxMonsters = data.numPlayers + extraMonsters;
+      if ((data.dungeonFlags & DUNGEON_FLAG_INCREASED_MIN_MONSTERS) && extraMonsters > 0)
+	minMonsters = extraMonsters;
+      room->monsterInfo =
+	(randomSource->random(minMonsters, maxMonsters) << 5) | monsterId;
+      --monsterData.monsterCountFromDepth[monsterDepth];
+    }
+    for (unsigned j = FLOOR_ITEM_GOLD; j <= FLOOR_ITEM_FOUNTAIN; j++)
+      if (floorLoot.floorItems[j] && !(floorLoot.floorItems[j] & 0x80))
+	/* +n means n% probability of item in any room */
+	if (randomSource->random(1, 100) <= floorLoot.floorItems[j])
+	  addLootToRoom(*room, FloorItem(j), 2);
+  }
+
+  // Add quest objects
+  for (unsigned i = 0; i < 8; i++) {
+    auto &questObject = data.questObjects[i];
+    if (data.currentFloor == data.numFloors) {
+      if (data.currentFloor > questObject.targetFloor)
+	continue;
+    } else {
+      if (data.currentFloor != questObject.targetFloor)
+	continue;
+    }
+    // Quest object should be placed on this floor, find a suitable room
+    byte stype = questObject.targetSpecialRoomType;
+    for (;;) {
+      RoomDescriptor *room = reinterpret_cast<RoomDescriptor *>(floorDescriptors);
+      for (unsigned j = 0; j < data.numRoomsPerFloor; j++, room++)
+	if (room->specialRoomType == stype) {
+	  if (!stype && j < data.numSpecialRoomsPerFloor)
+	    continue;
+	  if ((room->lootInfo & (1u << LOOT_INFO_QUEST_OBJECT)))
+	    continue;
+	  room->lootInfo |= 1u << LOOT_INFO_QUEST_OBJECT;
+	  room->lootId[2] = 0xe1+i;
+	  stype = 0;
+	  break;
+	}
+      if (!stype)
+	break;
+      // Failed to find a room of the right special type, try a regular room
+      stype = 0;
+    }
+  }
+
+  // Mandatory loot
+  for (unsigned i = FLOOR_ITEM_GOLD; i <= FLOOR_ITEM_FOUNTAIN; i++)
+    while ((floorLoot.floorItems[i] & 0x80))
+      /* -n means exactly n items to place in random rooms */
+      for (;;) {
+	unsigned roomNumber = randomSource->random(1, data.numRoomsPerFloor);
+	RoomDescriptor &room =
+	  reinterpret_cast<RoomDescriptor *>(floorDescriptors)[roomNumber-1];
+	if (!room.mapPosition)
+	  continue;
+	if (room.specialRoomType != 2) /* Vaults get a free pass for loot */ {
+	  if (room.specialRoomType != 0 or roomNumber <= data.numSpecialRoomsPerFloor)
+	    continue;
+	  if (randomSource->random(0, 2) != 0)
+	    continue;
+	}
+	if (addLootToRoom(room, FloorItem(i), 3)) {
+	  floorLoot.floorItems[i] ++;
+	  break;
+	}
+      }
+
+  // Pick specific loot ids, and add chests if appropriate
+  room = reinterpret_cast<RoomDescriptor *>(floorDescriptors);
+  for (unsigned i = 0; i < data.numRoomsPerFloor; i++, room++)
+    switch (room->specialRoomType) {
+    case 0: // Normal room
+      {
+	unsigned lootCount = countLootItems(*room);
+	if (room->goldAmount > 0)
+	  lootCount++;
+	if (lootCount >= floorLoot.chestItemCount) {
+	  room->roomFlags |= ROOM_FLAG_CHEST;
+	  if (randomSource->random(1, 100) <= floorLoot.chestTrapPercentage)
+	    room->roomFlags |= ROOM_FLAG_TRAP;
+	}
+      }
+      /* FALLTHROUGH */
+    case 2: // Vault
+      for (unsigned item = LOOT_INFO_MAGIC_ITEM_1; item <= LOOT_INFO_MAP; item++)
+	if ((room->lootInfo & (1u << item)))
+	  stockItemToRoom(*room, LootInfo(item));
+    }
+
+  // Corridor fountains
+  if (data.numFountainsPerFloor > 0) {
+    FountainDescriptor *fountain =
+      reinterpret_cast<FountainDescriptor *>(floorDescriptors+data.fountainDescriptorOffset);
+    fountain[0].effect = data.fountainEffectPerFloor[floor][0];
+    if (data.numFountainsPerFloor == 2)
+      fountain[1].effect = data.fountainEffectPerFloor[floor][1];
+  }
 }
 
 }}

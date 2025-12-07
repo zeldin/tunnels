@@ -186,7 +186,7 @@ public:
 private:
   byte random(byte upper);
   virtual byte random(byte lower, byte upper) override;
-  Event nextEvent();
+  Event nextEvent(bool nonBlock);
   EventType waitForEvent();
   Diversion delay(unsigned ms);
   Diversion waitForMusic();
@@ -224,11 +224,14 @@ private:
   Diversion loadSave(bool isSave, unsigned len, Utils::StringSpan name);
   void preserveState();
   void restoreState();
+  Diversion digFloor();
+  Diversion stockFloor();
+  Diversion buildDungeon();
   Diversion newOrRestockMenu();
   Diversion createPartyMenu();
   Diversion createPartyMember(unsigned player);
   Diversion pointOfNoReturnMenu();
-  Diversion rawGetKey(byte &kc);
+  Diversion rawGetKey(byte &kc, bool nonBlock = false);
   Diversion getKeyNoCursor(byte &kc);
   Diversion getKey(byte &kc);
   Diversion getNumberKey(byte &n, byte low, byte high);
